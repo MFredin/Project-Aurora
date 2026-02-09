@@ -100,10 +100,10 @@ struct ReaderView: View {
             // Top bar
             HStack {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.body.weight(.medium))
-                        .padding(10)
-                        .background(.ultraThinMaterial, in: Circle())
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title3)
+                        .symbolRenderingMode(.hierarchical)
+                        .padding(6)
                 }
 
                 Spacer()
@@ -117,19 +117,19 @@ struct ReaderView: View {
 
                 Menu {
                     Button(action: { viewModel.showTableOfContents = true }) {
-                        Label("Table of Contents", systemImage: "list.bullet")
+                        Label("Table of Contents", systemImage: "list.bullet.circle")
                     }
                     Button(action: { viewModel.showBookmarkSheet = true }) {
-                        Label("Add Bookmark", systemImage: "bookmark")
+                        Label("Add Bookmark", systemImage: "bookmark.circle")
                     }
                     Button(action: { viewModel.showSettings = true }) {
-                        Label("Settings", systemImage: "textformat.size")
+                        Label("Settings", systemImage: "textformat.size.larger")
                     }
                 } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.body.weight(.medium))
-                        .padding(10)
-                        .background(.ultraThinMaterial, in: Circle())
+                    Image(systemName: "ellipsis.circle.fill")
+                        .font(.title3)
+                        .symbolRenderingMode(.hierarchical)
+                        .padding(6)
                 }
             }
             .padding(.horizontal)
@@ -142,8 +142,9 @@ struct ReaderView: View {
                 // Chapter navigation
                 HStack {
                     Button(action: { viewModel.goToPreviousChapter() }) {
-                        Image(systemName: "chevron.left")
-                            .padding(8)
+                        Image(systemName: "chevron.backward.circle.fill")
+                            .font(.title3)
+                            .symbolRenderingMode(.hierarchical)
                     }
                     .disabled(!viewModel.canGoToPreviousChapter)
 
@@ -155,8 +156,9 @@ struct ReaderView: View {
                     Spacer()
 
                     Button(action: { viewModel.goToNextChapter() }) {
-                        Image(systemName: "chevron.right")
-                            .padding(8)
+                        Image(systemName: "chevron.forward.circle.fill")
+                            .font(.title3)
+                            .symbolRenderingMode(.hierarchical)
                     }
                     .disabled(!viewModel.canGoToNextChapter)
                 }
@@ -174,7 +176,7 @@ struct ReaderView: View {
 
     private func errorView(_ message: String) -> some View {
         ContentUnavailableView {
-            Label("Unable to Load", systemImage: "exclamationmark.triangle")
+            Label("Unable to Load", systemImage: "exclamationmark.triangle.fill")
         } description: {
             Text(message)
         } actions: {

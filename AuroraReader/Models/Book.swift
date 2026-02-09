@@ -47,14 +47,15 @@ enum BookFormat: String, Codable, CaseIterable {
     var iconName: String {
         switch self {
         case .epub: return "book.fill"
-        case .pdf: return "doc.richtext.fill"
-        case .plainText: return "doc.plaintext.fill"
-        case .mobi, .azw3: return "book.closed.fill"
+        case .pdf: return "book.closed.fill"
+        case .plainText: return "text.book.closed.fill"
+        case .mobi: return "book.fill"
+        case .azw3: return "book.fill"
         case .fb2: return "text.book.closed.fill"
-        case .cbz, .cbr: return "photo.on.rectangle.angled"
-        case .djvu: return "doc.viewfinder.fill"
-        case .rtf: return "doc.text.fill"
-        case .htmlBook: return "globe"
+        case .cbz, .cbr: return "books.vertical.fill"
+        case .djvu: return "book.closed.fill"
+        case .rtf: return "text.book.closed.fill"
+        case .htmlBook: return "book.closed.fill"
         }
     }
 

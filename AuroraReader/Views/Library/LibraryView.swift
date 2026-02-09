@@ -76,7 +76,7 @@ struct LibraryView: View {
                 .multilineTextAlignment(.center)
 
             Button(action: { showFileImporter = true }) {
-                Label("Import Books", systemImage: "plus")
+                Label("Import Books", systemImage: "plus.circle.fill")
             }
             .buttonStyle(AuroraButtonStyle())
         }
@@ -113,7 +113,7 @@ struct LibraryView: View {
         Button(role: .destructive) {
             viewModel.deleteBook(book, modelContext: modelContext)
         } label: {
-            Label("Delete", systemImage: "trash")
+            Label("Delete", systemImage: "trash.circle")
         }
     }
 
@@ -139,7 +139,8 @@ struct LibraryView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
             Button(action: { showFileImporter = true }) {
-                Image(systemName: "plus")
+                Image(systemName: "plus.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(AuroraTheme.auroraTeal)
             }
         }
@@ -172,7 +173,8 @@ struct LibraryView: View {
                     }
                 }
             } label: {
-                Image(systemName: "ellipsis.circle")
+                Image(systemName: "ellipsis.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(AuroraTheme.auroraTeal)
             }
         }

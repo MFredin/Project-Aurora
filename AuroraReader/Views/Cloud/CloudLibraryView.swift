@@ -130,8 +130,9 @@ struct CloudLibraryView: View {
                     .tint(AuroraTheme.auroraTeal)
             } else if cloudManager.currentFiles.isEmpty {
                 VStack(spacing: 12) {
-                    Image(systemName: "folder.fill")
+                    Image(systemName: "folder.circle.fill")
                         .font(.largeTitle)
+                        .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(AuroraTheme.textTertiary)
                     Text("No ebook files found")
                         .foregroundStyle(AuroraTheme.textSecondary)
@@ -164,7 +165,8 @@ struct CloudLibraryView: View {
 
                         Spacer()
 
-                        Image(systemName: "arrow.down.circle")
+                        Image(systemName: "arrow.down.circle.fill")
+                            .symbolRenderingMode(.hierarchical)
                             .foregroundStyle(AuroraTheme.auroraGreen)
                     }
                     .listRowBackground(AuroraTheme.surface)
@@ -209,7 +211,8 @@ struct CloudLibraryView: View {
 
                 Spacer()
 
-                Image(systemName: "arrow.right.circle")
+                Image(systemName: "arrow.right.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(AuroraTheme.auroraTeal)
             }
             .padding(16)

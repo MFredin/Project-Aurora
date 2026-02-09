@@ -18,9 +18,9 @@ enum CloudStorageProvider: String, Codable, CaseIterable, Identifiable {
 
     var iconName: String {
         switch self {
-        case .dropbox: return "shippingbox.fill"
-        case .googleDrive: return "externaldrive.fill"
-        case .protonDrive: return "lock.shield.fill"
+        case .dropbox: return "cloud.fill"
+        case .googleDrive: return "cloud.circle.fill"
+        case .protonDrive: return "cloud.bolt.fill"
         }
     }
 

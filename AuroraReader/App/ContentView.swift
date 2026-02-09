@@ -7,25 +7,25 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             LibraryView()
                 .tabItem {
-                    Label("Library", systemImage: "books.vertical.fill")
+                    Label("Library", systemImage: "book.fill")
                 }
                 .tag(AppTab.library)
 
             CloudLibraryView()
                 .tabItem {
-                    Label("Cloud", systemImage: "cloud.fill")
+                    Label("Cloud", systemImage: "icloud.fill")
                 }
                 .tag(AppTab.cloud)
 
             GoodReadsView()
                 .tabItem {
-                    Label("Discover", systemImage: "sparkle.magnifyingglass")
+                    Label("Discover", systemImage: "text.magnifyingglass")
                 }
                 .tag(AppTab.discover)
 
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
+                    Label("Settings", systemImage: "slider.horizontal.3")
                 }
                 .tag(AppTab.settings)
         }

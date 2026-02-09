@@ -39,10 +39,10 @@ struct ReaderSettingsSheet: View {
                 // Line Spacing
                 Section("Line Spacing") {
                     HStack {
-                        Image(systemName: "text.alignleft")
+                        Image(systemName: "line.3.horizontal.decrease")
                             .font(.caption)
                         Slider(value: $preferences.lineSpacing, in: 1.0...2.5, step: 0.1)
-                        Image(systemName: "text.alignleft")
+                        Image(systemName: "line.3.horizontal")
                             .font(.body)
                     }
                     Text("Current: \(String(format: "%.1f", preferences.lineSpacing))x")

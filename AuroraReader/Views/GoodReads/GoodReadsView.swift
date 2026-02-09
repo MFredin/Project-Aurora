@@ -153,7 +153,7 @@ struct GoodReadsView: View {
 
             // Empty shelf placeholder
             VStack(spacing: 12) {
-                Image(systemName: "text.book.closed")
+                Image(systemName: "text.book.closed.fill")
                     .font(.title)
                     .foregroundStyle(AuroraTheme.textTertiary)
                 Text("No books on this shelf yet")
@@ -257,7 +257,8 @@ struct GoodReadsView: View {
                     try? await service.addToShelf(goodreadsId: book.id, shelfName: "Want to Read")
                 }
             } label: {
-                Image(systemName: "plus.circle")
+                Image(systemName: "plus.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(AuroraTheme.auroraTeal)
             }
         }

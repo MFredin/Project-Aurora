@@ -10,7 +10,7 @@ struct BookmarkListView: View {
             if bookmarks.isEmpty {
                 ContentUnavailableView(
                     "No Bookmarks",
-                    systemImage: "bookmark",
+                    systemImage: "bookmark.circle",
                     description: Text("Bookmarks you add will appear here.")
                 )
             } else {
@@ -44,7 +44,7 @@ struct BookmarkListView: View {
                             Button(role: .destructive) {
                                 onDelete(bookmark)
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                Label("Delete", systemImage: "trash.circle")
                             }
                         }
                     }
