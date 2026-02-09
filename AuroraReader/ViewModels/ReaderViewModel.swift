@@ -14,12 +14,15 @@ final class ReaderViewModel {
     var showSettings: Bool = false
     var showBookmarkSheet: Bool = false
     var isToolbarVisible: Bool = true
+    var scrollOffset: Double = 0
+    var isSpeaking: Bool = false
 
     private var modelContext: ModelContext?
 
     init(book: Book) {
         self.book = book
         self.currentChapterIndex = book.readingProgress?.currentChapter ?? 0
+        self.scrollOffset = book.readingProgress?.scrollOffset ?? 0
     }
 
     var currentChapter: BookChapter? {
@@ -120,6 +123,37 @@ final class ReaderViewModel {
         try? modelContext.save()
     }
 
+    func updateScrollOffset(_ offset: Double) {
+        scrollOffset = offset
+        book.readingProgress?.updateScrollOffset(offset)
+        // Don't save on every scroll — debounce in the view
+    }
+
+    func saveScrollPosition() {
+        guard let modelContext else { return }
+        book.readingProgress?.updateScrollOffset(scrollOffset)
+        try? modelContext.save()
+    }
+
+    // MARK: - Text-to-Speech
+
+    private var ttsService: TextToSpeechService { TextToSpeechService.shared }
+
+    func toggleSpeech() {
+        if isSpeaking {
+            ttsService.stop()
+            isSpeaking = false
+        } else if let chapter = currentChapter {
+            ttsService.speak(chapter.content)
+            isSpeaking = true
+        }
+    }
+
+    func stopSpeech() {
+        ttsService.stop()
+        isSpeaking = false
+    }
+
     // MARK: - Private
 
     private func saveProgress() {
@@ -131,6 +165,7 @@ final class ReaderViewModel {
                 page: currentChapterIndex,
                 totalPages: chapters.count
             )
+            progress.updateScrollOffset(scrollOffset)
         } else {
             let progress = ReadingProgress(
                 currentChapter: currentChapterIndex,

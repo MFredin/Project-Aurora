@@ -57,15 +57,7 @@ struct CloudLibraryView: View {
                 .foregroundStyle(AuroraTheme.textSecondary)
                 .multilineTextAlignment(.center)
 
-            Text("COMING SOON")
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(AuroraTheme.auroraTeal)
-                .tracking(1.5)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
-                .background(AuroraTheme.auroraTeal.opacity(0.12), in: Capsule())
-
-            Text("Cloud storage integration is being finalized.\nYou can import books from the Files app via the Library tab.")
+            Text("Sign in to browse and download ebooks\nfrom your cloud storage accounts.")
                 .font(.caption)
                 .foregroundStyle(AuroraTheme.textTertiary)
                 .multilineTextAlignment(.center)

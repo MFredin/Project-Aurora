@@ -24,6 +24,10 @@ struct ReaderView: View {
     @State private var highlightColor: HighlightColor = .auroraTeal
     @State private var showNoteInput = false
     @State private var noteText = ""
+    @State private var showTTSControls = false
+    @State private var showDictionaryLookup = false
+    @State private var dictionaryWord = ""
+    @State private var ttsService = TextToSpeechService.shared
 
     init(book: Book) {
         _viewModel = State(wrappedValue: ReaderViewModel(book: book))
@@ -51,6 +55,19 @@ struct ReaderView: View {
                 readerOverlay
             }
 
+            // TTS floating controls
+            if showTTSControls, let chapter = viewModel.currentChapter {
+                VStack {
+                    Spacer()
+                    TTSControlView(chapterContent: chapter.content) {
+                        showTTSControls = false
+                        viewModel.stopSpeech()
+                    }
+                    .padding(.bottom, viewModel.isToolbarVisible ? 140 : 16)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
             // Highlight action bar
             if showHighlightActions && !selectedText.isEmpty {
                 highlightActionBar
@@ -70,6 +87,7 @@ struct ReaderView: View {
                 modelContext: modelContext
             )
             ambientService.stopSoundscape()
+            ttsService.stop()
         }
         .sheet(isPresented: $viewModel.showTableOfContents) {
             TableOfContentsView(
@@ -125,6 +143,20 @@ struct ReaderView: View {
                 chapters: viewModel.chapters,
                 currentChapterIndex: viewModel.currentChapterIndex
             )
+        }
+        .sheet(isPresented: $showDictionaryLookup) {
+            NavigationStack {
+                DictionaryView(term: dictionaryWord)
+                    .navigationTitle("Define: \(dictionaryWord)")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbarColorScheme(.dark, for: .navigationBar)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { showDictionaryLookup = false }
+                        }
+                    }
+            }
+            .preferredColorScheme(.dark)
         }
         .statusBarHidden(!viewModel.isToolbarVisible)
     }
@@ -282,6 +314,12 @@ struct ReaderView: View {
                     Button(action: { showAmbientControls = true }) {
                         Label("Ambient", systemImage: "music.note.list")
                     }
+                    Button(action: { toggleTTS() }) {
+                        Label(
+                            ttsService.isSpeaking ? "Stop Reading Aloud" : "Read Aloud",
+                            systemImage: ttsService.isSpeaking ? "speaker.slash.circle.fill" : "speaker.wave.2.circle.fill"
+                        )
+                    }
 
                     Divider()
 
@@ -318,9 +356,9 @@ struct ReaderView: View {
                     quickActionButton(icon: "sparkles", label: "AI") { showAICompanion = true }
                     quickActionButton(icon: selectedReadingMode.iconName, label: "Mode") { showReadingModeSelector = true }
                     quickActionButton(
-                        icon: ambientService.isAmbientEnabled ? "speaker.wave.2.fill" : "speaker.fill",
-                        label: "Ambient"
-                    ) { showAmbientControls = true }
+                        icon: ttsService.isSpeaking ? "speaker.wave.2.fill" : "speaker.fill",
+                        label: "Read"
+                    ) { toggleTTS() }
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 4)
@@ -415,6 +453,15 @@ struct ReaderView: View {
                         showNoteInput = true
                     } label: {
                         Label("Add Note", systemImage: "note.text")
+                            .font(.caption.weight(.medium))
+                    }
+
+                    Button {
+                        let word = DictionaryLookupService.shared.extractWord(from: selectedText)
+                        dictionaryWord = word
+                        showDictionaryLookup = true
+                    } label: {
+                        Label("Define", systemImage: "text.book.closed.fill")
                             .font(.caption.weight(.medium))
                     }
 
@@ -517,6 +564,16 @@ struct ReaderView: View {
         selectedText = ""
         noteText = ""
         showHighlightActions = false
+    }
+
+    private func toggleTTS() {
+        if ttsService.isSpeaking {
+            ttsService.stop()
+            showTTSControls = false
+        } else if let chapter = viewModel.currentChapter {
+            ttsService.speak(chapter.content)
+            showTTSControls = true
+        }
     }
 
     private func ensurePreferencesExist() {

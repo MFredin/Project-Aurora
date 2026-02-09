@@ -29,59 +29,22 @@ struct GoodReadsView: View {
                     .offset(x: 100, y: 200)
                     .ignoresSafeArea()
 
-                if !service.isAuthenticated {
-                    connectGoodReadsView
-                } else {
-                    authenticatedContentView
-                }
+                authenticatedContentView
             }
             .navigationTitle("Discover")
             .toolbarColorScheme(.dark, for: .navigationBar)
-            .searchable(text: $searchText, prompt: "Search books on GoodReads")
+            .searchable(text: $searchText, prompt: "Search books...")
             .onSubmit(of: .search) {
                 Task { await performSearch() }
             }
+            .task {
+                // Auto-activate — Open Library requires no API key
+                if !service.isAuthenticated {
+                    try? await service.authenticate(apiKey: "")
+                }
+            }
         }
         .preferredColorScheme(.dark)
-    }
-
-    // MARK: - Not Connected
-
-    private var connectGoodReadsView: some View {
-        VStack(spacing: 24) {
-            ZStack {
-                Circle()
-                    .fill(AuroraTheme.auroraWarm.opacity(0.1))
-                    .frame(width: 120, height: 120)
-                Circle()
-                    .fill(AuroraTheme.auroraPurple.opacity(0.08))
-                    .frame(width: 160, height: 160)
-                BrandAssets.GoodReadsLogo(size: 56)
-            }
-
-            Text("Discover Books")
-                .font(.title2.weight(.bold))
-                .foregroundStyle(AuroraTheme.textPrimary)
-
-            Text("Connect to GoodReads to discover new books,\nread reviews, and track your reading.")
-                .font(.subheadline)
-                .foregroundStyle(AuroraTheme.textSecondary)
-                .multilineTextAlignment(.center)
-
-            Text("COMING SOON")
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(AuroraTheme.auroraWarm)
-                .tracking(1.5)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
-                .background(AuroraTheme.auroraWarm.opacity(0.12), in: Capsule())
-
-            Text("GoodReads integration is being finalized.\nStay tuned for book discovery and reviews.")
-                .font(.caption)
-                .foregroundStyle(AuroraTheme.textTertiary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(40)
     }
 
     // MARK: - Authenticated Content
@@ -90,7 +53,12 @@ struct GoodReadsView: View {
         ScrollView {
             VStack(spacing: 24) {
                 // Search results
-                if !searchResults.isEmpty {
+                if isSearching {
+                    ProgressView("Searching...")
+                        .tint(AuroraTheme.auroraTeal)
+                        .foregroundStyle(AuroraTheme.textSecondary)
+                        .padding(.top, 40)
+                } else if !searchResults.isEmpty {
                     searchResultsSection
                 }
 
@@ -106,9 +74,15 @@ struct GoodReadsView: View {
 
     private var searchResultsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Search Results")
-                .font(.headline)
-                .foregroundStyle(AuroraTheme.textPrimary)
+            HStack {
+                Text("Search Results")
+                    .font(.headline)
+                    .foregroundStyle(AuroraTheme.textPrimary)
+                Spacer()
+                Text("\(searchResults.count) found")
+                    .font(.caption)
+                    .foregroundStyle(AuroraTheme.textTertiary)
+            }
 
             ForEach(searchResults) { book in
                 goodReadsBookRow(book)
@@ -160,6 +134,9 @@ struct GoodReadsView: View {
                     .foregroundStyle(AuroraTheme.textTertiary)
                 Text("No books on this shelf yet")
                     .font(.subheadline)
+                    .foregroundStyle(AuroraTheme.textTertiary)
+                Text("Search for books above and tap + to add them")
+                    .font(.caption)
                     .foregroundStyle(AuroraTheme.textTertiary)
             }
             .frame(maxWidth: .infinity)
@@ -220,14 +197,30 @@ struct GoodReadsView: View {
 
     private func goodReadsBookRow(_ book: GoodReadsBook) -> some View {
         HStack(spacing: 14) {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(AuroraTheme.coverGradient(for: book.title))
+            // Cover image or gradient placeholder
+            if let coverURL = book.imageURL, let url = URL(string: coverURL) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    default:
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(AuroraTheme.coverGradient(for: book.title))
+                            .overlay(Image(systemName: "book.fill").foregroundStyle(.white.opacity(0.6)).font(.caption))
+                    }
+                }
                 .frame(width: 50, height: 70)
-                .overlay(
-                    Image(systemName: "book.fill")
-                        .foregroundStyle(.white.opacity(0.6))
-                        .font(.caption)
-                )
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+            } else {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(AuroraTheme.coverGradient(for: book.title))
+                    .frame(width: 50, height: 70)
+                    .overlay(
+                        Image(systemName: "book.fill")
+                            .foregroundStyle(.white.opacity(0.6))
+                            .font(.caption)
+                    )
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(book.title)

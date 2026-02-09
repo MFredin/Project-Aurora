@@ -98,15 +98,7 @@ struct SettingsView: View {
                             }
                         }
                     } header: {
-                        HStack {
-                            Text("Sync").foregroundStyle(AuroraTheme.auroraTeal)
-                            Text("SOON")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundStyle(AuroraTheme.auroraTeal)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 1)
-                                .background(AuroraTheme.auroraTeal.opacity(0.15), in: Capsule())
-                        }
+                        Text("Sync").foregroundStyle(AuroraTheme.auroraTeal)
                     }
                     .listRowBackground(AuroraTheme.surface)
 
@@ -326,15 +318,31 @@ struct SettingsView: View {
                             }
                         }
                     } header: {
-                        HStack {
-                            Text("Cloud Storage").foregroundStyle(AuroraTheme.auroraTeal)
-                            Text("SOON")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundStyle(AuroraTheme.auroraTeal)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 1)
-                                .background(AuroraTheme.auroraTeal.opacity(0.15), in: Capsule())
+                        Text("Cloud Storage").foregroundStyle(AuroraTheme.auroraTeal)
+                    }
+                    .listRowBackground(AuroraTheme.surface)
+
+                    // Data Export
+                    Section {
+                        NavigationLink {
+                            DataExportView()
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "square.and.arrow.up.fill")
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(AuroraTheme.auroraGreen)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Export Data")
+                                        .foregroundStyle(AuroraTheme.textPrimary)
+                                    Text("Library, highlights, stats as JSON/CSV/Markdown")
+                                        .font(.caption)
+                                        .foregroundStyle(AuroraTheme.textTertiary)
+                                }
+                            }
                         }
+                    } header: {
+                        Text("Data").foregroundStyle(AuroraTheme.auroraTeal)
                     }
                     .listRowBackground(AuroraTheme.surface)
 
@@ -405,7 +413,7 @@ struct SettingsView: View {
                         HStack {
                             Text("Version").foregroundStyle(AuroraTheme.textPrimary)
                             Spacer()
-                            Text("3.2.0").foregroundStyle(AuroraTheme.textSecondary)
+                            Text("4.0.0").foregroundStyle(AuroraTheme.textSecondary)
                         }
                     } header: {
                         Text("About").foregroundStyle(AuroraTheme.auroraTeal)
