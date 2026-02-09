@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Reader - App Mockup</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif; background: #1a1a2e; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 40px 20px; gap: 40px; flex-wrap: wrap; }
+h1.page-title { width: 100%; text-align: center; color: #e0e0e0; font-size: 28px; font-weight: 700; margin-bottom: 0; }
+p.subtitle { width: 100%; text-align: center; color: #888; font-size: 14px; margin-bottom: 20px; }
+
+.phone-frame {
+  width: 375px; height: 812px; background: #fff; border-radius: 44px;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 4px #333;
+  position: relative; flex-shrink: 0;
+}
+.screen-label {
+  text-align: center; color: #aaa; font-size: 13px; margin-top: 12px;
+  font-weight: 500; letter-spacing: 0.5px;
+}
+
+/* Status bar */
+.status-bar {
+  height: 54px; display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 28px 8px; font-size: 15px; font-weight: 600;
+}
+.status-bar.light { color: #000; }
+.status-bar.dark { color: #fff; }
+.status-icons { display: flex; gap: 5px; align-items: center; }
+
+/* Navigation bar */
+.nav-bar {
+  height: 52px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; font-size: 34px; font-weight: 700;
+}
+.nav-bar .actions { display: flex; gap: 16px; }
+.nav-bar .actions span { font-size: 20px; color: #6366f1; cursor: pointer; }
+
+/* Tab bar */
+.tab-bar {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 83px;
+  background: rgba(249,249,249,0.94); border-top: 0.5px solid #ddd;
+  display: flex; justify-content: space-around; align-items: flex-start;
+  padding-top: 8px; backdrop-filter: blur(10px);
+}
+.tab-item { text-align: center; font-size: 10px; color: #999; }
+.tab-item.active { color: #6366f1; }
+.tab-item .tab-icon { font-size: 24px; margin-bottom: 2px; }
+
+/* Search bar */
+.search-bar {
+  margin: 4px 16px 12px; padding: 10px 12px; background: #f2f2f7;
+  border-radius: 12px; font-size: 16px; color: #8e8e93; display: flex;
+  align-items: center; gap: 6px;
+}
+
+/* Book grid */
+.book-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+  padding: 0 20px; overflow-y: auto;
+}
+.book-card { text-align: center; }
+.book-cover {
+  width: 140px; height: 200px; border-radius: 8px; margin: 0 auto 8px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.book-cover .icon { font-size: 28px; margin-bottom: 8px; opacity: 0.8; }
+.book-cover .title { font-size: 12px; font-weight: 600; line-height: 1.3; }
+.book-cover .author { font-size: 10px; opacity: 0.7; margin-top: 4px; }
+.book-card .card-title { font-size: 13px; font-weight: 600; color: #333; }
+.book-card .card-author { font-size: 11px; color: #888; }
+.book-card .progress-bar { width: 80px; height: 3px; background: #e5e5ea; border-radius: 2px; margin: 4px auto 0; }
+.book-card .progress-fill { height: 100%; background: #6366f1; border-radius: 2px; }
+
+.grad-1 { background: linear-gradient(135deg, #6366f1, #a855f7); }
+.grad-2 { background: linear-gradient(135deg, #f97316, #ef4444); }
+.grad-3 { background: linear-gradient(135deg, #10b981, #14b8a6); }
+.grad-4 { background: linear-gradient(135deg, #6366f1, #3b82f6); }
+
+/* Reader screen */
+.reader-bg { background: #fff; height: 100%; position: relative; }
+.reader-bg.sepia { background: #f5edd9; }
+.reader-bg.dark-theme { background: #262626; }
+
+.reader-top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; height: 44px;
+}
+.reader-top-bar .btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(120,120,128,0.12); display: flex;
+  align-items: center; justify-content: center; font-size: 16px;
+}
+.reader-top-bar .book-title { font-size: 15px; font-weight: 600; }
+
+.reader-content {
+  padding: 20px 24px; overflow-y: auto; height: calc(100% - 54px - 44px - 100px);
+}
+.reader-content .chapter-title {
+  font-size: 22px; font-weight: 700; margin-bottom: 16px;
+}
+.reader-content .body-text {
+  font-family: Georgia, serif; font-size: 18px; line-height: 1.6;
+  color: #333; text-align: justify;
+}
+.reader-bg.sepia .body-text { color: #5a4028; }
+.reader-bg.sepia .chapter-title { color: #5a4028; }
+.reader-bg.dark-theme .body-text { color: #d9d9d9; }
+.reader-bg.dark-theme .chapter-title { color: #d9d9d9; }
+.reader-bg.dark-theme .reader-top-bar .book-title { color: #d9d9d9; }
+.reader-bg.dark-theme .reader-top-bar .btn { background: rgba(255,255,255,0.1); color: #d9d9d9; }
+
+.reader-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 100px;
+  background: rgba(249,249,249,0.95); backdrop-filter: blur(10px);
+  padding: 12px 20px; border-top: 0.5px solid #ddd;
+}
+.reader-bg.dark-theme .reader-bottom { background: rgba(30,30,30,0.95); border-color: #444; }
+.reader-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.reader-nav .chev { font-size: 18px; color: #6366f1; padding: 4px 8px; }
+.reader-nav .chev.disabled { color: #ccc; }
+.reader-nav .progress-label { font-size: 13px; color: #888; }
+.reader-progress { width: 100%; height: 3px; background: #e5e5ea; border-radius: 2px; }
+.reader-progress .fill { height: 100%; background: #6366f1; border-radius: 2px; }
+
+/* Settings screen */
+.settings-content { padding: 0 0 83px; overflow-y: auto; height: calc(100% - 54px - 52px); }
+.section-header { font-size: 13px; color: #888; text-transform: uppercase; padding: 24px 16px 8px; font-weight: 500; }
+.setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; background: #fff; border-bottom: 0.5px solid #e5e5ea;
+}
+.setting-row .label { font-size: 16px; color: #333; }
+.setting-row .value { font-size: 16px; color: #888; }
+.setting-row .badge {
+  font-size: 12px; padding: 2px 8px; border-radius: 10px;
+  background: #f2f2f7; color: #666;
+}
+.setting-row .icon-left {
+  width: 28px; height: 28px; border-radius: 6px; display: flex;
+  align-items: center; justify-content: center; color: #fff;
+  font-size: 14px; margin-right: 12px;
+}
+
+/* Theme previews */
+.theme-row { display: flex; gap: 12px; padding: 16px; }
+.theme-chip {
+  flex: 1; height: 50px; border-radius: 10px; display: flex;
+  align-items: center; justify-content: center; font-size: 14px;
+  font-weight: 500; border: 2px solid transparent;
+}
+.theme-chip.selected { border-color: #6366f1; }
+.theme-chip.t-light { background: #fff; color: #333; border-color: #ddd; }
+.theme-chip.t-light.selected { border-color: #6366f1; }
+.theme-chip.t-sepia { background: #f5edd9; color: #5a4028; }
+.theme-chip.t-dark { background: #262626; color: #d9d9d9; }
+.theme-chip.t-midnight { background: #0d0d14; color: #b3b3bf; }
+
+/* TOC screen */
+.toc-list { padding: 0; }
+.toc-row {
+  padding: 14px 16px; border-bottom: 0.5px solid #e5e5ea;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.toc-row.active { background: #f0f0ff; }
+.toc-row .ch-title { font-size: 16px; color: #333; font-weight: 500; }
+.toc-row.active .ch-title { color: #6366f1; font-weight: 600; }
+.toc-row .ch-meta { font-size: 12px; color: #999; margin-top: 2px; }
+.toc-row .bookmark-icon { color: #6366f1; font-size: 14px; }
+
+/* Empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: calc(100% - 54px - 52px - 50px);
+  color: #999; text-align: center; padding: 40px;
+}
+.empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.4; }
+.empty-state .empty-title { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 8px; }
+.empty-state .empty-desc { font-size: 15px; color: #888; margin-bottom: 20px; }
+.empty-state .import-btn {
+  background: #6366f1; color: #fff; border: none; padding: 12px 24px;
+  border-radius: 12px; font-size: 16px; font-weight: 600;
+}
+
+/* Format badge in settings */
+.format-row { display: flex; align-items: center; gap: 12px; }
+.format-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Responsive layout for screens */
+.screens-row { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
+.screen-wrapper { display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Aurora Reader</h1>
+<p class="subtitle">iOS Ebook Reader App &mdash; Visual Mockup</p>
+
+<div class="screens-row">
+
+<!-- SCREEN 1: Empty Library -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="status-bar light">
+    <span>9:41</span>
+    <div class="status-icons">
+      <span>&#9679;&#9679;&#9679;&#9679;</span>
+      <span style="font-size:12px">WiFi</span>
+      <span>&#128267;</span>
+    </div>
+  </div>
+  <div class="nav-bar">
+    <span>Library</span>
+    <div class="actions"><span>&#8943;</span> <span>&#43;</span></div>
+  </div>
+  <div class="search-bar">&#128269; Search books</div>
+  <div class="empty-state">
+    <div class="empty-icon">&#128214;</div>
+    <div class="empty-title">No Books Yet</div>
+    <div class="empty-desc">Import EPUB, PDF, or text files to start reading.</div>
+    <button class="import-btn">&#43; Import Books</button>
+  </div>
+  <div class="tab-bar">
+    <div class="tab-item active">
+      <div class="tab-icon">&#128218;</div>
+      Library
+    </div>
+    <div class="tab-item">
+      <div class="tab-icon">&#9881;</div>
+      Settings
+    </div>
+  </div>
+</div>
+<div class="screen-label">Empty Library</div>
+</div>
+
+<!-- SCREEN 2: Library with Books -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="status-bar light">
+    <span>9:41</span>
+    <div class="status-icons">
+      <span>&#9679;&#9679;&#9679;&#9679;</span>
+      <span style="font-size:12px">WiFi</span>
+      <span>&#128267;</span>
+    </div>
+  </div>
+  <div class="nav-bar">
+    <span>Library</span>
+    <div class="actions"><span>&#8943;</span> <span>&#43;</span></div>
+  </div>
+  <div class="search-bar">&#128269; Search books</div>
+  <div class="book-grid">
+    <div class="book-card">
+      <div class="book-cover grad-1">
+        <div class="icon">&#128214;</div>
+        <div class="title">The Great Gatsby</div>
+        <div class="author">F. Scott Fitzgerald</div>
+      </div>
+      <div class="card-title">The Great Gatsby</div>
+      <div class="card-author">F. Scott Fitzgerald</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover grad-2">
+        <div class="icon">&#128196;</div>
+        <div class="title">iOS Programming Guide</div>
+        <div class="author">Apple Inc.</div>
+      </div>
+      <div class="card-title">iOS Programming</div>
+      <div class="card-author">Apple Inc.</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover grad-3">
+        <div class="icon">&#128214;</div>
+        <div class="title">Pride and Prejudice</div>
+        <div class="author">Jane Austen</div>
+      </div>
+      <div class="card-title">Pride and Prejudice</div>
+      <div class="card-author">Jane Austen</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover grad-4">
+        <div class="icon">&#128196;</div>
+        <div class="title">Swift Language Reference</div>
+        <div class="author">Apple Developer</div>
+      </div>
+      <div class="card-title">Swift Reference</div>
+      <div class="card-author">Apple Developer</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab-item active">
+      <div class="tab-icon">&#128218;</div>
+      Library
+    </div>
+    <div class="tab-item">
+      <div class="tab-icon">&#9881;</div>
+      Settings
+    </div>
+  </div>
+</div>
+<div class="screen-label">Library (Grid View)</div>
+</div>
+
+<!-- SCREEN 3: Reader - Light Theme -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="reader-bg">
+    <div class="status-bar light">
+      <span>9:41</span>
+      <div class="status-icons">
+        <span>&#9679;&#9679;&#9679;&#9679;</span>
+        <span style="font-size:12px">WiFi</span>
+        <span>&#128267;</span>
+      </div>
+    </div>
+    <div class="reader-top-bar">
+      <div class="btn">&times;</div>
+      <div class="book-title">The Great Gatsby</div>
+      <div class="btn">&#8943;</div>
+    </div>
+    <div class="reader-content">
+      <div class="chapter-title">Chapter 1</div>
+      <div class="body-text">
+        In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since.
+        <br><br>
+        "Whenever you feel like criticizing anyone," he told me, "just remember that all the people in this world haven't had the advantages that you've had."
+        <br><br>
+        He didn't say any more, but we've always been unusually communicative in a reserved way, and I understood that he meant a great deal more than that. In consequence, I'm inclined to reserve all judgments, a habit that has opened up many curious natures to me and also made me the victim of not a few veteran bores.
+        <br><br>
+        The abnormal mind is quick to detect and attach itself to this quality when it appears in a normal person, and so it came about that in college I was unjustly accused of being a politician, because I was privy to the secret griefs of wild, unknown men.
+      </div>
+    </div>
+    <div class="reader-bottom">
+      <div class="reader-nav">
+        <span class="chev disabled">&lsaquo;</span>
+        <span class="progress-label">Chapter 1 of 9</span>
+        <span class="chev">&rsaquo;</span>
+      </div>
+      <div class="reader-progress"><div class="fill" style="width:11%"></div></div>
+    </div>
+  </div>
+</div>
+<div class="screen-label">Reader (Light Theme)</div>
+</div>
+
+<!-- SCREEN 4: Reader - Sepia Theme -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="reader-bg sepia">
+    <div class="status-bar light">
+      <span>9:41</span>
+      <div class="status-icons">
+        <span>&#9679;&#9679;&#9679;&#9679;</span>
+        <span style="font-size:12px">WiFi</span>
+        <span>&#128267;</span>
+      </div>
+    </div>
+    <div class="reader-top-bar">
+      <div class="btn">&times;</div>
+      <div class="book-title" style="color:#5a4028">Pride and Prejudice</div>
+      <div class="btn">&#8943;</div>
+    </div>
+    <div class="reader-content">
+      <div class="chapter-title">Chapter 3</div>
+      <div class="body-text">
+        Not all that Mrs. Bennet, however, with the assistance of her five daughters, could ask on the subject, was sufficient to draw from her husband any satisfactory description of Mr. Bingley.
+        <br><br>
+        They attacked him in various ways &mdash; with barefaced questions, ingenious suppositions, and distant surmises; but he eluded the skill of them all, and they were at last obliged to accept the second-hand intelligence of their neighbour, Lady Lucas.
+        <br><br>
+        Her report was highly favourable. Sir William had been delighted with him. He was quite young, wonderfully handsome, extremely agreeable, and, to crown the whole, he meant to be at the next ball with a large party.
+      </div>
+    </div>
+    <div class="reader-bottom" style="background:rgba(245,237,217,0.95);border-color:#d4c5a9">
+      <div class="reader-nav">
+        <span class="chev">&lsaquo;</span>
+        <span class="progress-label">Chapter 3 of 61</span>
+        <span class="chev">&rsaquo;</span>
+      </div>
+      <div class="reader-progress"><div class="fill" style="width:5%"></div></div>
+    </div>
+  </div>
+</div>
+<div class="screen-label">Reader (Sepia Theme)</div>
+</div>
+
+<!-- SCREEN 5: Reader - Dark Theme -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="reader-bg dark-theme">
+    <div class="status-bar dark">
+      <span>9:41</span>
+      <div class="status-icons">
+        <span>&#9679;&#9679;&#9679;&#9679;</span>
+        <span style="font-size:12px">WiFi</span>
+        <span>&#128267;</span>
+      </div>
+    </div>
+    <div class="reader-top-bar">
+      <div class="btn">&times;</div>
+      <div class="book-title">Swift Reference</div>
+      <div class="btn">&#8943;</div>
+    </div>
+    <div class="reader-content">
+      <div class="chapter-title">The Basics</div>
+      <div class="body-text">
+        Swift is a type-safe language, which means the language helps you to be clear about the types of values your code can work with.
+        <br><br>
+        If part of your code requires a String, type safety prevents you from passing it an Int by mistake. Likewise, type safety prevents you from accidentally passing an optional String to a piece of code that requires a non-optional String.
+        <br><br>
+        Type safety helps you catch and fix errors as early as possible in the development process. Swift provides many standard data types, including Int for integers, Double for floating-point values, Bool for Boolean values, and String for text.
+      </div>
+    </div>
+    <div class="reader-bottom">
+      <div class="reader-nav">
+        <span class="chev">&lsaquo;</span>
+        <span class="progress-label">Chapter 2 of 15</span>
+        <span class="chev">&rsaquo;</span>
+      </div>
+      <div class="reader-progress"><div class="fill" style="width:13%"></div></div>
+    </div>
+  </div>
+</div>
+<div class="screen-label">Reader (Dark Theme)</div>
+</div>
+
+<!-- SCREEN 6: Table of Contents -->
+<div class="screen-wrapper">
+<div class="phone-frame" style="background:#fff">
+  <div class="status-bar light">
+    <span>9:41</span>
+    <div class="status-icons">
+      <span>&#9679;&#9679;&#9679;&#9679;</span>
+      <span style="font-size:12px">WiFi</span>
+      <span>&#128267;</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;border-bottom:0.5px solid #e5e5ea">
+    <span style="color:#6366f1;font-size:16px">Done</span>
+    <span style="font-size:17px;font-weight:600">Table of Contents</span>
+    <span style="width:40px"></span>
+  </div>
+  <div class="toc-list" style="overflow-y:auto;height:calc(100% - 106px)">
+    <div class="toc-row active">
+      <div>
+        <div class="ch-title">Chapter 1</div>
+        <div class="ch-meta">2,450 words &middot; 10 min read</div>
+      </div>
+      <div class="bookmark-icon">&#128278;</div>
+    </div>
+    <div class="toc-row">
+      <div>
+        <div class="ch-title">Chapter 2</div>
+        <div class="ch-meta">3,102 words &middot; 12 min read</div>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div>
+        <div class="ch-title">Chapter 3</div>
+        <div class="ch-meta">2,890 words &middot; 12 min read</div>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div>
+        <div class="ch-title">Chapter 4</div>
+        <div class="ch-meta">1,965 words &middot; 8 min read</div>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div>
+        <div class="ch-title">Chapter 5</div>
+        <div class="ch-meta">3,540 words &middot; 14 min read</div>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div>
+        <div class="ch-title">Chapter 6</div>
+        <div class="ch-meta">2,710 words &middot; 11 min read</div>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div>
+        <div class="ch-title">Chapter 7</div>
+        <div class="ch-meta">3,200 words &middot; 13 min read</div>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div>
+        <div class="ch-title">Chapter 8</div>
+        <div class="ch-meta">2,100 words &middot; 8 min read</div>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div>
+        <div class="ch-title">Chapter 9</div>
+        <div class="ch-meta">1,800 words &middot; 7 min read</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="screen-label">Table of Contents</div>
+</div>
+
+<!-- SCREEN 7: Reader Settings -->
+<div class="screen-wrapper">
+<div class="phone-frame" style="background:#f2f2f7">
+  <div class="status-bar light">
+    <span>9:41</span>
+    <div class="status-icons">
+      <span>&#9679;&#9679;&#9679;&#9679;</span>
+      <span style="font-size:12px">WiFi</span>
+      <span>&#128267;</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;">
+    <span style="width:40px"></span>
+    <span style="font-size:17px;font-weight:600">Reader Settings</span>
+    <span style="color:#6366f1;font-size:16px;font-weight:500">Done</span>
+  </div>
+
+  <div style="overflow-y:auto;height:calc(100% - 106px);padding-bottom:20px">
+    <div class="section-header">Font Size</div>
+    <div class="setting-row" style="flex-direction:column;gap:8px;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:14px;color:#888">A</span>
+        <div style="flex:1;height:4px;background:#e5e5ea;border-radius:2px;position:relative">
+          <div style="position:absolute;left:30%;top:-6px;width:16px;height:16px;background:#6366f1;border-radius:50%;transform:translateX(-50%)"></div>
+        </div>
+        <span style="font-size:24px;color:#888">A</span>
+      </div>
+      <span style="font-size:13px;color:#888">Current: 18pt</span>
+    </div>
+
+    <div class="section-header">Font</div>
+    <div class="setting-row">
+      <span class="label">Font Family</span>
+      <span class="value" style="display:flex;align-items:center;gap:4px">Georgia <span style="color:#ccc">&#9656;</span></span>
+    </div>
+
+    <div class="section-header">Line Spacing</div>
+    <div class="setting-row" style="flex-direction:column;gap:8px;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:12px;color:#888">&#9776;</span>
+        <div style="flex:1;height:4px;background:#e5e5ea;border-radius:2px;position:relative">
+          <div style="position:absolute;left:40%;top:-6px;width:16px;height:16px;background:#6366f1;border-radius:50%;transform:translateX(-50%)"></div>
+        </div>
+        <span style="font-size:18px;color:#888">&#9776;</span>
+      </div>
+      <span style="font-size:13px;color:#888">Current: 1.4x</span>
+    </div>
+
+    <div class="section-header">Theme</div>
+    <div class="theme-row">
+      <div class="theme-chip t-light selected">Aa</div>
+      <div class="theme-chip t-sepia">Aa</div>
+      <div class="theme-chip t-dark">Aa</div>
+      <div class="theme-chip t-midnight">Aa</div>
+    </div>
+    <div style="display:flex;justify-content:space-around;padding:0 16px;margin-top:-8px">
+      <span style="font-size:11px;color:#6366f1">Light</span>
+      <span style="font-size:11px;color:#888">Sepia</span>
+      <span style="font-size:11px;color:#888">Dark</span>
+      <span style="font-size:11px;color:#888">Midnight</span>
+    </div>
+
+    <div class="section-header">Reading</div>
+    <div class="setting-row">
+      <span class="label">Keep Screen Awake</span>
+      <div style="width:51px;height:31px;background:#34c759;border-radius:16px;position:relative">
+        <div style="width:27px;height:27px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
+      </div>
+    </div>
+
+    <div class="section-header">Preview</div>
+    <div style="margin:0 16px;padding:16px;background:#fff;border-radius:12px;border:1px solid #e5e5ea">
+      <p style="font-family:Georgia,serif;font-size:18px;line-height:1.6;color:#333">The quick brown fox jumps over the lazy dog. This is a preview of your text.</p>
+    </div>
+  </div>
+</div>
+<div class="screen-label">Reader Settings</div>
+</div>
+
+<!-- SCREEN 8: Settings -->
+<div class="screen-wrapper">
+<div class="phone-frame" style="background:#f2f2f7">
+  <div class="status-bar light">
+    <span>9:41</span>
+    <div class="status-icons">
+      <span>&#9679;&#9679;&#9679;&#9679;</span>
+      <span style="font-size:12px">WiFi</span>
+      <span>&#128267;</span>
+    </div>
+  </div>
+  <div class="nav-bar" style="background:#f2f2f7">
+    <span>Settings</span>
+  </div>
+
+  <div class="settings-content">
+    <div class="section-header">Library</div>
+    <div class="setting-row"><span class="label">Total Books</span><span class="value">4</span></div>
+    <div class="setting-row"><span class="label">EPUB</span><span class="value">2</span></div>
+    <div class="setting-row"><span class="label">PDF</span><span class="value">1</span></div>
+    <div class="setting-row"><span class="label">Plain Text</span><span class="value">1</span></div>
+
+    <div class="section-header">Default Reader Settings</div>
+    <div class="setting-row">
+      <span class="label">Font</span>
+      <span class="value" style="display:flex;align-items:center;gap:4px">Georgia <span style="color:#ccc">&#9656;</span></span>
+    </div>
+    <div class="setting-row"><span class="label">Font Size</span><span class="value">18pt</span></div>
+    <div class="setting-row"><span class="label">Theme</span><span class="value">Light</span></div>
+
+    <div class="section-header">Supported Formats</div>
+    <div class="setting-row">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="icon-left" style="background:#6366f1">&#128214;</div>
+        <span class="label">EPUB</span>
+      </div>
+      <span class="badge">.epub</span>
+    </div>
+    <div class="setting-row">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="icon-left" style="background:#ef4444">&#128196;</div>
+        <span class="label">PDF</span>
+      </div>
+      <span class="badge">.pdf</span>
+    </div>
+    <div class="setting-row">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="icon-left" style="background:#10b981">&#128221;</div>
+        <span class="label">Plain Text</span>
+      </div>
+      <span class="badge">.txt</span>
+    </div>
+
+    <div class="section-header">About</div>
+    <div class="setting-row"><span class="label">App</span><span class="value">Aurora Reader</span></div>
+    <div class="setting-row"><span class="label">Version</span><span class="value">1.0.0</span></div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item">
+      <div class="tab-icon">&#128218;</div>
+      Library
+    </div>
+    <div class="tab-item active">
+      <div class="tab-icon">&#9881;</div>
+      Settings
+    </div>
+  </div>
+</div>
+<div class="screen-label">Settings</div>
+</div>
+
+</div><!-- end screens-row -->
+
+</body>
+</html>
