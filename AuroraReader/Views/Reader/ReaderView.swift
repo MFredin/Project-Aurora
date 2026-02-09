@@ -356,7 +356,7 @@ struct ReaderView: View {
                 }
 
                 ProgressView(value: viewModel.progressPercentage)
-                    .tint(.accentColor)
+                    .tint(AuroraTheme.auroraTeal)
             }
             .padding()
             .background(.ultraThinMaterial)

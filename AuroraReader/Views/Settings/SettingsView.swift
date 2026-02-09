@@ -17,6 +17,9 @@ struct SettingsView: View {
     @State private var apiKeyInput = ""
     @State private var showAPIKeyField = false
     @State private var apiKeyStatus: APIKeyStatus = .unknown
+    @State private var showResultAlert = false
+    @State private var resultAlertTitle = ""
+    @State private var resultAlertMessage = ""
 
     enum APIKeyStatus {
         case unknown, valid, invalid, checking
@@ -95,7 +98,15 @@ struct SettingsView: View {
                             }
                         }
                     } header: {
-                        Text("Sync").foregroundStyle(AuroraTheme.auroraTeal)
+                        HStack {
+                            Text("Sync").foregroundStyle(AuroraTheme.auroraTeal)
+                            Text("SOON")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundStyle(AuroraTheme.auroraTeal)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(AuroraTheme.auroraTeal.opacity(0.15), in: Capsule())
+                        }
                     }
                     .listRowBackground(AuroraTheme.surface)
 
@@ -218,6 +229,12 @@ struct SettingsView: View {
                         Button {
                             Task {
                                 await metadataService.enrichLibrary(books: books, modelContext: modelContext)
+                                let enriched = metadataService.enrichedCount
+                                resultAlertTitle = "Metadata Enrichment Complete"
+                                resultAlertMessage = enriched > 0
+                                    ? "Updated metadata for \(enriched) book\(enriched == 1 ? "" : "s")."
+                                    : "All books already have complete metadata."
+                                showResultAlert = true
                             }
                         } label: {
                             HStack(spacing: 10) {
@@ -249,6 +266,15 @@ struct SettingsView: View {
                         Button {
                             Task {
                                 await coverArtService.fetchMissingCovers(books: books, modelContext: modelContext)
+                                let found = coverArtService.coversFoundCount
+                                let total = coverArtService.totalToFetch
+                                resultAlertTitle = "Cover Art Complete"
+                                resultAlertMessage = found > 0
+                                    ? "Found covers for \(found) of \(total) book\(total == 1 ? "" : "s")."
+                                    : total > 0
+                                        ? "No covers found. Try enriching metadata first for better results."
+                                        : "All books already have cover art."
+                                showResultAlert = true
                             }
                         } label: {
                             HStack(spacing: 10) {
@@ -300,7 +326,15 @@ struct SettingsView: View {
                             }
                         }
                     } header: {
-                        Text("Cloud Storage").foregroundStyle(AuroraTheme.auroraTeal)
+                        HStack {
+                            Text("Cloud Storage").foregroundStyle(AuroraTheme.auroraTeal)
+                            Text("SOON")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundStyle(AuroraTheme.auroraTeal)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(AuroraTheme.auroraTeal.opacity(0.15), in: Capsule())
+                        }
                     }
                     .listRowBackground(AuroraTheme.surface)
 
@@ -371,7 +405,7 @@ struct SettingsView: View {
                         HStack {
                             Text("Version").foregroundStyle(AuroraTheme.textPrimary)
                             Spacer()
-                            Text("3.1.0").foregroundStyle(AuroraTheme.textSecondary)
+                            Text("3.2.0").foregroundStyle(AuroraTheme.textSecondary)
                         }
                     } header: {
                         Text("About").foregroundStyle(AuroraTheme.auroraTeal)
@@ -382,6 +416,11 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .alert(resultAlertTitle, isPresented: $showResultAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(resultAlertMessage)
+            }
         }
         .preferredColorScheme(.dark)
         .onAppear {

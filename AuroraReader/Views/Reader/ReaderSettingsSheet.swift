@@ -6,98 +6,123 @@ struct ReaderSettingsSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                // Font Size
-                Section("Font Size") {
-                    HStack {
-                        Text("A")
-                            .font(.system(size: 14))
+            ZStack {
+                AuroraTheme.deepSpace.ignoresSafeArea()
 
-                        Slider(value: $preferences.fontSizeRaw, in: 12...32, step: 1)
+                Form {
+                    // Font Size
+                    Section("Font Size") {
+                        HStack {
+                            Text("A")
+                                .font(.system(size: 14))
+                                .foregroundStyle(AuroraTheme.textSecondary)
 
-                        Text("A")
-                            .font(.system(size: 24))
-                    }
+                            Slider(value: $preferences.fontSizeRaw, in: 12...32, step: 1)
+                                .tint(AuroraTheme.auroraTeal)
 
-                    Text("Current: \(Int(preferences.fontSizeRaw))pt")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                // Font Family
-                Section("Font") {
-                    Picker("Font Family", selection: $preferences.fontFamily) {
-                        ForEach(UserPreferences.availableFonts, id: \.self) { font in
-                            Text(font)
-                                .font(.custom(font, size: 16))
-                                .tag(font)
+                            Text("A")
+                                .font(.system(size: 24))
+                                .foregroundStyle(AuroraTheme.textSecondary)
                         }
-                    }
-                    .pickerStyle(.navigationLink)
-                }
 
-                // Line Spacing
-                Section("Line Spacing") {
-                    HStack {
-                        Image(systemName: "line.3.horizontal.decrease")
+                        Text("Current: \(Int(preferences.fontSizeRaw))pt")
                             .font(.caption)
-                        Slider(value: $preferences.lineSpacing, in: 1.0...2.5, step: 0.1)
-                        Image(systemName: "line.3.horizontal")
-                            .font(.body)
+                            .foregroundStyle(AuroraTheme.textTertiary)
                     }
-                    Text("Current: \(String(format: "%.1f", preferences.lineSpacing))x")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                    .listRowBackground(AuroraTheme.surface)
 
-                // Margin
-                Section("Margins") {
-                    Slider(value: $preferences.marginSize, in: 8...40, step: 4)
-                    Text("Current: \(Int(preferences.marginSize))pt")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                // Theme
-                Section("Theme") {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 12) {
-                        ForEach(ReaderTheme.allCases, id: \.self) { theme in
-                            ThemeButton(
-                                theme: theme,
-                                isSelected: preferences.theme == theme
-                            ) {
-                                preferences.theme = theme
+                    // Font Family
+                    Section("Font") {
+                        Picker("Font Family", selection: $preferences.fontFamily) {
+                            ForEach(UserPreferences.availableFonts, id: \.self) { font in
+                                Text(font)
+                                    .font(.custom(font, size: 16))
+                                    .tag(font)
                             }
                         }
+                        .pickerStyle(.navigationLink)
+                        .foregroundStyle(AuroraTheme.textPrimary)
                     }
-                    .padding(.vertical, 4)
-                }
+                    .listRowBackground(AuroraTheme.surface)
 
-                // Reading Options
-                Section("Reading") {
-                    Toggle("Keep Screen Awake", isOn: $preferences.keepScreenAwake)
-                }
+                    // Line Spacing
+                    Section("Line Spacing") {
+                        HStack {
+                            Image(systemName: "line.3.horizontal.decrease")
+                                .font(.caption)
+                                .foregroundStyle(AuroraTheme.textSecondary)
+                            Slider(value: $preferences.lineSpacing, in: 1.0...2.5, step: 0.1)
+                                .tint(AuroraTheme.auroraTeal)
+                            Image(systemName: "line.3.horizontal")
+                                .font(.body)
+                                .foregroundStyle(AuroraTheme.textSecondary)
+                        }
+                        Text("Current: \(String(format: "%.1f", preferences.lineSpacing))x")
+                            .font(.caption)
+                            .foregroundStyle(AuroraTheme.textTertiary)
+                    }
+                    .listRowBackground(AuroraTheme.surface)
 
-                // Preview
-                Section("Preview") {
-                    Text("The quick brown fox jumps over the lazy dog. This is a preview of how your text will appear while reading.")
-                        .font(.custom(preferences.fontFamily, size: preferences.fontSize))
-                        .lineSpacing(preferences.fontSize * CGFloat(preferences.lineSpacing - 1.0))
-                        .foregroundStyle(preferences.theme.textColor)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(preferences.theme.backgroundColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    // Margin
+                    Section("Margins") {
+                        Slider(value: $preferences.marginSize, in: 8...40, step: 4)
+                            .tint(AuroraTheme.auroraTeal)
+                        Text("Current: \(Int(preferences.marginSize))pt")
+                            .font(.caption)
+                            .foregroundStyle(AuroraTheme.textTertiary)
+                    }
+                    .listRowBackground(AuroraTheme.surface)
+
+                    // Theme
+                    Section("Theme") {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 12) {
+                            ForEach(ReaderTheme.allCases, id: \.self) { theme in
+                                ThemeButton(
+                                    theme: theme,
+                                    isSelected: preferences.theme == theme
+                                ) {
+                                    preferences.theme = theme
+                                }
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .listRowBackground(AuroraTheme.surface)
+
+                    // Reading Options
+                    Section("Reading") {
+                        Toggle("Keep Screen Awake", isOn: $preferences.keepScreenAwake)
+                            .foregroundStyle(AuroraTheme.textPrimary)
+                            .tint(AuroraTheme.auroraTeal)
+                    }
+                    .listRowBackground(AuroraTheme.surface)
+
+                    // Preview
+                    Section("Preview") {
+                        Text("The quick brown fox jumps over the lazy dog. This is a preview of how your text will appear while reading.")
+                            .font(.custom(preferences.fontFamily, size: preferences.fontSize))
+                            .lineSpacing(preferences.fontSize * CGFloat(preferences.lineSpacing - 1.0))
+                            .foregroundStyle(preferences.theme.textColor)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(preferences.theme.backgroundColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .listRowBackground(AuroraTheme.surface)
                 }
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Reader Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
+                        .foregroundStyle(AuroraTheme.auroraTeal)
                 }
             }
         }
+        .preferredColorScheme(.dark)
     }
 }
 
@@ -114,7 +139,7 @@ struct ThemeButton: View {
                     .overlay {
                         RoundedRectangle(cornerRadius: 8)
                             .strokeBorder(
-                                isSelected ? Color.accentColor : Color.gray.opacity(0.3),
+                                isSelected ? AuroraTheme.auroraTeal : AuroraTheme.textTertiary.opacity(0.3),
                                 lineWidth: isSelected ? 2 : 1
                             )
                     }
@@ -127,7 +152,7 @@ struct ThemeButton: View {
 
                 Text(theme.displayName)
                     .font(.caption2)
-                    .foregroundStyle(isSelected ? .accentColor : .secondary)
+                    .foregroundStyle(isSelected ? AuroraTheme.auroraTeal : AuroraTheme.textTertiary)
             }
         }
         .buttonStyle(.plain)

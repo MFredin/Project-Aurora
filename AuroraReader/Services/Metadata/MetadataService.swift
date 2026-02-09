@@ -9,6 +9,7 @@ final class MetadataService {
 
     var isEnriching: Bool = false
     var enrichmentProgress: Double = 0
+    var enrichedCount: Int = 0
 
     private let openLibraryBaseURL = "https://openlibrary.org"
     private let googleBooksBaseURL = "https://www.googleapis.com/books/v1"
@@ -56,10 +57,16 @@ final class MetadataService {
 
         let booksNeedingEnrichment = books.filter { $0.coverImageData == nil || $0.isbn == nil }
         let total = Double(booksNeedingEnrichment.count)
+        enrichedCount = 0
 
         for (index, book) in booksNeedingEnrichment.enumerated() {
             enrichmentProgress = Double(index) / total
+            let hadISBN = book.isbn != nil
+            let hadCover = book.coverImageData != nil
             await enrichBook(book, modelContext: modelContext)
+            if book.isbn != nil && !hadISBN || book.coverImageData != nil && !hadCover {
+                enrichedCount += 1
+            }
             // Rate limit
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s delay
         }

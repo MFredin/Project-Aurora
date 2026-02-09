@@ -36,6 +36,7 @@ struct ContentView: View {
                 .tag(AppTab.settings)
         }
         .tint(AuroraTheme.auroraTeal)
+        .preferredColorScheme(.dark)
     }
 }
 

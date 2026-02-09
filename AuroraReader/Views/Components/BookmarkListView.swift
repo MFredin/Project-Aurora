@@ -8,11 +8,19 @@ struct BookmarkListView: View {
     var body: some View {
         Group {
             if bookmarks.isEmpty {
-                ContentUnavailableView(
-                    "No Bookmarks",
-                    systemImage: "bookmark.circle",
-                    description: Text("Bookmarks you add will appear here.")
-                )
+                VStack(spacing: 12) {
+                    Image(systemName: "bookmark.circle.fill")
+                        .font(.system(size: 40))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(AuroraTheme.textTertiary)
+                    Text("No Bookmarks")
+                        .font(.headline)
+                        .foregroundStyle(AuroraTheme.textSecondary)
+                    Text("Bookmarks you add will appear here.")
+                        .font(.caption)
+                        .foregroundStyle(AuroraTheme.textTertiary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
                     ForEach(sortedBookmarks) { bookmark in
@@ -23,21 +31,22 @@ struct BookmarkListView: View {
                                 Text(bookmark.title)
                                     .font(.body)
                                     .fontWeight(.medium)
+                                    .foregroundStyle(AuroraTheme.textPrimary)
 
                                 Text("Chapter \(bookmark.chapter + 1)")
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(AuroraTheme.textSecondary)
 
                                 if !bookmark.textSnippet.isEmpty {
                                     Text(bookmark.textSnippet)
                                         .font(.caption)
-                                        .foregroundStyle(.tertiary)
+                                        .foregroundStyle(AuroraTheme.textTertiary)
                                         .lineLimit(2)
                                 }
 
                                 Text(bookmark.dateCreated, style: .date)
                                     .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(AuroraTheme.textTertiary)
                             }
                         }
                         .swipeActions(edge: .trailing) {
@@ -47,8 +56,10 @@ struct BookmarkListView: View {
                                 Label("Delete", systemImage: "trash.circle")
                             }
                         }
+                        .listRowBackground(AuroraTheme.surface)
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
         }
     }

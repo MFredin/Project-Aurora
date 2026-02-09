@@ -60,6 +60,14 @@ final class BookImportService {
             UTType(filenameExtension: "epub") ?? .data,
             .pdf,
             .plainText,
+            .rtf,
+            .html,
+            UTType(filenameExtension: "mobi") ?? .data,
+            UTType(filenameExtension: "azw3") ?? .data,
+            UTType(filenameExtension: "fb2") ?? .data,
+            UTType(filenameExtension: "djvu") ?? .data,
+            UTType(filenameExtension: "cbz") ?? .data,
+            UTType(filenameExtension: "doc") ?? .data,
         ]
     }
 }

@@ -68,17 +68,18 @@ struct GoodReadsView: View {
                 .foregroundStyle(AuroraTheme.textSecondary)
                 .multilineTextAlignment(.center)
 
-            Button(action: {
-                Task {
-                    try? await service.authenticate(apiKey: "")
-                }
-            }) {
-                HStack(spacing: 8) {
-                    BrandAssets.GoodReadsLogo(size: 20)
-                    Text("Connect GoodReads")
-                }
-            }
-            .buttonStyle(AuroraButtonStyle(gradient: AuroraTheme.warmGradient))
+            Text("COMING SOON")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(AuroraTheme.auroraWarm)
+                .tracking(1.5)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(AuroraTheme.auroraWarm.opacity(0.12), in: Capsule())
+
+            Text("GoodReads integration is being finalized.\nStay tuned for book discovery and reviews.")
+                .font(.caption)
+                .foregroundStyle(AuroraTheme.textTertiary)
+                .multilineTextAlignment(.center)
         }
         .padding(40)
     }

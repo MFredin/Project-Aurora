@@ -11,6 +11,7 @@ final class CoverArtService {
     var fetchProgress: Double = 0
     var fetchedCount = 0
     var totalToFetch = 0
+    var coversFoundCount = 0
 
     private init() {}
 
@@ -57,6 +58,7 @@ final class CoverArtService {
         isFetching = true
         totalToFetch = booksNeedingCovers.count
         fetchedCount = 0
+        coversFoundCount = 0
         fetchProgress = 0
 
         defer {
@@ -67,6 +69,7 @@ final class CoverArtService {
         for book in booksNeedingCovers {
             let found = await fetchCover(for: book, modelContext: modelContext)
             fetchedCount += 1
+            if found { coversFoundCount += 1 }
             fetchProgress = Double(fetchedCount) / Double(totalToFetch)
 
             // Rate limit between requests
