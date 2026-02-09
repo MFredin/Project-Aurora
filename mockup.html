@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurora Reader - App Mockup v2</title>
+<title>Aurora Reader - App Mockup v4</title>
 <style>
 :root {
   --deep-space: #0a0a1f;
@@ -229,7 +229,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
 
 <h1 class="page-title">Aurora Reader</h1>
 <p class="subtitle">iOS Ebook Reader &mdash; Northern Lights Edition</p>
-<div class="version-badge"><span>v3.0 &bull; 11 Formats &bull; Cloud + GoodReads + Activity Tracking</span></div>
+<div class="version-badge"><span>v4.0 &bull; 11 Formats &bull; AI Companion &bull; Knowledge Graph &bull; Ambient Immersion &bull; Book Clubs &bull; iCloud Sync</span></div>
 
 <div class="screens-row">
 
@@ -254,7 +254,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
     <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
     <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
-    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
     <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
@@ -294,7 +294,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
     <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
     <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
-    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
     <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
@@ -442,7 +442,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
     <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
     <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item active"><div class="tab-icon">&#9729;</div>Cloud</div>
-    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
     <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
@@ -730,7 +730,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
     <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
     <div class="tab-item active"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
-    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
     <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
@@ -839,7 +839,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
 
     <div class="section-header">About</div>
     <div class="setting-row"><span class="label">App</span><span class="value">Aurora Reader</span></div>
-    <div class="setting-row"><span class="label">Version</span><span class="value">2.0.0</span></div>
+    <div class="setting-row"><span class="label">Version</span><span class="value">3.0.0</span></div>
     <div style="height:20px"></div>
   </div>
 
@@ -847,11 +847,426 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
     <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
     <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
-    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
     <div class="tab-item active"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
 <div class="screen-label">Settings</div>
+</div>
+
+<!-- SCREEN 11: Highlights & Annotations -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow2"></div><div class="glow3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons">&#9679;&#9679;&#9679; &#128246; &#128267;</div></div>
+  <div class="nav-bar" style="font-size:17px"><span style="font-size:17px;font-weight:600">Annotations</span><div class="actions"><span>&#8942;</span></div></div>
+
+  <div style="position:relative;z-index:1;overflow-y:auto;height:620px;padding:0 16px 16px">
+    <!-- Filter chips -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto">
+      <span style="font-size:11px;color:#fff;background:var(--aurora-teal);padding:4px 12px;border-radius:20px;font-weight:500">All</span>
+      <span style="font-size:11px;color:var(--text-secondary);background:var(--surface);padding:4px 12px;border-radius:20px;display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--aurora-green)"></span>Green</span>
+      <span style="font-size:11px;color:var(--text-secondary);background:var(--surface);padding:4px 12px;border-radius:20px;display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--aurora-teal)"></span>Teal</span>
+      <span style="font-size:11px;color:var(--text-secondary);background:var(--surface);padding:4px 12px;border-radius:20px;display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--aurora-purple)"></span>Purple</span>
+      <span style="font-size:11px;color:var(--text-secondary);background:var(--surface);padding:4px 12px;border-radius:20px;display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--aurora-warm)"></span>Warm</span>
+    </div>
+
+    <!-- Highlight items -->
+    <div style="background:var(--surface);border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid var(--aurora-teal)">
+      <div style="font-size:13px;color:var(--text-primary);font-style:italic;margin-bottom:6px">"The aurora danced across the sky like a celestial curtain, weaving threads of green and purple..."</div>
+      <div style="font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">&#128221; This passage perfectly captures the visual essence</div>
+      <div style="display:flex;gap:4px;margin-top:6px"><span style="font-size:9px;color:var(--aurora-teal);background:rgba(38,199,209,0.12);padding:2px 6px;border-radius:10px">#nature</span><span style="font-size:9px;color:var(--aurora-teal);background:rgba(38,199,209,0.12);padding:2px 6px;border-radius:10px">#imagery</span></div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px">Northern Lights &bull; Ch. 3 &bull; Jan 28</div>
+    </div>
+
+    <div style="background:var(--surface);border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid var(--aurora-purple)">
+      <div style="font-size:13px;color:var(--text-primary);font-style:italic;margin-bottom:6px">"Every great reader is, in the end, nothing more than a dreamer with open eyes."</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px">The Midnight Library &bull; Ch. 7 &bull; Feb 2</div>
+    </div>
+
+    <div style="background:var(--surface);border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid var(--aurora-green)">
+      <div style="font-size:13px;color:var(--text-primary);font-style:italic;margin-bottom:6px">"The algorithm had evolved beyond its original parameters, developing what could only be described as curiosity."</div>
+      <div style="font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">&#128221; Key plot point - AI gaining consciousness</div>
+      <div style="display:flex;gap:4px;margin-top:6px"><span style="font-size:9px;color:var(--aurora-teal);background:rgba(38,199,209,0.12);padding:2px 6px;border-radius:10px">#AI</span><span style="font-size:9px;color:var(--aurora-teal);background:rgba(38,199,209,0.12);padding:2px 6px;border-radius:10px">#consciousness</span></div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px">Digital Horizons &bull; Ch. 12 &bull; Feb 5</div>
+    </div>
+
+    <div style="background:var(--surface);border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid var(--aurora-warm)">
+      <div style="font-size:13px;color:var(--text-primary);font-style:italic;margin-bottom:6px">"To love is to recognize yourself in another, and in doing so, discover who you truly are."</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px">Echoes of the Heart &bull; Ch. 15 &bull; Feb 8</div>
+    </div>
+
+    <div style="background:var(--surface);border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid var(--aurora-pink)">
+      <div style="font-size:13px;color:var(--text-primary);font-style:italic;margin-bottom:6px">"The old map showed a path that no modern cartographer had ever recorded..."</div>
+      <div style="font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">&#128221; Beginning of the quest arc</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px">The Lost Expedition &bull; Ch. 4 &bull; Feb 9</div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
+  </div>
+</div>
+<div class="screen-label">Highlights & Annotations</div>
+</div>
+
+<!-- SCREEN 12: AI Companion -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow2"></div><div class="glow3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons">&#9679;&#9679;&#9679; &#128246; &#128267;</div></div>
+  <div class="nav-bar" style="font-size:17px"><span style="font-size:17px;font-weight:600">AI Companion</span><div class="actions"><span style="font-size:14px;color:var(--text-secondary)">Done</span></div></div>
+
+  <div style="position:relative;z-index:1;overflow-y:auto;height:620px">
+    <!-- Tab selector -->
+    <div style="display:flex;gap:6px;padding:8px 16px;overflow-x:auto">
+      <span style="font-size:13px;color:#fff;background:linear-gradient(135deg,var(--aurora-blue),var(--aurora-purple));padding:6px 16px;border-radius:20px;font-weight:500">Recap</span>
+      <span style="font-size:13px;color:var(--text-secondary);background:var(--surface);padding:6px 16px;border-radius:20px">Characters</span>
+      <span style="font-size:13px;color:var(--text-secondary);background:var(--surface);padding:6px 16px;border-radius:20px">Vocabulary</span>
+      <span style="font-size:13px;color:var(--text-secondary);background:var(--surface);padding:6px 16px;border-radius:20px">Ask</span>
+    </div>
+
+    <div style="padding:12px 16px">
+      <!-- Where you left off -->
+      <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+          <span style="font-size:18px">&#128278;</span>
+          <span style="font-size:15px;font-weight:600;color:var(--text-primary)">Where You Left Off</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">You've read 12 chapters (48,350 words). Your last chapter was "The Convergence".</div>
+        <div style="height:4px;background:var(--surface-elev);border-radius:2px;margin-bottom:4px"><div style="width:60%;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green))"></div></div>
+        <div style="font-size:10px;color:var(--text-tertiary)">~3h 45m remaining</div>
+      </div>
+
+      <!-- Key Characters -->
+      <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+          <span style="font-size:18px;color:var(--aurora-purple)">&#128101;</span>
+          <span style="font-size:15px;font-weight:600;color:var(--text-primary)">Key Characters</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:11px;color:var(--text-primary);background:rgba(148,76,242,0.15);padding:4px 10px;border-radius:20px">Eleanor</span>
+          <span style="font-size:11px;color:var(--text-primary);background:rgba(148,76,242,0.15);padding:4px 10px;border-radius:20px">Marcus</span>
+          <span style="font-size:11px;color:var(--text-primary);background:rgba(148,76,242,0.15);padding:4px 10px;border-radius:20px">Dr. Voss</span>
+          <span style="font-size:11px;color:var(--text-primary);background:rgba(148,76,242,0.15);padding:4px 10px;border-radius:20px">The Keeper</span>
+          <span style="font-size:11px;color:var(--text-primary);background:rgba(148,76,242,0.15);padding:4px 10px;border-radius:20px">Aria</span>
+        </div>
+      </div>
+
+      <!-- Recent Events -->
+      <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+          <span style="font-size:18px;color:var(--aurora-warm)">&#10024;</span>
+          <span style="font-size:15px;font-weight:600;color:var(--text-primary)">Recent Events</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:8px">
+          <span style="font-size:10px;font-weight:700;color:var(--aurora-warm);min-width:16px">1</span>
+          <span style="font-size:11px;color:var(--text-secondary)">Eleanor discovered the hidden chamber beneath the library</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:8px">
+          <span style="font-size:10px;font-weight:700;color:var(--aurora-warm);min-width:16px">2</span>
+          <span style="font-size:11px;color:var(--text-secondary)">Marcus revealed his true identity to the group</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:6px">
+          <span style="font-size:10px;font-weight:700;color:var(--aurora-warm);min-width:16px">3</span>
+          <span style="font-size:11px;color:var(--text-secondary)">The Keeper warned of the approaching convergence</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
+  </div>
+</div>
+<div class="screen-label">AI Companion</div>
+</div>
+
+<!-- SCREEN 13: Smart Reading Modes -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow2"></div><div class="glow3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons">&#9679;&#9679;&#9679; &#128246; &#128267;</div></div>
+  <div class="nav-bar" style="font-size:17px"><span style="font-size:17px;font-weight:600">Reading Mode</span><div class="actions"><span style="font-size:14px;color:var(--text-secondary)">Done</span></div></div>
+
+  <div style="position:relative;z-index:1;overflow-y:auto;height:620px;padding:12px 16px">
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;border:1px solid rgba(38,199,209,0.3)">
+      <span style="font-size:22px;color:var(--aurora-teal)">&#128196;</span>
+      <div><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Standard</div><div style="font-size:11px;color:var(--text-tertiary)">Normal reading experience</div></div>
+      <span style="margin-left:auto;color:var(--aurora-teal)">&#10003;</span>
+    </div>
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:22px;color:var(--text-secondary)">&#66;</span>
+      <div><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Bionic</div><div style="font-size:11px;color:var(--text-tertiary)">Bold first letters for faster scanning</div></div>
+    </div>
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:22px;color:var(--text-secondary)">&#127919;</span>
+      <div><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Focus</div><div style="font-size:11px;color:var(--text-tertiary)">Pomodoro timer with ambient sounds</div></div>
+    </div>
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:22px;color:var(--text-secondary)">&#9201;</span>
+      <div><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Speed</div><div style="font-size:11px;color:var(--text-tertiary)">Rapid Serial Visual Presentation (RSVP)</div></div>
+    </div>
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:22px;color:var(--text-secondary)">&#9855;</span>
+      <div><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Accessibility</div><div style="font-size:11px;color:var(--text-tertiary)">Dyslexia-friendly font, line ruler, spacing</div></div>
+    </div>
+
+    <!-- Bionic preview -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-top:16px">
+      <div style="font-size:11px;color:var(--aurora-teal);font-weight:500;margin-bottom:8px">BIONIC PREVIEW</div>
+      <div style="font-size:14px;color:var(--text-primary);line-height:1.7"><b>The</b> au<span style="opacity:0.6">rora</span> <b>dan</b><span style="opacity:0.6">ced</span> <b>acr</b><span style="opacity:0.6">oss</span> <b>the</b> <b>ni</b><span style="opacity:0.6">ght</span> <b>sk</b><span style="opacity:0.6">y,</span> <b>cas</b><span style="opacity:0.6">ting</span> <b>rib</b><span style="opacity:0.6">bons</span> <b>of</b> <b>gre</b><span style="opacity:0.6">en</span> <b>an</b><span style="opacity:0.6">d</span> <b>pur</b><span style="opacity:0.6">ple</span> <b>li</b><span style="opacity:0.6">ght</span> <b>acr</b><span style="opacity:0.6">oss</span> <b>the</b> <b>fro</b><span style="opacity:0.6">zen</span> <b>lan</b><span style="opacity:0.6">dscape.</span></div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
+  </div>
+</div>
+<div class="screen-label">Smart Reading Modes</div>
+</div>
+
+<!-- SCREEN 14: Knowledge Graph -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow2"></div><div class="glow3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons">&#9679;&#9679;&#9679; &#128246; &#128267;</div></div>
+  <div class="nav-bar" style="font-size:17px"><span style="font-size:17px;font-weight:600">Knowledge Graph</span><div class="actions"><span>&#8942;</span></div></div>
+
+  <div style="position:relative;z-index:1;overflow-y:auto;height:620px">
+    <!-- Filter chips -->
+    <div style="display:flex;gap:6px;padding:8px 16px;overflow-x:auto">
+      <span style="font-size:11px;color:#fff;background:var(--aurora-teal);padding:4px 12px;border-radius:20px;font-weight:500">All</span>
+      <span style="font-size:11px;color:var(--aurora-teal);background:var(--surface);padding:4px 12px;border-radius:20px">Concept</span>
+      <span style="font-size:11px;color:var(--aurora-purple);background:var(--surface);padding:4px 12px;border-radius:20px">Character</span>
+      <span style="font-size:11px;color:var(--aurora-pink);background:var(--surface);padding:4px 12px;border-radius:20px">Theme</span>
+      <span style="font-size:11px;color:var(--aurora-warm);background:var(--surface);padding:4px 12px;border-radius:20px">Quote</span>
+    </div>
+
+    <!-- Graph visualization -->
+    <div style="position:relative;height:420px;margin:0 16px">
+      <!-- Connection lines (SVG) -->
+      <svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none">
+        <line x1="170" y1="80" x2="80" y2="180" stroke="rgba(102,102,132,0.3)" stroke-width="1"/>
+        <line x1="170" y1="80" x2="260" y2="160" stroke="rgba(102,102,132,0.3)" stroke-width="1"/>
+        <line x1="80" y1="180" x2="140" y2="300" stroke="rgba(102,102,132,0.3)" stroke-width="1"/>
+        <line x1="260" y1="160" x2="200" y2="280" stroke="rgba(102,102,132,0.3)" stroke-width="1"/>
+        <line x1="140" y1="300" x2="200" y2="280" stroke="rgba(102,102,132,0.3)" stroke-width="1"/>
+        <line x1="200" y1="280" x2="300" y2="350" stroke="rgba(102,102,132,0.3)" stroke-width="1"/>
+        <line x1="80" y1="180" x2="40" y2="310" stroke="rgba(102,102,132,0.3)" stroke-width="1"/>
+      </svg>
+      <!-- Nodes -->
+      <div style="position:absolute;top:60px;left:130px;text-align:center;padding:8px;background:rgba(38,199,209,0.15);border-radius:10px;border:1px solid rgba(38,199,209,0.4)">
+        <div style="font-size:16px">&#128161;</div>
+        <div style="font-size:9px;font-weight:500;color:var(--text-primary);max-width:70px">Consciousness</div>
+      </div>
+      <div style="position:absolute;top:160px;left:40px;text-align:center;padding:8px;background:rgba(148,76,242,0.15);border-radius:10px;border:1px solid rgba(148,76,242,0.3)">
+        <div style="font-size:16px">&#128100;</div>
+        <div style="font-size:9px;font-weight:500;color:var(--text-primary);max-width:70px">Eleanor</div>
+      </div>
+      <div style="position:absolute;top:140px;left:220px;text-align:center;padding:8px;background:rgba(148,76,242,0.15);border-radius:10px;border:1px solid rgba(148,76,242,0.3)">
+        <div style="font-size:16px">&#128100;</div>
+        <div style="font-size:9px;font-weight:500;color:var(--text-primary);max-width:70px">Marcus</div>
+      </div>
+      <div style="position:absolute;top:280px;left:100px;text-align:center;padding:8px;background:rgba(217,64,166,0.15);border-radius:10px;border:1px solid rgba(217,64,166,0.3)">
+        <div style="font-size:16px">&#127912;</div>
+        <div style="font-size:9px;font-weight:500;color:var(--text-primary);max-width:70px">Identity</div>
+      </div>
+      <div style="position:absolute;top:260px;left:165px;text-align:center;padding:8px;background:rgba(242,115,64,0.15);border-radius:10px;border:1px solid rgba(242,115,64,0.3)">
+        <div style="font-size:16px">&#10077;</div>
+        <div style="font-size:9px;font-weight:500;color:var(--text-primary);max-width:70px">"Truth is..."</div>
+      </div>
+      <div style="position:absolute;top:330px;left:260px;text-align:center;padding:8px;background:rgba(46,222,143,0.15);border-radius:10px;border:1px solid rgba(46,222,143,0.3)">
+        <div style="font-size:16px">&#129504;</div>
+        <div style="font-size:9px;font-weight:500;color:var(--text-primary);max-width:70px">Free Will</div>
+      </div>
+      <div style="position:absolute;top:290px;left:5px;text-align:center;padding:8px;background:rgba(64,120,242,0.15);border-radius:10px;border:1px solid rgba(64,120,242,0.3)">
+        <div style="font-size:16px">&#128279;</div>
+        <div style="font-size:9px;font-weight:500;color:var(--text-primary);max-width:70px">Plato's Cave</div>
+      </div>
+    </div>
+
+    <!-- Node detail panel -->
+    <div style="padding:0 16px">
+      <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border-radius:12px;padding:12px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="color:var(--aurora-teal)">&#128161;</span>
+          <span style="font-size:14px;font-weight:600;color:var(--text-primary)">Consciousness</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">The nature of awareness explored across multiple books</div>
+        <div style="display:flex;gap:10px;font-size:10px;color:var(--text-tertiary)">
+          <span>&#128161; Concept</span><span>&#128214; Digital Horizons</span><span>&#128279; 4 links</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
+    <div class="tab-item active"><div class="tab-icon">&#129504;</div>Knowledge</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
+  </div>
+</div>
+<div class="screen-label">Knowledge Graph</div>
+</div>
+
+<!-- SCREEN 15: Ambient Immersion -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow2"></div><div class="glow3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons">&#9679;&#9679;&#9679; &#128246; &#128267;</div></div>
+  <div class="nav-bar" style="font-size:17px"><span style="font-size:17px;font-weight:600">Ambient</span><div class="actions"><span style="font-size:14px;color:var(--text-secondary)">Done</span></div></div>
+
+  <div style="position:relative;z-index:1;overflow-y:auto;height:620px;padding:12px 16px">
+    <!-- Mood selector -->
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <span style="color:var(--aurora-purple)">&#127925;</span>
+        <span style="font-size:15px;font-weight:600;color:var(--text-primary)">Reading Mood</span>
+      </div>
+      <div style="display:flex;justify-content:space-around">
+        <div style="text-align:center"><div style="width:36px;height:36px;border-radius:50%;background:var(--surface-elev);display:flex;align-items:center;justify-content:center;margin:0 auto">&#128524;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:3px">Neutral</div></div>
+        <div style="text-align:center"><div style="width:36px;height:36px;border-radius:50%;background:var(--surface-elev);display:flex;align-items:center;justify-content:center;margin:0 auto">&#128560;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:3px">Tense</div></div>
+        <div style="text-align:center"><div style="width:36px;height:36px;border-radius:50%;background:var(--aurora-teal);display:flex;align-items:center;justify-content:center;margin:0 auto">&#129496;</div><div style="font-size:9px;color:var(--text-primary);margin-top:3px">Calm</div></div>
+        <div style="text-align:center"><div style="width:36px;height:36px;border-radius:50%;background:var(--surface-elev);display:flex;align-items:center;justify-content:center;margin:0 auto">&#128546;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:3px">Sad</div></div>
+        <div style="text-align:center"><div style="width:36px;height:36px;border-radius:50%;background:var(--surface-elev);display:flex;align-items:center;justify-content:center;margin:0 auto">&#128516;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:3px">Joyful</div></div>
+      </div>
+    </div>
+
+    <!-- Soundscapes -->
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="color:var(--aurora-teal)">&#127925;</span>
+          <span style="font-size:15px;font-weight:600;color:var(--text-primary)">Soundscape</span>
+        </div>
+        <span style="font-size:12px;color:var(--aurora-warm)">Stop</span>
+      </div>
+      <!-- Suggested -->
+      <div style="background:rgba(46,222,143,0.08);border-radius:8px;padding:8px;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--aurora-green)">&#10024;</span>
+        <span style="font-size:11px;color:var(--text-secondary)">Suggested: Gentle Rain</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--aurora-teal)">Play</span>
+      </div>
+      <!-- Grid -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <div style="text-align:center;padding:8px;background:rgba(38,199,209,0.12);border-radius:8px"><div style="font-size:18px">&#127783;</div><div style="font-size:9px;color:var(--text-primary);margin-top:2px">Rain</div></div>
+        <div style="text-align:center;padding:8px;background:var(--surface-elev);border-radius:8px"><div style="font-size:18px">&#9889;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">Thunder</div></div>
+        <div style="text-align:center;padding:8px;background:var(--surface-elev);border-radius:8px"><div style="font-size:18px">&#128293;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">Fireplace</div></div>
+        <div style="text-align:center;padding:8px;background:var(--surface-elev);border-radius:8px"><div style="font-size:18px">&#127754;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">Ocean</div></div>
+        <div style="text-align:center;padding:8px;background:var(--surface-elev);border-radius:8px"><div style="font-size:18px">&#127795;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">Forest</div></div>
+        <div style="text-align:center;padding:8px;background:var(--surface-elev);border-radius:8px"><div style="font-size:18px">&#9749;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">Cafe</div></div>
+        <div style="text-align:center;padding:8px;background:var(--surface-elev);border-radius:8px"><div style="font-size:18px">&#10024;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">Enchanted</div></div>
+        <div style="text-align:center;padding:8px;background:var(--surface-elev);border-radius:8px"><div style="font-size:18px">&#127761;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">Space</div></div>
+        <div style="text-align:center;padding:8px;background:var(--surface-elev);border-radius:8px"><div style="font-size:18px">&#10052;</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">Snowfall</div></div>
+      </div>
+      <!-- Volume -->
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+        <span style="font-size:12px;color:var(--text-tertiary)">&#128264;</span>
+        <div style="flex:1;height:3px;background:var(--surface-elev);border-radius:2px;position:relative"><div style="width:50%;height:100%;background:var(--aurora-teal);border-radius:2px"></div></div>
+        <span style="font-size:12px;color:var(--text-tertiary)">&#128266;</span>
+      </div>
+    </div>
+
+    <!-- Time-aware -->
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="color:var(--aurora-warm)">&#127773;</span>
+          <span style="font-size:15px;font-weight:600;color:var(--text-primary)">Time-Aware Theme</span>
+        </div>
+        <div style="width:40px;height:22px;background:var(--aurora-teal);border-radius:11px;position:relative"><div style="width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface-elev);border-radius:8px;padding:8px">
+        <span style="font-size:20px">&#127769;</span>
+        <div><div style="font-size:12px;font-weight:500;color:var(--text-primary)">Night</div><div style="font-size:10px;color:var(--text-tertiary)">Suggested: Midnight theme</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
+  </div>
+</div>
+<div class="screen-label">Ambient Immersion</div>
+</div>
+
+<!-- SCREEN 16: Book Club -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow2"></div><div class="glow3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons">&#9679;&#9679;&#9679; &#128246; &#128267;</div></div>
+  <div class="nav-bar" style="font-size:17px"><span style="font-size:17px;font-weight:600">Book Clubs</span><div class="actions"><span style="color:var(--aurora-teal);font-size:20px">+</span></div></div>
+
+  <div style="position:relative;z-index:1;overflow-y:auto;height:620px;padding:12px 16px">
+    <!-- Club card 1 -->
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div><div style="font-size:15px;font-weight:600;color:var(--text-primary)">Sci-Fi Explorers</div><div style="font-size:12px;color:var(--text-secondary)">Digital Horizons</div></div>
+        <span style="font-size:10px;color:var(--aurora-teal);background:rgba(38,199,209,0.12);padding:3px 8px;border-radius:10px;height:fit-content">Weekly</span>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="height:4px;background:var(--surface-elev);border-radius:2px"><div style="width:65%;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green))"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:10px;color:var(--text-tertiary)">Chapter 13 of 20</span><span style="font-size:10px;font-weight:700;color:var(--aurora-teal)">65%</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:0"><span style="font-size:16px;margin-left:-4px">&#128218;</span><span style="font-size:16px;margin-left:-4px">&#128214;</span><span style="font-size:16px;margin-left:-4px">&#128213;</span><span style="font-size:16px;margin-left:-4px">&#128217;</span></div>
+        <span style="font-size:10px;color:var(--text-tertiary)">&#128172; 24 discussions</span>
+      </div>
+    </div>
+
+    <!-- Club card 2 -->
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div><div style="font-size:15px;font-weight:600;color:var(--text-primary)">Classic Literature</div><div style="font-size:12px;color:var(--text-secondary)">Pride and Prejudice</div></div>
+        <span style="font-size:10px;color:var(--aurora-teal);background:rgba(38,199,209,0.12);padding:3px 8px;border-radius:10px;height:fit-content">Bi-weekly</span>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="height:4px;background:var(--surface-elev);border-radius:2px"><div style="width:30%;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green))"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:10px;color:var(--text-tertiary)">Chapter 8 of 24</span><span style="font-size:10px;font-weight:700;color:var(--aurora-teal)">30%</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:0"><span style="font-size:16px;margin-left:-4px">&#128218;</span><span style="font-size:16px;margin-left:-4px">&#128214;</span><span style="font-size:16px;margin-left:-4px">&#128213;</span></div>
+        <span style="font-size:10px;color:var(--text-tertiary)">&#128172; 12 discussions</span>
+      </div>
+    </div>
+
+    <!-- Invite section -->
+    <div style="background:var(--surface);border-radius:12px;padding:20px;text-align:center;margin-top:16px">
+      <div style="font-size:28px;margin-bottom:8px">&#128101;</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:4px">Start a New Club</div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">Read together, discuss chapters, compete</div>
+      <div style="display:inline-block;background:linear-gradient(135deg,var(--aurora-teal),var(--aurora-green));color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600">Create Book Club</div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
+    <div class="tab-item"><div class="tab-icon">&#129504;</div>Knowledge</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item active"><div class="tab-icon">&#9881;</div>Settings</div>
+  </div>
+</div>
+<div class="screen-label">Book Clubs</div>
 </div>
 
 </div><!-- end screens-row -->
