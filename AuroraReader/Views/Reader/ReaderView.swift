@@ -8,6 +8,7 @@ struct ReaderView: View {
     @State private var viewModel: ReaderViewModel
     @State private var statsService = ReadingStatsService.shared
     @State private var ambientService = AmbientService.shared
+    @State private var formattingService = BookFormattingService.shared
     @State private var currentSession: ReadingSession?
 
     // New feature states
@@ -17,6 +18,7 @@ struct ReaderView: View {
     @State private var showAmbientControls = false
     @State private var showReadingModeSelector = false
     @State private var showHighlightActions = false
+    @State private var showFormattingSheet = false
     @State private var selectedReadingMode: SmartReadingMode = .standard
     @State private var selectedText = ""
     @State private var highlightColor: HighlightColor = .auroraTeal
@@ -117,6 +119,12 @@ struct ReaderView: View {
         }
         .sheet(isPresented: $showNoteInput) {
             addNoteSheet
+        }
+        .sheet(isPresented: $showFormattingSheet) {
+            FormattingSheetView(
+                chapters: viewModel.chapters,
+                currentChapterIndex: viewModel.currentChapterIndex
+            )
         }
         .statusBarHidden(!viewModel.isToolbarVisible)
     }
@@ -280,6 +288,12 @@ struct ReaderView: View {
                     Button(action: { viewModel.showBookmarkSheet = true }) {
                         Label("Add Bookmark", systemImage: "bookmark.circle")
                     }
+                    Button(action: { showFormattingSheet = true }) {
+                        Label("Fix Formatting", systemImage: "wand.and.stars")
+                    }
+
+                    Divider()
+
                     Button(action: { viewModel.showSettings = true }) {
                         Label("Settings", systemImage: "textformat.size.larger")
                     }

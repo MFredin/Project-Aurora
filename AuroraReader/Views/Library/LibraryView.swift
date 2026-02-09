@@ -5,6 +5,7 @@ struct LibraryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var books: [Book]
     @State private var viewModel = LibraryViewModel()
+    @State private var coverArtService = CoverArtService.shared
     @State private var showFileImporter = false
     @State private var selectedBook: Book?
     @State private var isGridView = true
@@ -110,6 +111,24 @@ struct LibraryView: View {
 
     @ViewBuilder
     private func bookContextMenu(for book: Book) -> some View {
+        if book.coverImageData == nil {
+            Button {
+                Task {
+                    await coverArtService.fetchCover(for: book, modelContext: modelContext)
+                }
+            } label: {
+                Label("Fetch Cover", systemImage: "photo.on.rectangle.angled")
+            }
+        } else {
+            Button {
+                Task {
+                    await coverArtService.refreshCover(for: book, modelContext: modelContext)
+                }
+            } label: {
+                Label("Refresh Cover", systemImage: "arrow.triangle.2.circlepath")
+            }
+        }
+
         Button(role: .destructive) {
             viewModel.deleteBook(book, modelContext: modelContext)
         } label: {
@@ -172,6 +191,17 @@ struct LibraryView: View {
                         Button(format.displayName) { viewModel.selectedFormat = format }
                     }
                 }
+
+                Divider()
+
+                Button {
+                    Task {
+                        await coverArtService.fetchMissingCovers(books: books, modelContext: modelContext)
+                    }
+                } label: {
+                    Label("Fetch Missing Covers", systemImage: "photo.on.rectangle.angled")
+                }
+                .disabled(coverArtService.isFetching)
             } label: {
                 Image(systemName: "ellipsis.circle.fill")
                     .symbolRenderingMode(.hierarchical)
@@ -188,6 +218,12 @@ struct LibraryView: View {
             for url in urls {
                 Task {
                     await viewModel.importBook(from: url, modelContext: modelContext)
+
+                    // Auto-fetch cover for newly imported books missing covers
+                    if let imported = books.first(where: { $0.fileURL == url.absoluteString }),
+                       imported.coverImageData == nil {
+                        await coverArtService.fetchCover(for: imported, modelContext: modelContext)
+                    }
                 }
             }
         case .failure(let error):

@@ -117,7 +117,7 @@ final class AICompanionService {
 
     // MARK: - Q&A / Chat
 
-    /// Processes a question about the book content
+    /// Processes a question about the book content (keyword-based fallback)
     func answerQuestion(
         question: String,
         chapters: [BookChapter],
@@ -131,6 +131,100 @@ final class AICompanionService {
             relevantChapters: findRelevantChapterIndices(for: question, in: chapters),
             confidence: calculateConfidence(question: question, content: relevantContent)
         )
+    }
+
+    /// AI-powered Q&A using Claude API — falls back to keyword-based if unavailable
+    func answerQuestionWithAI(
+        question: String,
+        chapters: [BookChapter],
+        currentChapter: Int,
+        bookTitle: String
+    ) async -> CompanionResponse {
+        guard await ClaudeAPIClient.shared.isConfigured else {
+            return answerQuestion(question: question, chapters: chapters, currentChapter: currentChapter)
+        }
+
+        isProcessing = true
+        defer { isProcessing = false }
+
+        let recentChapters = Array(chapters.prefix(currentChapter + 1).suffix(3))
+        let context = recentChapters
+            .map { "[\($0.title)]\n\($0.content.prefix(3000))" }
+            .joined(separator: "\n\n---\n\n")
+
+        let system = """
+        You are an AI reading companion for "\(bookTitle)". Answer based only on the \
+        book content provided. Be concise, helpful, and spoiler-free (don't reveal events \
+        beyond what was provided). If the answer isn't in the text, say so honestly.
+        """
+
+        let prompt = "Book content from recent chapters:\n\n\(String(context.prefix(10000)))\n\nReader's question: \(question)"
+
+        do {
+            let answer = try await ClaudeAPIClient.shared.sendMessage(
+                system: system,
+                userMessage: prompt,
+                maxTokens: 1024
+            )
+
+            return CompanionResponse(
+                question: question,
+                answer: answer,
+                relevantChapters: findRelevantChapterIndices(for: question, in: chapters),
+                confidence: 0.9
+            )
+        } catch {
+            return answerQuestion(question: question, chapters: chapters, currentChapter: currentChapter)
+        }
+    }
+
+    /// Generates an AI-powered recap using Claude API
+    func generateRecapWithAI(
+        book: Book,
+        chapters: [BookChapter],
+        currentChapter: Int
+    ) async -> ReadingRecap {
+        guard await ClaudeAPIClient.shared.isConfigured else {
+            return generateRecap(book: book, chapters: chapters, currentChapter: currentChapter)
+        }
+
+        isProcessing = true
+        defer { isProcessing = false }
+
+        let chaptersRead = Array(chapters.prefix(currentChapter + 1))
+        let summaryContent = chaptersRead.suffix(3)
+            .map { "[\($0.title)]\n\($0.content.prefix(2000))" }
+            .joined(separator: "\n\n")
+
+        let system = """
+        You are a reading companion. Provide a brief recap of where the reader left off. \
+        Include: key characters involved, recent events, and what was happening. \
+        Keep it to 2-3 sentences. Be warm and engaging. No spoilers beyond what's provided.
+        """
+
+        do {
+            let summary = try await ClaudeAPIClient.shared.sendMessage(
+                system: system,
+                userMessage: "The reader is on chapter \(currentChapter + 1) of \"\(book.title)\" by \(book.author). Recent content:\n\n\(String(summaryContent.prefix(8000)))",
+                maxTokens: 512
+            )
+
+            let characters = extractCharacters(from: chaptersRead.suffix(3).map(\.content).joined(separator: " "))
+            let events = extractKeyEvents(from: chaptersRead.last?.content ?? "")
+
+            return ReadingRecap(
+                bookTitle: book.title,
+                currentChapter: currentChapter,
+                chapterTitle: chaptersRead.last?.title ?? "",
+                summary: summary,
+                keyCharacters: characters,
+                recentEvents: events,
+                readingProgress: Double(currentChapter + 1) / Double(max(chapters.count, 1)),
+                estimatedTimeToFinish: estimateRemainingTime(chaptersRead: currentChapter + 1, totalChapters: chapters.count)
+            )
+        } catch {
+            return generateRecap(book: book, chapters: chapters, currentChapter: currentChapter)
+        }
     }
 
     // MARK: - Private Helpers
