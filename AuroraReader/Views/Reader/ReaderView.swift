@@ -1,0 +1,193 @@
+import SwiftUI
+import SwiftData
+
+struct ReaderView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Query private var preferences: [UserPreferences]
+    @State private var viewModel: ReaderViewModel
+
+    init(book: Book) {
+        _viewModel = State(wrappedValue: ReaderViewModel(book: book))
+    }
+
+    private var currentPreferences: UserPreferences {
+        preferences.first ?? UserPreferences()
+    }
+
+    var body: some View {
+        ZStack {
+            currentPreferences.theme.backgroundColor
+                .ignoresSafeArea()
+
+            if viewModel.isLoading {
+                ProgressView("Loading book...")
+            } else if let error = viewModel.errorMessage {
+                errorView(error)
+            } else {
+                readerContent
+            }
+
+            // Overlaid toolbar
+            if viewModel.isToolbarVisible {
+                readerOverlay
+            }
+        }
+        .task {
+            await viewModel.loadBook(modelContext: modelContext)
+            ensurePreferencesExist()
+        }
+        .sheet(isPresented: $viewModel.showTableOfContents) {
+            TableOfContentsView(
+                chapters: viewModel.chapters,
+                currentIndex: viewModel.currentChapterIndex
+            ) { index in
+                viewModel.goToChapter(at: index)
+            }
+        }
+        .sheet(isPresented: $viewModel.showSettings) {
+            ReaderSettingsSheet(preferences: currentPreferences)
+        }
+        .sheet(isPresented: $viewModel.showBookmarkSheet) {
+            AddBookmarkSheet { title in
+                viewModel.addBookmark(title: title, modelContext: modelContext)
+            }
+        }
+        .statusBarHidden(!viewModel.isToolbarVisible)
+    }
+
+    // MARK: - Reader Content
+
+    private var readerContent: some View {
+        let prefs = currentPreferences
+
+        return ScrollView {
+            if let chapter = viewModel.currentChapter {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(chapter.title)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(prefs.theme.textColor)
+                        .padding(.bottom, 16)
+
+                    Text(chapter.content)
+                        .font(.custom(prefs.fontFamily, size: prefs.fontSize))
+                        .foregroundStyle(prefs.theme.textColor)
+                        .lineSpacing(prefs.fontSize * CGFloat(prefs.lineSpacing - 1.0))
+                        .textSelection(.enabled)
+                }
+                .padding(.horizontal, prefs.marginSize)
+                .padding(.vertical, 60)
+            }
+        }
+        .onTapGesture { viewModel.toggleToolbar() }
+        .gesture(
+            DragGesture(minimumDistance: 50)
+                .onEnded { value in
+                    if value.translation.width < -50 {
+                        viewModel.goToNextChapter()
+                    } else if value.translation.width > 50 {
+                        viewModel.goToPreviousChapter()
+                    }
+                }
+        )
+    }
+
+    // MARK: - Overlay
+
+    private var readerOverlay: some View {
+        VStack {
+            // Top bar
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .font(.body.weight(.medium))
+                        .padding(10)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+
+                Spacer()
+
+                Text(viewModel.book.title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+
+                Spacer()
+
+                Menu {
+                    Button(action: { viewModel.showTableOfContents = true }) {
+                        Label("Table of Contents", systemImage: "list.bullet")
+                    }
+                    Button(action: { viewModel.showBookmarkSheet = true }) {
+                        Label("Add Bookmark", systemImage: "bookmark")
+                    }
+                    Button(action: { viewModel.showSettings = true }) {
+                        Label("Settings", systemImage: "textformat.size")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.body.weight(.medium))
+                        .padding(10)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 8)
+
+            Spacer()
+
+            // Bottom bar
+            VStack(spacing: 8) {
+                // Chapter navigation
+                HStack {
+                    Button(action: { viewModel.goToPreviousChapter() }) {
+                        Image(systemName: "chevron.left")
+                            .padding(8)
+                    }
+                    .disabled(!viewModel.canGoToPreviousChapter)
+
+                    Spacer()
+
+                    Text(viewModel.progressText)
+                        .font(.caption)
+
+                    Spacer()
+
+                    Button(action: { viewModel.goToNextChapter() }) {
+                        Image(systemName: "chevron.right")
+                            .padding(8)
+                    }
+                    .disabled(!viewModel.canGoToNextChapter)
+                }
+
+                ProgressView(value: viewModel.progressPercentage)
+                    .tint(.accentColor)
+            }
+            .padding()
+            .background(.ultraThinMaterial)
+        }
+        .transition(.opacity)
+    }
+
+    // MARK: - Error View
+
+    private func errorView(_ message: String) -> some View {
+        ContentUnavailableView {
+            Label("Unable to Load", systemImage: "exclamationmark.triangle")
+        } description: {
+            Text(message)
+        } actions: {
+            Button("Go Back") { dismiss() }
+                .buttonStyle(.borderedProminent)
+        }
+    }
+
+    private func ensurePreferencesExist() {
+        if preferences.isEmpty {
+            let prefs = UserPreferences()
+            modelContext.insert(prefs)
+            try? modelContext.save()
+        }
+    }
+}
