@@ -3,341 +3,324 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurora Reader - App Mockup</title>
+<title>Aurora Reader - App Mockup v2</title>
 <style>
+:root {
+  --deep-space: #0a0a1f;
+  --cosmos: #12122e;
+  --surface: #1a1a38;
+  --surface-elev: #222244;
+  --aurora-green: #2ede8f;
+  --aurora-teal: #26c7d1;
+  --aurora-blue: #4078f2;
+  --aurora-purple: #944cf2;
+  --aurora-pink: #d940a6;
+  --aurora-warm: #f27340;
+  --text-primary: #ededf7;
+  --text-secondary: #9e9eb8;
+  --text-tertiary: #666684;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif; background: #1a1a2e; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 40px 20px; gap: 40px; flex-wrap: wrap; }
-h1.page-title { width: 100%; text-align: center; color: #e0e0e0; font-size: 28px; font-weight: 700; margin-bottom: 0; }
-p.subtitle { width: 100%; text-align: center; color: #888; font-size: 14px; margin-bottom: 20px; }
-
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  background: #08081a; display: flex; justify-content: center; align-items: flex-start;
+  min-height: 100vh; padding: 40px 20px; gap: 40px; flex-wrap: wrap;
+}
+h1.page-title { width: 100%; text-align: center; font-size: 32px; font-weight: 700; margin-bottom: 0;
+  background: linear-gradient(135deg, var(--aurora-teal), var(--aurora-green), var(--aurora-blue), var(--aurora-purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font-size: 14px; margin-bottom: 10px; }
+.version-badge { width:100%; text-align:center; margin-bottom:20px; }
+.version-badge span { font-size:11px; color:var(--aurora-teal); border:1px solid var(--aurora-teal); border-radius:12px; padding:3px 10px; opacity:0.7; }
 .phone-frame {
-  width: 375px; height: 812px; background: #fff; border-radius: 44px;
-  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 4px #333;
+  width: 375px; height: 812px; background: var(--deep-space); border-radius: 44px;
+  overflow: hidden; box-shadow: 0 0 40px rgba(38,199,209,0.08), 0 20px 60px rgba(0,0,0,0.5), 0 0 0 4px #1a1a3a;
   position: relative; flex-shrink: 0;
 }
-.screen-label {
-  text-align: center; color: #aaa; font-size: 13px; margin-top: 12px;
-  font-weight: 500; letter-spacing: 0.5px;
-}
+.screen-label { text-align: center; color: var(--text-secondary); font-size: 13px; margin-top: 12px; font-weight: 500; letter-spacing: 0.5px; }
+.screens-row { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
+.screen-wrapper { display: flex; flex-direction: column; align-items: center; }
+
+/* Aurora glow background */
+.aurora-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; overflow: hidden; }
+.aurora-bg .glow1 { position:absolute; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle, rgba(46,222,143,0.12) 0%, transparent 70%); top:-100px; left:-80px; }
+.aurora-bg .glow2 { position:absolute; width:250px; height:250px; border-radius:50%; background:radial-gradient(circle, rgba(64,120,242,0.10) 0%, transparent 70%); top:50px; right:-60px; }
+.aurora-bg .glow3 { position:absolute; width:350px; height:350px; border-radius:50%; background:radial-gradient(circle, rgba(148,76,242,0.10) 0%, transparent 70%); bottom:-50px; left:50px; }
 
 /* Status bar */
-.status-bar {
-  height: 54px; display: flex; align-items: flex-end; justify-content: space-between;
-  padding: 0 28px 8px; font-size: 15px; font-weight: 600;
-}
-.status-bar.light { color: #000; }
-.status-bar.dark { color: #fff; }
-.status-icons { display: flex; gap: 5px; align-items: center; }
+.status-bar { height: 54px; display:flex; align-items:flex-end; justify-content:space-between; padding:0 28px 8px; font-size:15px; font-weight:600; color:var(--text-primary); }
+.status-icons { display:flex; gap:5px; align-items:center; }
 
-/* Navigation bar */
-.nav-bar {
-  height: 52px; display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px; font-size: 34px; font-weight: 700;
-}
-.nav-bar .actions { display: flex; gap: 16px; }
-.nav-bar .actions span { font-size: 20px; color: #6366f1; cursor: pointer; }
+/* Nav bar */
+.nav-bar { height:52px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; font-size:34px; font-weight:700; color:var(--text-primary); }
+.nav-bar .actions { display:flex; gap:16px; }
+.nav-bar .actions span { font-size:20px; color:var(--aurora-teal); cursor:pointer; }
 
 /* Tab bar */
 .tab-bar {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 83px;
-  background: rgba(249,249,249,0.94); border-top: 0.5px solid #ddd;
-  display: flex; justify-content: space-around; align-items: flex-start;
-  padding-top: 8px; backdrop-filter: blur(10px);
+  position:absolute; bottom:0; left:0; right:0; height:83px;
+  background:rgba(10,10,31,0.95); border-top:0.5px solid rgba(255,255,255,0.06);
+  display:flex; justify-content:space-around; align-items:flex-start; padding-top:8px;
+  backdrop-filter:blur(20px);
 }
-.tab-item { text-align: center; font-size: 10px; color: #999; }
-.tab-item.active { color: #6366f1; }
-.tab-item .tab-icon { font-size: 24px; margin-bottom: 2px; }
+.tab-item { text-align:center; font-size:10px; color:var(--text-tertiary); }
+.tab-item.active { color:var(--aurora-teal); }
+.tab-item .tab-icon { font-size:22px; margin-bottom:2px; }
 
 /* Search bar */
 .search-bar {
-  margin: 4px 16px 12px; padding: 10px 12px; background: #f2f2f7;
-  border-radius: 12px; font-size: 16px; color: #8e8e93; display: flex;
-  align-items: center; gap: 6px;
+  margin:4px 16px 12px; padding:10px 12px; background:var(--surface);
+  border-radius:12px; font-size:16px; color:var(--text-tertiary); display:flex;
+  align-items:center; gap:6px; border:0.5px solid rgba(255,255,255,0.05);
 }
 
 /* Book grid */
-.book-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
-  padding: 0 20px; overflow-y: auto;
-}
-.book-card { text-align: center; }
+.book-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; padding:0 20px; overflow-y:auto; }
+.book-card { text-align:center; }
 .book-cover {
-  width: 140px; height: 200px; border-radius: 8px; margin: 0 auto 8px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  color: #fff; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width:140px; height:200px; border-radius:10px; margin:0 auto 8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  color:#fff; padding:12px;
+  box-shadow:0 4px 16px rgba(64,120,242,0.15);
+  border:0.5px solid rgba(255,255,255,0.08);
 }
-.book-cover .icon { font-size: 28px; margin-bottom: 8px; opacity: 0.8; }
-.book-cover .title { font-size: 12px; font-weight: 600; line-height: 1.3; }
-.book-cover .author { font-size: 10px; opacity: 0.7; margin-top: 4px; }
-.book-card .card-title { font-size: 13px; font-weight: 600; color: #333; }
-.book-card .card-author { font-size: 11px; color: #888; }
-.book-card .progress-bar { width: 80px; height: 3px; background: #e5e5ea; border-radius: 2px; margin: 4px auto 0; }
-.book-card .progress-fill { height: 100%; background: #6366f1; border-radius: 2px; }
+.book-cover .icon { font-size:26px; margin-bottom:8px; opacity:0.85; }
+.book-cover .title { font-size:12px; font-weight:600; line-height:1.3; }
+.book-cover .author { font-size:10px; opacity:0.7; margin-top:4px; }
+.book-cover .fmt-badge { font-size:9px; font-weight:600; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:8px; margin-top:6px; }
+.book-card .card-title { font-size:13px; font-weight:600; color:var(--text-primary); }
+.book-card .card-author { font-size:11px; color:var(--text-secondary); }
+.book-card .progress-bar { width:80px; height:3px; background:var(--surface); border-radius:2px; margin:4px auto 0; }
+.book-card .progress-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green)); }
 
-.grad-1 { background: linear-gradient(135deg, #6366f1, #a855f7); }
-.grad-2 { background: linear-gradient(135deg, #f97316, #ef4444); }
-.grad-3 { background: linear-gradient(135deg, #10b981, #14b8a6); }
-.grad-4 { background: linear-gradient(135deg, #6366f1, #3b82f6); }
+/* Aurora cover gradients */
+.grad-1 { background:linear-gradient(135deg, var(--aurora-purple), var(--aurora-blue)); }
+.grad-2 { background:linear-gradient(135deg, var(--aurora-pink), var(--aurora-purple)); }
+.grad-3 { background:linear-gradient(135deg, var(--aurora-teal), var(--aurora-green)); }
+.grad-4 { background:linear-gradient(135deg, var(--aurora-blue), var(--aurora-teal)); }
+.grad-5 { background:linear-gradient(135deg, var(--aurora-warm), var(--aurora-pink)); }
+.grad-6 { background:linear-gradient(135deg, var(--aurora-green), var(--aurora-teal)); }
 
-/* Reader screen */
-.reader-bg { background: #fff; height: 100%; position: relative; }
-.reader-bg.sepia { background: #f5edd9; }
-.reader-bg.dark-theme { background: #262626; }
+/* Reader */
+.reader-bg { height:100%; position:relative; }
+.reader-bg.aurora-dark { background:var(--deep-space); }
+.reader-bg.sepia { background:#f5edd9; }
 
-.reader-top-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px; height: 44px;
-}
+.reader-top-bar { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:44px; }
 .reader-top-bar .btn {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(120,120,128,0.12); display: flex;
-  align-items: center; justify-content: center; font-size: 16px;
+  width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px;
 }
-.reader-top-bar .book-title { font-size: 15px; font-weight: 600; }
+.reader-top-bar .btn.dark { background:rgba(255,255,255,0.08); color:var(--text-primary); }
+.reader-top-bar .btn.light { background:rgba(0,0,0,0.06); color:#333; }
+.reader-top-bar .book-title { font-size:15px; font-weight:600; }
 
-.reader-content {
-  padding: 20px 24px; overflow-y: auto; height: calc(100% - 54px - 44px - 100px);
-}
-.reader-content .chapter-title {
-  font-size: 22px; font-weight: 700; margin-bottom: 16px;
-}
-.reader-content .body-text {
-  font-family: Georgia, serif; font-size: 18px; line-height: 1.6;
-  color: #333; text-align: justify;
-}
-.reader-bg.sepia .body-text { color: #5a4028; }
-.reader-bg.sepia .chapter-title { color: #5a4028; }
-.reader-bg.dark-theme .body-text { color: #d9d9d9; }
-.reader-bg.dark-theme .chapter-title { color: #d9d9d9; }
-.reader-bg.dark-theme .reader-top-bar .book-title { color: #d9d9d9; }
-.reader-bg.dark-theme .reader-top-bar .btn { background: rgba(255,255,255,0.1); color: #d9d9d9; }
+.reader-content { padding:20px 24px; overflow-y:auto; }
+.reader-content .chapter-title { font-size:22px; font-weight:700; margin-bottom:16px; }
+.reader-content .body-text { font-family:Georgia,serif; font-size:18px; line-height:1.6; text-align:justify; }
+
+/* Dark reader */
+.reader-bg.aurora-dark .book-title { color:var(--text-primary); }
+.reader-bg.aurora-dark .btn { background:rgba(255,255,255,0.08); color:var(--text-primary); }
+.reader-bg.aurora-dark .chapter-title { color:var(--text-primary); }
+.reader-bg.aurora-dark .body-text { color:rgba(220,220,240,0.85); }
+
+/* Sepia reader */
+.reader-bg.sepia .book-title { color:#5a4028; }
+.reader-bg.sepia .chapter-title { color:#5a4028; }
+.reader-bg.sepia .body-text { color:#5a4028; }
 
 .reader-bottom {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 100px;
-  background: rgba(249,249,249,0.95); backdrop-filter: blur(10px);
-  padding: 12px 20px; border-top: 0.5px solid #ddd;
+  position:absolute; bottom:0; left:0; right:0; height:100px; padding:12px 20px;
 }
-.reader-bg.dark-theme .reader-bottom { background: rgba(30,30,30,0.95); border-color: #444; }
-.reader-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.reader-nav .chev { font-size: 18px; color: #6366f1; padding: 4px 8px; }
-.reader-nav .chev.disabled { color: #ccc; }
-.reader-nav .progress-label { font-size: 13px; color: #888; }
-.reader-progress { width: 100%; height: 3px; background: #e5e5ea; border-radius: 2px; }
-.reader-progress .fill { height: 100%; background: #6366f1; border-radius: 2px; }
+.reader-bottom.dark { background:rgba(10,10,31,0.95); border-top:0.5px solid rgba(255,255,255,0.06); backdrop-filter:blur(20px); }
+.reader-bottom.light { background:rgba(249,249,249,0.95); border-top:0.5px solid #ddd; }
+.reader-bottom.sepia-bar { background:rgba(245,237,217,0.95); border-top:0.5px solid #d4c5a9; }
+.reader-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.reader-nav .chev { font-size:18px; color:var(--aurora-teal); padding:4px 8px; }
+.reader-nav .chev.disabled { color:var(--text-tertiary); }
+.reader-nav .progress-label { font-size:13px; color:var(--text-secondary); }
+.reader-progress { width:100%; height:3px; background:var(--surface); border-radius:2px; }
+.reader-progress .fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green)); }
 
-/* Settings screen */
-.settings-content { padding: 0 0 83px; overflow-y: auto; height: calc(100% - 54px - 52px); }
-.section-header { font-size: 13px; color: #888; text-transform: uppercase; padding: 24px 16px 8px; font-weight: 500; }
+/* Settings */
+.section-header { font-size:13px; color:var(--aurora-teal); text-transform:uppercase; padding:24px 16px 8px; font-weight:600; letter-spacing:0.5px; }
 .setting-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 13px 16px; background: #fff; border-bottom: 0.5px solid #e5e5ea;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 16px; background:var(--surface); border-bottom:0.5px solid rgba(255,255,255,0.04);
 }
-.setting-row .label { font-size: 16px; color: #333; }
-.setting-row .value { font-size: 16px; color: #888; }
-.setting-row .badge {
-  font-size: 12px; padding: 2px 8px; border-radius: 10px;
-  background: #f2f2f7; color: #666;
-}
-.setting-row .icon-left {
-  width: 28px; height: 28px; border-radius: 6px; display: flex;
-  align-items: center; justify-content: center; color: #fff;
-  font-size: 14px; margin-right: 12px;
-}
+.setting-row .label { font-size:16px; color:var(--text-primary); }
+.setting-row .value { font-size:16px; color:var(--text-secondary); }
+.setting-row .badge { font-size:11px; padding:3px 8px; border-radius:10px; background:rgba(148,76,242,0.15); color:var(--text-secondary); }
+.setting-row .icon-left { width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; margin-right:10px; }
 
-/* Theme previews */
-.theme-row { display: flex; gap: 12px; padding: 16px; }
-.theme-chip {
-  flex: 1; height: 50px; border-radius: 10px; display: flex;
-  align-items: center; justify-content: center; font-size: 14px;
-  font-weight: 500; border: 2px solid transparent;
+/* Cloud view */
+.cloud-card {
+  display:flex; align-items:center; gap:14px; padding:16px;
+  background:var(--surface); border-radius:16px; margin-bottom:10px;
+  border:0.5px solid rgba(255,255,255,0.05);
 }
-.theme-chip.selected { border-color: #6366f1; }
-.theme-chip.t-light { background: #fff; color: #333; border-color: #ddd; }
-.theme-chip.t-light.selected { border-color: #6366f1; }
-.theme-chip.t-sepia { background: #f5edd9; color: #5a4028; }
-.theme-chip.t-dark { background: #262626; color: #d9d9d9; }
-.theme-chip.t-midnight { background: #0d0d14; color: #b3b3bf; }
+.cloud-card .cloud-icon {
+  width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:20px; background:rgba(64,120,242,0.15); color:var(--aurora-blue);
+}
+.cloud-card .cloud-name { font-size:16px; font-weight:600; color:var(--text-primary); }
+.cloud-card .cloud-status { font-size:12px; }
+.cloud-card .connected { color:var(--aurora-green); }
+.cloud-card .not-connected { color:var(--text-tertiary); }
 
-/* TOC screen */
-.toc-list { padding: 0; }
-.toc-row {
-  padding: 14px 16px; border-bottom: 0.5px solid #e5e5ea;
-  display: flex; align-items: center; justify-content: space-between;
+/* GoodReads */
+.gr-shelf-chips { display:flex; gap:8px; padding:0 16px; margin-bottom:16px; overflow-x:auto; }
+.gr-chip {
+  font-size:14px; font-weight:500; padding:8px 16px; border-radius:20px; white-space:nowrap;
 }
-.toc-row.active { background: #f0f0ff; }
-.toc-row .ch-title { font-size: 16px; color: #333; font-weight: 500; }
-.toc-row.active .ch-title { color: #6366f1; font-weight: 600; }
-.toc-row .ch-meta { font-size: 12px; color: #999; margin-top: 2px; }
-.toc-row .bookmark-icon { color: #6366f1; font-size: 14px; }
+.gr-chip.active { background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green)); color:#fff; }
+.gr-chip.inactive { background:var(--surface); color:var(--text-secondary); border:0.5px solid rgba(255,255,255,0.06); }
+
+.gr-book-row {
+  display:flex; align-items:center; gap:12px; padding:12px;
+  background:var(--surface); border-radius:14px; margin-bottom:8px;
+  border:0.5px solid rgba(255,255,255,0.05);
+}
+.gr-book-cover { width:50px; height:70px; border-radius:6px; display:flex; align-items:center; justify-content:center; }
+.gr-stars { display:flex; gap:1px; }
+.gr-star { font-size:10px; color:var(--aurora-warm); }
+.gr-star.empty { opacity:0.3; }
+
+/* Trending horizontal scroll */
+.trending-scroll { display:flex; gap:14px; padding:0 16px; overflow-x:auto; }
+.trending-item { flex-shrink:0; text-align:center; }
+.trending-cover { width:100px; height:150px; border-radius:8px; display:flex; align-items:center; justify-content:center; border:0.5px solid rgba(255,255,255,0.08); }
+
+/* Theme chips */
+.theme-row { display:flex; gap:10px; padding:12px 16px; }
+.theme-chip { flex:1; height:50px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:500; border:2px solid transparent; }
+.theme-chip.selected { border-color:var(--aurora-teal); box-shadow: 0 0 8px rgba(38,199,209,0.3); }
+.theme-chip.t-light { background:#fff; color:#333; }
+.theme-chip.t-sepia { background:#f5edd9; color:#5a4028; }
+.theme-chip.t-dark { background:#262626; color:#d9d9d9; }
+.theme-chip.t-midnight { background:var(--deep-space); color:var(--text-secondary); }
 
 /* Empty state */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; height: calc(100% - 54px - 52px - 50px);
-  color: #999; text-align: center; padding: 40px;
-}
-.empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.4; }
-.empty-state .empty-title { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 8px; }
-.empty-state .empty-desc { font-size: 15px; color: #888; margin-bottom: 20px; }
-.empty-state .import-btn {
-  background: #6366f1; color: #fff; border: none; padding: 12px 24px;
-  border-radius: 12px; font-size: 16px; font-weight: 600;
-}
+.empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px; }
+.empty-icon-wrap { position:relative; margin-bottom:20px; }
+.empty-icon-wrap .glow-circle-1 { width:120px; height:120px; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+.empty-icon-wrap .glow-circle-2 { width:160px; height:160px; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+.empty-icon-wrap .main-icon { position:relative; font-size:44px; z-index:1; }
+.empty-state .empty-title { font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:8px; }
+.empty-state .empty-desc { font-size:15px; color:var(--text-secondary); margin-bottom:20px; line-height:1.5; }
 
-/* Format badge in settings */
-.format-row { display: flex; align-items: center; gap: 12px; }
-.format-dot { width: 8px; height: 8px; border-radius: 50%; }
+/* Aurora button */
+.aurora-btn {
+  background:linear-gradient(90deg, var(--aurora-teal), var(--aurora-green));
+  color:#fff; border:none; padding:14px 28px; border-radius:24px;
+  font-size:16px; font-weight:600; box-shadow:0 4px 16px rgba(38,199,209,0.3);
+}
+.aurora-btn.warm { background:linear-gradient(90deg, var(--aurora-pink), var(--aurora-warm)); box-shadow:0 4px 16px rgba(217,64,166,0.2); }
 
-/* Responsive layout for screens */
-.screens-row { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
-.screen-wrapper { display: flex; flex-direction: column; align-items: center; }
+/* Toggle switch */
+.toggle-on { width:51px; height:31px; background:var(--aurora-teal); border-radius:16px; position:relative; }
+.toggle-on .knob { width:27px; height:27px; background:#fff; border-radius:50%; position:absolute; top:2px; right:2px; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+
+/* Format desc */
+.fmt-desc { font-size:11px; color:var(--text-tertiary); margin-top:1px; }
 </style>
 </head>
 <body>
 
 <h1 class="page-title">Aurora Reader</h1>
-<p class="subtitle">iOS Ebook Reader App &mdash; Visual Mockup</p>
+<p class="subtitle">iOS Ebook Reader &mdash; Northern Lights Edition</p>
+<div class="version-badge"><span>v2.0 &bull; 11 Formats &bull; Cloud + GoodReads</span></div>
 
 <div class="screens-row">
 
-<!-- SCREEN 1: Empty Library -->
+<!-- SCREEN 1: Empty Library (Aurora) -->
 <div class="screen-wrapper">
 <div class="phone-frame">
-  <div class="status-bar light">
-    <span>9:41</span>
-    <div class="status-icons">
-      <span>&#9679;&#9679;&#9679;&#9679;</span>
-      <span style="font-size:12px">WiFi</span>
-      <span>&#128267;</span>
-    </div>
-  </div>
-  <div class="nav-bar">
-    <span>Library</span>
-    <div class="actions"><span>&#8943;</span> <span>&#43;</span></div>
-  </div>
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow2"></div><div class="glow3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
+  <div class="nav-bar"><span>Library</span><div class="actions"><span>&#8943;</span> <span>&#43;</span></div></div>
   <div class="search-bar">&#128269; Search books</div>
-  <div class="empty-state">
-    <div class="empty-icon">&#128214;</div>
+  <div class="empty-state" style="height:calc(100% - 200px)">
+    <div class="empty-icon-wrap">
+      <div class="glow-circle-2" style="background:rgba(148,76,242,0.08)"></div>
+      <div class="glow-circle-1" style="background:rgba(38,199,209,0.10)"></div>
+      <div class="main-icon" style="color:var(--aurora-teal)">&#128214;</div>
+    </div>
     <div class="empty-title">No Books Yet</div>
-    <div class="empty-desc">Import EPUB, PDF, or text files to start reading.</div>
-    <button class="import-btn">&#43; Import Books</button>
+    <div class="empty-desc">Import ebooks in any format to start reading.<br>Supports EPUB, PDF, MOBI, FB2, CBZ, and more.</div>
+    <button class="aurora-btn">&#43; Import Books</button>
   </div>
   <div class="tab-bar">
-    <div class="tab-item active">
-      <div class="tab-icon">&#128218;</div>
-      Library
-    </div>
-    <div class="tab-item">
-      <div class="tab-icon">&#9881;</div>
-      Settings
-    </div>
+    <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
 <div class="screen-label">Empty Library</div>
 </div>
 
-<!-- SCREEN 2: Library with Books -->
+<!-- SCREEN 2: Library with Books (Aurora) -->
 <div class="screen-wrapper">
 <div class="phone-frame">
-  <div class="status-bar light">
-    <span>9:41</span>
-    <div class="status-icons">
-      <span>&#9679;&#9679;&#9679;&#9679;</span>
-      <span style="font-size:12px">WiFi</span>
-      <span>&#128267;</span>
-    </div>
-  </div>
-  <div class="nav-bar">
-    <span>Library</span>
-    <div class="actions"><span>&#8943;</span> <span>&#43;</span></div>
-  </div>
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow2"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
+  <div class="nav-bar"><span>Library</span><div class="actions"><span>&#8943;</span> <span>&#43;</span></div></div>
   <div class="search-bar">&#128269; Search books</div>
   <div class="book-grid">
     <div class="book-card">
-      <div class="book-cover grad-1">
-        <div class="icon">&#128214;</div>
-        <div class="title">The Great Gatsby</div>
-        <div class="author">F. Scott Fitzgerald</div>
-      </div>
-      <div class="card-title">The Great Gatsby</div>
-      <div class="card-author">F. Scott Fitzgerald</div>
+      <div class="book-cover grad-1"><div class="icon">&#128214;</div><div class="title">The Great Gatsby</div><div class="author">F. Scott Fitzgerald</div><div class="fmt-badge">EPUB</div></div>
+      <div class="card-title">The Great Gatsby</div><div class="card-author">F. Scott Fitzgerald</div>
       <div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div>
     </div>
     <div class="book-card">
-      <div class="book-cover grad-2">
-        <div class="icon">&#128196;</div>
-        <div class="title">iOS Programming Guide</div>
-        <div class="author">Apple Inc.</div>
-      </div>
-      <div class="card-title">iOS Programming</div>
-      <div class="card-author">Apple Inc.</div>
+      <div class="book-cover grad-5"><div class="icon">&#128196;</div><div class="title">iOS Design Guide</div><div class="author">Apple Inc.</div><div class="fmt-badge">PDF</div></div>
+      <div class="card-title">iOS Design Guide</div><div class="card-author">Apple Inc.</div>
       <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
     </div>
     <div class="book-card">
-      <div class="book-cover grad-3">
-        <div class="icon">&#128214;</div>
-        <div class="title">Pride and Prejudice</div>
-        <div class="author">Jane Austen</div>
-      </div>
-      <div class="card-title">Pride and Prejudice</div>
-      <div class="card-author">Jane Austen</div>
+      <div class="book-cover grad-3"><div class="icon">&#128214;</div><div class="title">War and Peace</div><div class="author">Leo Tolstoy</div><div class="fmt-badge">FB2</div></div>
+      <div class="card-title">War and Peace</div><div class="card-author">Leo Tolstoy</div>
       <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
     </div>
     <div class="book-card">
-      <div class="book-cover grad-4">
-        <div class="icon">&#128196;</div>
-        <div class="title">Swift Language Reference</div>
-        <div class="author">Apple Developer</div>
-      </div>
-      <div class="card-title">Swift Reference</div>
-      <div class="card-author">Apple Developer</div>
+      <div class="book-cover grad-4"><div class="icon">&#128218;</div><div class="title">Kindle Highlights</div><div class="author">Various</div><div class="fmt-badge">MOBI</div></div>
+      <div class="card-title">Kindle Highlights</div><div class="card-author">Various</div>
       <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
     </div>
   </div>
   <div class="tab-bar">
-    <div class="tab-item active">
-      <div class="tab-icon">&#128218;</div>
-      Library
-    </div>
-    <div class="tab-item">
-      <div class="tab-icon">&#9881;</div>
-      Settings
-    </div>
+    <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
 <div class="screen-label">Library (Grid View)</div>
 </div>
 
-<!-- SCREEN 3: Reader - Light Theme -->
+<!-- SCREEN 3: Reader - Aurora Dark -->
 <div class="screen-wrapper">
 <div class="phone-frame">
-  <div class="reader-bg">
-    <div class="status-bar light">
-      <span>9:41</span>
-      <div class="status-icons">
-        <span>&#9679;&#9679;&#9679;&#9679;</span>
-        <span style="font-size:12px">WiFi</span>
-        <span>&#128267;</span>
-      </div>
-    </div>
+  <div class="reader-bg aurora-dark">
+    <div class="aurora-bg"><div class="glow1" style="opacity:0.5"></div><div class="glow3" style="opacity:0.3"></div></div>
+    <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
     <div class="reader-top-bar">
-      <div class="btn">&times;</div>
-      <div class="book-title">The Great Gatsby</div>
-      <div class="btn">&#8943;</div>
+      <div class="btn dark">&times;</div>
+      <div class="book-title" style="color:var(--text-primary)">The Great Gatsby</div>
+      <div class="btn dark">&#8943;</div>
     </div>
-    <div class="reader-content">
+    <div class="reader-content" style="height:calc(100% - 54px - 44px - 100px)">
       <div class="chapter-title">Chapter 1</div>
       <div class="body-text">
         In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since.
         <br><br>
         "Whenever you feel like criticizing anyone," he told me, "just remember that all the people in this world haven't had the advantages that you've had."
         <br><br>
-        He didn't say any more, but we've always been unusually communicative in a reserved way, and I understood that he meant a great deal more than that. In consequence, I'm inclined to reserve all judgments, a habit that has opened up many curious natures to me and also made me the victim of not a few veteran bores.
-        <br><br>
-        The abnormal mind is quick to detect and attach itself to this quality when it appears in a normal person, and so it came about that in college I was unjustly accused of being a politician, because I was privy to the secret griefs of wild, unknown men.
+        He didn't say any more, but we've always been unusually communicative in a reserved way, and I understood that he meant a great deal more than that. In consequence, I'm inclined to reserve all judgments, a habit that has opened up many curious natures to me.
       </div>
     </div>
-    <div class="reader-bottom">
+    <div class="reader-bottom dark">
       <div class="reader-nav">
         <span class="chev disabled">&lsaquo;</span>
         <span class="progress-label">Chapter 1 of 9</span>
@@ -347,312 +330,326 @@ p.subtitle { width: 100%; text-align: center; color: #888; font-size: 14px; marg
     </div>
   </div>
 </div>
-<div class="screen-label">Reader (Light Theme)</div>
+<div class="screen-label">Reader (Aurora Dark)</div>
 </div>
 
-<!-- SCREEN 4: Reader - Sepia Theme -->
+<!-- SCREEN 4: Reader - Sepia -->
 <div class="screen-wrapper">
 <div class="phone-frame">
   <div class="reader-bg sepia">
-    <div class="status-bar light">
-      <span>9:41</span>
-      <div class="status-icons">
-        <span>&#9679;&#9679;&#9679;&#9679;</span>
-        <span style="font-size:12px">WiFi</span>
-        <span>&#128267;</span>
-      </div>
-    </div>
+    <div class="status-bar" style="color:#5a4028"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
     <div class="reader-top-bar">
-      <div class="btn">&times;</div>
+      <div class="btn light">&times;</div>
       <div class="book-title" style="color:#5a4028">Pride and Prejudice</div>
-      <div class="btn">&#8943;</div>
+      <div class="btn light">&#8943;</div>
     </div>
-    <div class="reader-content">
+    <div class="reader-content" style="height:calc(100% - 54px - 44px - 100px)">
       <div class="chapter-title">Chapter 3</div>
       <div class="body-text">
         Not all that Mrs. Bennet, however, with the assistance of her five daughters, could ask on the subject, was sufficient to draw from her husband any satisfactory description of Mr. Bingley.
         <br><br>
-        They attacked him in various ways &mdash; with barefaced questions, ingenious suppositions, and distant surmises; but he eluded the skill of them all, and they were at last obliged to accept the second-hand intelligence of their neighbour, Lady Lucas.
+        They attacked him in various ways &mdash; with barefaced questions, ingenious suppositions, and distant surmises; but he eluded the skill of them all.
         <br><br>
         Her report was highly favourable. Sir William had been delighted with him. He was quite young, wonderfully handsome, extremely agreeable, and, to crown the whole, he meant to be at the next ball with a large party.
       </div>
     </div>
-    <div class="reader-bottom" style="background:rgba(245,237,217,0.95);border-color:#d4c5a9">
+    <div class="reader-bottom sepia-bar">
       <div class="reader-nav">
-        <span class="chev">&lsaquo;</span>
-        <span class="progress-label">Chapter 3 of 61</span>
-        <span class="chev">&rsaquo;</span>
+        <span class="chev" style="color:#8a6e50">&lsaquo;</span>
+        <span class="progress-label" style="color:#8a6e50">Chapter 3 of 61</span>
+        <span class="chev" style="color:#8a6e50">&rsaquo;</span>
       </div>
-      <div class="reader-progress"><div class="fill" style="width:5%"></div></div>
+      <div class="reader-progress" style="background:#e0d5c0"><div class="fill" style="width:5%;background:linear-gradient(90deg,#b8956a,#8a6e50)"></div></div>
     </div>
   </div>
 </div>
-<div class="screen-label">Reader (Sepia Theme)</div>
+<div class="screen-label">Reader (Sepia)</div>
 </div>
 
-<!-- SCREEN 5: Reader - Dark Theme -->
+<!-- SCREEN 5: Cloud Library -->
 <div class="screen-wrapper">
 <div class="phone-frame">
-  <div class="reader-bg dark-theme">
-    <div class="status-bar dark">
-      <span>9:41</span>
-      <div class="status-icons">
-        <span>&#9679;&#9679;&#9679;&#9679;</span>
-        <span style="font-size:12px">WiFi</span>
-        <span>&#128267;</span>
+  <div class="aurora-bg"><div class="glow2"></div><div class="glow3" style="background:radial-gradient(circle,rgba(64,120,242,0.12) 0%,transparent 70%)"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
+  <div class="nav-bar"><span style="font-size:28px">Cloud Library</span></div>
+
+  <div style="padding:0 16px;overflow-y:auto;height:calc(100% - 106px - 83px)">
+    <div class="cloud-card">
+      <div class="cloud-icon">&#128230;</div>
+      <div style="flex:1">
+        <div class="cloud-name">Dropbox</div>
+        <div class="cloud-status connected">Connected &bull; 12 books found</div>
       </div>
+      <span style="color:var(--text-tertiary)">&#9656;</span>
     </div>
-    <div class="reader-top-bar">
-      <div class="btn">&times;</div>
-      <div class="book-title">Swift Reference</div>
-      <div class="btn">&#8943;</div>
-    </div>
-    <div class="reader-content">
-      <div class="chapter-title">The Basics</div>
-      <div class="body-text">
-        Swift is a type-safe language, which means the language helps you to be clear about the types of values your code can work with.
-        <br><br>
-        If part of your code requires a String, type safety prevents you from passing it an Int by mistake. Likewise, type safety prevents you from accidentally passing an optional String to a piece of code that requires a non-optional String.
-        <br><br>
-        Type safety helps you catch and fix errors as early as possible in the development process. Swift provides many standard data types, including Int for integers, Double for floating-point values, Bool for Boolean values, and String for text.
+    <div class="cloud-card">
+      <div class="cloud-icon" style="background:rgba(64,120,242,0.15)">&#128190;</div>
+      <div style="flex:1">
+        <div class="cloud-name">Google Drive</div>
+        <div class="cloud-status connected">Connected &bull; 8 books found</div>
       </div>
+      <span style="color:var(--text-tertiary)">&#9656;</span>
     </div>
-    <div class="reader-bottom">
-      <div class="reader-nav">
-        <span class="chev">&lsaquo;</span>
-        <span class="progress-label">Chapter 2 of 15</span>
-        <span class="chev">&rsaquo;</span>
+    <div class="cloud-card">
+      <div class="cloud-icon" style="background:rgba(148,76,242,0.15);color:var(--aurora-purple)">&#128274;</div>
+      <div style="flex:1">
+        <div class="cloud-name">Proton Drive</div>
+        <div class="cloud-status not-connected">Not connected</div>
       </div>
-      <div class="reader-progress"><div class="fill" style="width:13%"></div></div>
+      <span style="color:var(--aurora-teal)">Connect &#8594;</span>
+    </div>
+
+    <div class="section-header">DROPBOX FILES</div>
+
+    <div class="gr-book-row">
+      <div class="gr-book-cover grad-1" style="font-size:14px">&#128214;</div>
+      <div style="flex:1">
+        <div style="color:var(--text-primary);font-weight:500">Dune.epub</div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <span style="font-size:12px;color:var(--aurora-teal);background:rgba(38,199,209,0.15);padding:2px 6px;border-radius:8px">EPUB</span>
+          <span style="font-size:12px;color:var(--text-tertiary)">2.4 MB</span>
+        </div>
+      </div>
+      <span style="color:var(--aurora-green);font-size:20px">&#8595;</span>
+    </div>
+    <div class="gr-book-row">
+      <div class="gr-book-cover grad-4" style="font-size:14px">&#128196;</div>
+      <div style="flex:1">
+        <div style="color:var(--text-primary);font-weight:500">Research_Paper.pdf</div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <span style="font-size:12px;color:var(--aurora-teal);background:rgba(38,199,209,0.15);padding:2px 6px;border-radius:8px">PDF</span>
+          <span style="font-size:12px;color:var(--text-tertiary)">5.1 MB</span>
+        </div>
+      </div>
+      <span style="color:var(--aurora-green);font-size:20px">&#8595;</span>
+    </div>
+    <div class="gr-book-row">
+      <div class="gr-book-cover grad-5" style="font-size:14px">&#128218;</div>
+      <div style="flex:1">
+        <div style="color:var(--text-primary);font-weight:500">Novel_Draft.mobi</div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <span style="font-size:12px;color:var(--aurora-teal);background:rgba(38,199,209,0.15);padding:2px 6px;border-radius:8px">MOBI</span>
+          <span style="font-size:12px;color:var(--text-tertiary)">890 KB</span>
+        </div>
+      </div>
+      <span style="color:var(--aurora-green);font-size:20px">&#8595;</span>
     </div>
   </div>
+
+  <div class="tab-bar">
+    <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item active"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
+  </div>
 </div>
-<div class="screen-label">Reader (Dark Theme)</div>
+<div class="screen-label">Cloud Library</div>
 </div>
 
-<!-- SCREEN 6: Table of Contents -->
+<!-- SCREEN 6: GoodReads / Discover -->
 <div class="screen-wrapper">
-<div class="phone-frame" style="background:#fff">
-  <div class="status-bar light">
-    <span>9:41</span>
-    <div class="status-icons">
-      <span>&#9679;&#9679;&#9679;&#9679;</span>
-      <span style="font-size:12px">WiFi</span>
-      <span>&#128267;</span>
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1" style="background:radial-gradient(circle,rgba(242,115,64,0.08) 0%,transparent 70%)"></div><div class="glow3" style="background:radial-gradient(circle,rgba(148,76,242,0.08) 0%,transparent 70%)"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
+  <div class="nav-bar"><span style="font-size:28px">Discover</span></div>
+  <div class="search-bar">&#128269; Search books on GoodReads</div>
+
+  <div style="overflow-y:auto;height:calc(100% - 106px - 50px - 83px)">
+    <!-- Shelf chips -->
+    <div class="gr-shelf-chips">
+      <div class="gr-chip active">Want to Read</div>
+      <div class="gr-chip inactive">Currently Reading</div>
+      <div class="gr-chip inactive">Read</div>
+    </div>
+
+    <div style="padding:0 16px">
+      <!-- Trending section -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:17px;font-weight:600;color:var(--text-primary)">Trending This Week</span>
+        <span style="font-size:14px;color:var(--aurora-teal)">See All</span>
+      </div>
+    </div>
+
+    <div class="trending-scroll">
+      <div class="trending-item">
+        <div class="trending-cover grad-1" style="font-size:22px;color:rgba(255,255,255,0.5)">&#128214;</div>
+        <div style="font-size:12px;color:var(--text-primary);margin-top:6px;width:100px">Project Hail Mary</div>
+        <div class="gr-stars" style="justify-content:center;margin-top:2px"><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star empty">&#9733;</span></div>
+      </div>
+      <div class="trending-item">
+        <div class="trending-cover grad-3" style="font-size:22px;color:rgba(255,255,255,0.5)">&#128214;</div>
+        <div style="font-size:12px;color:var(--text-primary);margin-top:6px;width:100px">Atomic Habits</div>
+        <div class="gr-stars" style="justify-content:center;margin-top:2px"><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span></div>
+      </div>
+      <div class="trending-item">
+        <div class="trending-cover grad-5" style="font-size:22px;color:rgba(255,255,255,0.5)">&#128214;</div>
+        <div style="font-size:12px;color:var(--text-primary);margin-top:6px;width:100px">The Midnight Library</div>
+        <div class="gr-stars" style="justify-content:center;margin-top:2px"><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star empty">&#9733;</span></div>
+      </div>
+      <div class="trending-item">
+        <div class="trending-cover grad-2" style="font-size:22px;color:rgba(255,255,255,0.5)">&#128214;</div>
+        <div style="font-size:12px;color:var(--text-primary);margin-top:6px;width:100px">Klara and the Sun</div>
+        <div class="gr-stars" style="justify-content:center;margin-top:2px"><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star empty">&#9733;</span><span class="gr-star empty">&#9733;</span></div>
+      </div>
+    </div>
+
+    <div style="padding:16px">
+      <div style="font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:12px">Popular This Month</div>
+
+      <div class="gr-book-row">
+        <div class="gr-book-cover grad-6" style="font-size:14px">&#128214;</div>
+        <div style="flex:1">
+          <div style="color:var(--text-primary);font-weight:500">Tomorrow, and Tomorrow</div>
+          <div style="color:var(--text-secondary);font-size:14px">Gabrielle Zevin</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <div class="gr-stars"><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star empty">&#9733;</span></div>
+            <span style="font-size:11px;color:var(--text-tertiary)">42k ratings</span>
+          </div>
+        </div>
+        <span style="font-size:20px;color:var(--aurora-teal)">&#8853;</span>
+      </div>
+
+      <div class="gr-book-row">
+        <div class="gr-book-cover grad-4" style="font-size:14px">&#128214;</div>
+        <div style="flex:1">
+          <div style="color:var(--text-primary);font-weight:500">Lessons in Chemistry</div>
+          <div style="color:var(--text-secondary);font-size:14px">Bonnie Garmus</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <div class="gr-stars"><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span><span class="gr-star">&#9733;</span></div>
+            <span style="font-size:11px;color:var(--text-tertiary)">89k ratings</span>
+          </div>
+        </div>
+        <span style="font-size:20px;color:var(--aurora-teal)">&#8853;</span>
+      </div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;border-bottom:0.5px solid #e5e5ea">
-    <span style="color:#6366f1;font-size:16px">Done</span>
-    <span style="font-size:17px;font-weight:600">Table of Contents</span>
-    <span style="width:40px"></span>
-  </div>
-  <div class="toc-list" style="overflow-y:auto;height:calc(100% - 106px)">
-    <div class="toc-row active">
-      <div>
-        <div class="ch-title">Chapter 1</div>
-        <div class="ch-meta">2,450 words &middot; 10 min read</div>
-      </div>
-      <div class="bookmark-icon">&#128278;</div>
-    </div>
-    <div class="toc-row">
-      <div>
-        <div class="ch-title">Chapter 2</div>
-        <div class="ch-meta">3,102 words &middot; 12 min read</div>
-      </div>
-    </div>
-    <div class="toc-row">
-      <div>
-        <div class="ch-title">Chapter 3</div>
-        <div class="ch-meta">2,890 words &middot; 12 min read</div>
-      </div>
-    </div>
-    <div class="toc-row">
-      <div>
-        <div class="ch-title">Chapter 4</div>
-        <div class="ch-meta">1,965 words &middot; 8 min read</div>
-      </div>
-    </div>
-    <div class="toc-row">
-      <div>
-        <div class="ch-title">Chapter 5</div>
-        <div class="ch-meta">3,540 words &middot; 14 min read</div>
-      </div>
-    </div>
-    <div class="toc-row">
-      <div>
-        <div class="ch-title">Chapter 6</div>
-        <div class="ch-meta">2,710 words &middot; 11 min read</div>
-      </div>
-    </div>
-    <div class="toc-row">
-      <div>
-        <div class="ch-title">Chapter 7</div>
-        <div class="ch-meta">3,200 words &middot; 13 min read</div>
-      </div>
-    </div>
-    <div class="toc-row">
-      <div>
-        <div class="ch-title">Chapter 8</div>
-        <div class="ch-meta">2,100 words &middot; 8 min read</div>
-      </div>
-    </div>
-    <div class="toc-row">
-      <div>
-        <div class="ch-title">Chapter 9</div>
-        <div class="ch-meta">1,800 words &middot; 7 min read</div>
-      </div>
-    </div>
+
+  <div class="tab-bar">
+    <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item active"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
-<div class="screen-label">Table of Contents</div>
+<div class="screen-label">Discover (GoodReads)</div>
 </div>
 
-<!-- SCREEN 7: Reader Settings -->
+<!-- SCREEN 7: Reader Settings (Aurora) -->
 <div class="screen-wrapper">
-<div class="phone-frame" style="background:#f2f2f7">
-  <div class="status-bar light">
-    <span>9:41</span>
-    <div class="status-icons">
-      <span>&#9679;&#9679;&#9679;&#9679;</span>
-      <span style="font-size:12px">WiFi</span>
-      <span>&#128267;</span>
-    </div>
-  </div>
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1" style="opacity:0.3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
   <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;">
     <span style="width:40px"></span>
-    <span style="font-size:17px;font-weight:600">Reader Settings</span>
-    <span style="color:#6366f1;font-size:16px;font-weight:500">Done</span>
+    <span style="font-size:17px;font-weight:600;color:var(--text-primary)">Reader Settings</span>
+    <span style="color:var(--aurora-teal);font-size:16px;font-weight:500">Done</span>
   </div>
 
   <div style="overflow-y:auto;height:calc(100% - 106px);padding-bottom:20px">
     <div class="section-header">Font Size</div>
     <div class="setting-row" style="flex-direction:column;gap:8px;align-items:stretch">
       <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:14px;color:#888">A</span>
-        <div style="flex:1;height:4px;background:#e5e5ea;border-radius:2px;position:relative">
-          <div style="position:absolute;left:30%;top:-6px;width:16px;height:16px;background:#6366f1;border-radius:50%;transform:translateX(-50%)"></div>
+        <span style="font-size:14px;color:var(--text-tertiary)">A</span>
+        <div style="flex:1;height:4px;background:var(--surface-elev);border-radius:2px;position:relative">
+          <div style="position:absolute;left:30%;top:-6px;width:16px;height:16px;background:linear-gradient(135deg,var(--aurora-teal),var(--aurora-green));border-radius:50%;transform:translateX(-50%);box-shadow:0 0 8px rgba(38,199,209,0.4)"></div>
         </div>
-        <span style="font-size:24px;color:#888">A</span>
+        <span style="font-size:24px;color:var(--text-tertiary)">A</span>
       </div>
-      <span style="font-size:13px;color:#888">Current: 18pt</span>
+      <span style="font-size:13px;color:var(--text-tertiary)">Current: 18pt</span>
     </div>
 
     <div class="section-header">Font</div>
     <div class="setting-row">
       <span class="label">Font Family</span>
-      <span class="value" style="display:flex;align-items:center;gap:4px">Georgia <span style="color:#ccc">&#9656;</span></span>
+      <span class="value">Georgia &#9656;</span>
     </div>
 
     <div class="section-header">Line Spacing</div>
     <div class="setting-row" style="flex-direction:column;gap:8px;align-items:stretch">
       <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:12px;color:#888">&#9776;</span>
-        <div style="flex:1;height:4px;background:#e5e5ea;border-radius:2px;position:relative">
-          <div style="position:absolute;left:40%;top:-6px;width:16px;height:16px;background:#6366f1;border-radius:50%;transform:translateX(-50%)"></div>
+        <span style="font-size:12px;color:var(--text-tertiary)">&#9776;</span>
+        <div style="flex:1;height:4px;background:var(--surface-elev);border-radius:2px;position:relative">
+          <div style="position:absolute;left:40%;top:-6px;width:16px;height:16px;background:linear-gradient(135deg,var(--aurora-teal),var(--aurora-green));border-radius:50%;transform:translateX(-50%);box-shadow:0 0 8px rgba(38,199,209,0.4)"></div>
         </div>
-        <span style="font-size:18px;color:#888">&#9776;</span>
+        <span style="font-size:18px;color:var(--text-tertiary)">&#9776;</span>
       </div>
-      <span style="font-size:13px;color:#888">Current: 1.4x</span>
+      <span style="font-size:13px;color:var(--text-tertiary)">Current: 1.4x</span>
     </div>
 
     <div class="section-header">Theme</div>
     <div class="theme-row">
-      <div class="theme-chip t-light selected">Aa</div>
+      <div class="theme-chip t-light">Aa</div>
       <div class="theme-chip t-sepia">Aa</div>
       <div class="theme-chip t-dark">Aa</div>
-      <div class="theme-chip t-midnight">Aa</div>
+      <div class="theme-chip t-midnight selected">Aa</div>
     </div>
-    <div style="display:flex;justify-content:space-around;padding:0 16px;margin-top:-8px">
-      <span style="font-size:11px;color:#6366f1">Light</span>
-      <span style="font-size:11px;color:#888">Sepia</span>
-      <span style="font-size:11px;color:#888">Dark</span>
-      <span style="font-size:11px;color:#888">Midnight</span>
+    <div style="display:flex;justify-content:space-around;padding:0 16px;margin-top:-6px">
+      <span style="font-size:11px;color:var(--text-tertiary)">Light</span>
+      <span style="font-size:11px;color:var(--text-tertiary)">Sepia</span>
+      <span style="font-size:11px;color:var(--text-tertiary)">Dark</span>
+      <span style="font-size:11px;color:var(--aurora-teal)">Midnight</span>
     </div>
 
     <div class="section-header">Reading</div>
     <div class="setting-row">
       <span class="label">Keep Screen Awake</span>
-      <div style="width:51px;height:31px;background:#34c759;border-radius:16px;position:relative">
-        <div style="width:27px;height:27px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
-      </div>
+      <div class="toggle-on"><div class="knob"></div></div>
     </div>
 
     <div class="section-header">Preview</div>
-    <div style="margin:0 16px;padding:16px;background:#fff;border-radius:12px;border:1px solid #e5e5ea">
-      <p style="font-family:Georgia,serif;font-size:18px;line-height:1.6;color:#333">The quick brown fox jumps over the lazy dog. This is a preview of your text.</p>
+    <div style="margin:0 16px;padding:16px;background:var(--deep-space);border-radius:12px;border:1px solid rgba(255,255,255,0.06)">
+      <p style="font-family:Georgia,serif;font-size:18px;line-height:1.6;color:var(--text-secondary)">The quick brown fox jumps over the lazy dog. This is a preview of your text.</p>
     </div>
   </div>
 </div>
 <div class="screen-label">Reader Settings</div>
 </div>
 
-<!-- SCREEN 8: Settings -->
+<!-- SCREEN 8: Settings (Aurora) -->
 <div class="screen-wrapper">
-<div class="phone-frame" style="background:#f2f2f7">
-  <div class="status-bar light">
-    <span>9:41</span>
-    <div class="status-icons">
-      <span>&#9679;&#9679;&#9679;&#9679;</span>
-      <span style="font-size:12px">WiFi</span>
-      <span>&#128267;</span>
-    </div>
-  </div>
-  <div class="nav-bar" style="background:#f2f2f7">
-    <span>Settings</span>
-  </div>
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1" style="opacity:0.3"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
+  <div class="nav-bar"><span style="font-size:28px">Settings</span></div>
 
-  <div class="settings-content">
+  <div style="overflow-y:auto;height:calc(100% - 106px - 83px)">
     <div class="section-header">Library</div>
-    <div class="setting-row"><span class="label">Total Books</span><span class="value">4</span></div>
-    <div class="setting-row"><span class="label">EPUB</span><span class="value">2</span></div>
-    <div class="setting-row"><span class="label">PDF</span><span class="value">1</span></div>
-    <div class="setting-row"><span class="label">Plain Text</span><span class="value">1</span></div>
+    <div class="setting-row"><span class="label">Total Books</span><span style="color:var(--aurora-teal)">4</span></div>
+    <div class="setting-row"><span class="label">Ebooks</span><span style="color:var(--aurora-teal)">2</span></div>
+    <div class="setting-row"><span class="label">Documents</span><span style="color:var(--aurora-teal)">1</span></div>
+    <div class="setting-row"><span class="label">Comics</span><span style="color:var(--aurora-teal)">1</span></div>
 
-    <div class="section-header">Default Reader Settings</div>
-    <div class="setting-row">
-      <span class="label">Font</span>
-      <span class="value" style="display:flex;align-items:center;gap:4px">Georgia <span style="color:#ccc">&#9656;</span></span>
-    </div>
-    <div class="setting-row"><span class="label">Font Size</span><span class="value">18pt</span></div>
-    <div class="setting-row"><span class="label">Theme</span><span class="value">Light</span></div>
+    <div class="section-header">Cloud Storage</div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-blue)">&#128230;</span> Dropbox</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-blue)">&#128190;</span> Google Drive</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-purple)">&#128274;</span> Proton Drive</span><span style="font-size:12px;color:var(--text-tertiary)">Not Connected</span></div>
 
-    <div class="section-header">Supported Formats</div>
-    <div class="setting-row">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="icon-left" style="background:#6366f1">&#128214;</div>
-        <span class="label">EPUB</span>
-      </div>
-      <span class="badge">.epub</span>
-    </div>
-    <div class="setting-row">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="icon-left" style="background:#ef4444">&#128196;</div>
-        <span class="label">PDF</span>
-      </div>
-      <span class="badge">.pdf</span>
-    </div>
-    <div class="setting-row">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="icon-left" style="background:#10b981">&#128221;</div>
-        <span class="label">Plain Text</span>
-      </div>
-      <span class="badge">.txt</span>
-    </div>
+    <div class="section-header">Integrations</div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-warm)">&#9733;</span> GoodReads</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
+
+    <div class="section-header">Supported Formats (11)</div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128214;</span> EPUB</span><span class="badge">.epub</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128196;</span> PDF</span><span class="badge">.pdf</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128218;</span> MOBI</span><span class="badge">.mobi</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128218;</span> AZW3</span><span class="badge">.azw3</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128214;</span> FB2</span><span class="badge">.fb2</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128444;</span> CBZ / CBR</span><span class="badge">.cbz</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128196;</span> DjVu</span><span class="badge">.djvu</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128221;</span> RTF</span><span class="badge">.rtf</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128196;</span> HTML</span><span class="badge">.html</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128221;</span> Plain Text</span><span class="badge">.txt</span></div>
 
     <div class="section-header">About</div>
     <div class="setting-row"><span class="label">App</span><span class="value">Aurora Reader</span></div>
-    <div class="setting-row"><span class="label">Version</span><span class="value">1.0.0</span></div>
+    <div class="setting-row"><span class="label">Version</span><span class="value">2.0.0</span></div>
+    <div style="height:20px"></div>
   </div>
 
   <div class="tab-bar">
-    <div class="tab-item">
-      <div class="tab-icon">&#128218;</div>
-      Library
-    </div>
-    <div class="tab-item active">
-      <div class="tab-icon">&#9881;</div>
-      Settings
-    </div>
+    <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item active"><div class="tab-icon">&#9881;</div>Settings</div>
   </div>
 </div>
 <div class="screen-label">Settings</div>

@@ -48,6 +48,13 @@ final class BookParserService {
         registerParser(EPUBParser())
         registerParser(PDFBookParser())
         registerParser(PlainTextParser())
+        registerParser(MOBIParser())
+        registerParser(FB2Parser())
+        registerParser(CBZParser())
+        registerParser(CBRParser())
+        registerParser(DjVuParser())
+        registerParser(RTFParser())
+        registerParser(HTMLBookParser())
     }
 
     func registerParser(_ parser: BookParser) {

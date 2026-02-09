@@ -11,14 +11,19 @@ struct LibraryView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if books.isEmpty && !viewModel.isLoading {
-                    emptyLibraryView
-                } else {
-                    bookListContent
+            ZStack {
+                AuroraTheme.deepSpace.ignoresSafeArea()
+
+                Group {
+                    if books.isEmpty && !viewModel.isLoading {
+                        emptyLibraryView
+                    } else {
+                        bookListContent
+                    }
                 }
             }
             .navigationTitle("Library")
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar { toolbarContent }
             .searchable(text: $viewModel.searchText, prompt: "Search books")
             .fileImporter(
@@ -42,21 +47,40 @@ struct LibraryView: View {
                 ReaderView(book: book)
             }
         }
+        .preferredColorScheme(.dark)
     }
 
     // MARK: - Subviews
 
     private var emptyLibraryView: some View {
-        ContentUnavailableView {
-            Label("No Books Yet", systemImage: "book.closed")
-        } description: {
-            Text("Import EPUB, PDF, or text files to start reading.")
-        } actions: {
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(AuroraTheme.auroraTeal.opacity(0.1))
+                    .frame(width: 120, height: 120)
+                Circle()
+                    .fill(AuroraTheme.auroraPurple.opacity(0.08))
+                    .frame(width: 160, height: 160)
+                Image(systemName: "book.closed.fill")
+                    .font(.system(size: 44))
+                    .foregroundStyle(AuroraTheme.auroraTeal)
+            }
+
+            Text("No Books Yet")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(AuroraTheme.textPrimary)
+
+            Text("Import ebooks in any format to start reading.\nSupports EPUB, PDF, MOBI, FB2, CBZ, and more.")
+                .font(.subheadline)
+                .foregroundStyle(AuroraTheme.textSecondary)
+                .multilineTextAlignment(.center)
+
             Button(action: { showFileImporter = true }) {
                 Label("Import Books", systemImage: "plus")
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(AuroraButtonStyle())
         }
+        .padding(40)
     }
 
     private var bookListContent: some View {
@@ -95,11 +119,17 @@ struct LibraryView: View {
 
     private var loadingOverlay: some View {
         ZStack {
-            Color.black.opacity(0.3)
+            Color.black.opacity(0.5)
                 .ignoresSafeArea()
-            ProgressView("Importing...")
-                .padding()
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+            VStack(spacing: 12) {
+                ProgressView()
+                    .tint(AuroraTheme.auroraTeal)
+                Text("Importing...")
+                    .font(.subheadline)
+                    .foregroundStyle(AuroraTheme.textSecondary)
+            }
+            .padding(24)
+            .auroraCard()
         }
     }
 
@@ -110,6 +140,7 @@ struct LibraryView: View {
         ToolbarItem(placement: .primaryAction) {
             Button(action: { showFileImporter = true }) {
                 Image(systemName: "plus")
+                    .foregroundStyle(AuroraTheme.auroraTeal)
             }
         }
 
@@ -142,6 +173,7 @@ struct LibraryView: View {
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")
+                    .foregroundStyle(AuroraTheme.auroraTeal)
             }
         }
     }

@@ -7,25 +7,30 @@ struct BookGridCell: View {
         VStack(spacing: 8) {
             bookCover
                 .frame(width: 140, height: 200)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 0.5)
+                )
+                .shadow(color: AuroraTheme.auroraBlue.opacity(0.15), radius: 8, x: 0, y: 4)
 
             VStack(spacing: 2) {
                 Text(book.title)
                     .font(.caption)
                     .fontWeight(.medium)
+                    .foregroundStyle(AuroraTheme.textPrimary)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
 
                 Text(book.author)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AuroraTheme.textSecondary)
                     .lineLimit(1)
             }
 
             if let progress = book.readingProgress, progress.progressPercentage > 0 {
                 ProgressView(value: progress.progressPercentage)
-                    .tint(.accentColor)
+                    .tint(AuroraTheme.auroraTeal)
                     .frame(width: 100)
             }
         }
@@ -46,16 +51,12 @@ struct BookGridCell: View {
 
     private var defaultCover: some View {
         ZStack {
-            LinearGradient(
-                colors: gradientColors(for: book.title),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            AuroraTheme.coverGradient(for: book.title)
 
             VStack(spacing: 8) {
-                Image(systemName: iconForFormat(book.bookFormat))
+                Image(systemName: book.bookFormat.iconName)
                     .font(.title)
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(.white.opacity(0.85))
 
                 Text(book.title)
                     .font(.caption)
@@ -70,30 +71,14 @@ struct BookGridCell: View {
                     .foregroundStyle(.white.opacity(0.7))
                     .lineLimit(1)
                     .padding(.horizontal, 8)
+
+                Text(book.bookFormat.displayName)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(.white.opacity(0.2), in: Capsule())
             }
-        }
-    }
-
-    private func gradientColors(for title: String) -> [Color] {
-        let hash = abs(title.hashValue)
-        let palettes: [[Color]] = [
-            [.blue, .purple],
-            [.orange, .red],
-            [.green, .teal],
-            [.indigo, .blue],
-            [.pink, .purple],
-            [.teal, .cyan],
-            [.brown, .orange],
-            [.mint, .green],
-        ]
-        return palettes[hash % palettes.count]
-    }
-
-    private func iconForFormat(_ format: BookFormat) -> String {
-        switch format {
-        case .epub: return "book.fill"
-        case .pdf: return "doc.richtext"
-        case .plainText: return "doc.plaintext"
         }
     }
 }
