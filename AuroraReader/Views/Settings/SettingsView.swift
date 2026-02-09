@@ -42,10 +42,8 @@ struct SettingsView: View {
                     // Cloud Accounts
                     Section {
                         ForEach(CloudStorageProvider.allCases) { provider in
-                            HStack {
-                                Image(systemName: provider.iconName)
-                                    .foregroundStyle(AuroraTheme.auroraBlue)
-                                    .frame(width: 24)
+                            HStack(spacing: 10) {
+                                BrandAssets.BrandIcon(brand: BrandAssets.BrandIcon.brand(for: provider), size: 28)
                                 Text(provider.displayName)
                                     .foregroundStyle(AuroraTheme.textPrimary)
                                 Spacer()
@@ -61,10 +59,8 @@ struct SettingsView: View {
 
                     // GoodReads
                     Section {
-                        HStack {
-                            Image(systemName: "star.fill")
-                                .foregroundStyle(AuroraTheme.auroraWarm)
-                                .frame(width: 24)
+                        HStack(spacing: 10) {
+                            BrandAssets.BrandIcon(brand: .goodReads, size: 28)
                             Text("GoodReads")
                                 .foregroundStyle(AuroraTheme.textPrimary)
                             Spacer()

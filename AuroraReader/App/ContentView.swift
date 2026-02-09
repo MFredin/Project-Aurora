@@ -11,6 +11,12 @@ struct ContentView: View {
                 }
                 .tag(AppTab.library)
 
+            ActivityView()
+                .tabItem {
+                    Label("Activity", systemImage: "chart.bar.fill")
+                }
+                .tag(AppTab.activity)
+
             CloudLibraryView()
                 .tabItem {
                     Label("Cloud", systemImage: "icloud.fill")
@@ -35,6 +41,7 @@ struct ContentView: View {
 
 enum AppTab: Hashable {
     case library
+    case activity
     case cloud
     case discover
     case settings
@@ -42,5 +49,8 @@ enum AppTab: Hashable {
 
 #Preview {
     ContentView()
-        .modelContainer(for: [Book.self, ReadingProgress.self, Bookmark.self, UserPreferences.self], inMemory: true)
+        .modelContainer(for: [
+            Book.self, ReadingProgress.self, Bookmark.self, UserPreferences.self,
+            ReadingSession.self, ReadingStreak.self, Achievement.self, FriendProfile.self
+        ], inMemory: true)
 }

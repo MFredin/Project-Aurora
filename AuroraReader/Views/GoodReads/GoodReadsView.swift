@@ -56,9 +56,7 @@ struct GoodReadsView: View {
                 Circle()
                     .fill(AuroraTheme.auroraPurple.opacity(0.08))
                     .frame(width: 160, height: 160)
-                Image(systemName: "star.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(AuroraTheme.auroraWarm)
+                BrandAssets.GoodReadsLogo(size: 56)
             }
 
             Text("Discover Books")
@@ -75,7 +73,10 @@ struct GoodReadsView: View {
                     try? await service.authenticate(apiKey: "")
                 }
             }) {
-                Label("Connect GoodReads", systemImage: "star.circle.fill")
+                HStack(spacing: 8) {
+                    BrandAssets.GoodReadsLogo(size: 20)
+                    Text("Connect GoodReads")
+                }
             }
             .buttonStyle(AuroraButtonStyle(gradient: AuroraTheme.warmGradient))
         }

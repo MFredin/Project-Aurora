@@ -44,9 +44,8 @@ struct CloudLibraryView: View {
                 Circle()
                     .fill(AuroraTheme.auroraPurple.opacity(0.08))
                     .frame(width: 160, height: 160)
-                Image(systemName: "cloud.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(AuroraTheme.auroraBlue)
+                BrandAssets.DropboxLogo(size: 44)
+                    .opacity(0.7)
             }
 
             Text("Connect Cloud Storage")
@@ -79,11 +78,7 @@ struct CloudLibraryView: View {
                         selectedProvider = provider
                     } label: {
                         HStack(spacing: 16) {
-                            Image(systemName: provider.iconName)
-                                .font(.title2)
-                                .foregroundStyle(AuroraTheme.auroraBlue)
-                                .frame(width: 44, height: 44)
-                                .background(AuroraTheme.auroraBlue.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
+                            BrandAssets.BrandIcon(brand: BrandAssets.BrandIcon.brand(for: provider), size: 44)
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(provider.displayName)
@@ -199,11 +194,7 @@ struct CloudLibraryView: View {
             }
         } label: {
             HStack(spacing: 16) {
-                Image(systemName: provider.iconName)
-                    .font(.title3)
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
-                    .background(AuroraTheme.auroraBlue.opacity(0.3), in: RoundedRectangle(cornerRadius: 10))
+                BrandAssets.BrandIcon(brand: BrandAssets.BrandIcon.brand(for: provider), size: 40)
 
                 Text("Connect \(provider.displayName)")
                     .font(.body.weight(.medium))

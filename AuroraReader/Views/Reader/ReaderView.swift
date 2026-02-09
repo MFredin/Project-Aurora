@@ -6,6 +6,8 @@ struct ReaderView: View {
     @Environment(\.dismiss) private var dismiss
     @Query private var preferences: [UserPreferences]
     @State private var viewModel: ReaderViewModel
+    @State private var statsService = ReadingStatsService.shared
+    @State private var currentSession: ReadingSession?
 
     init(book: Book) {
         _viewModel = State(wrappedValue: ReaderViewModel(book: book))
@@ -36,6 +38,16 @@ struct ReaderView: View {
         .task {
             await viewModel.loadBook(modelContext: modelContext)
             ensurePreferencesExist()
+            currentSession = statsService.startSession(for: viewModel.book, modelContext: modelContext)
+        }
+        .onDisappear {
+            let chaptersRead = viewModel.currentChapterIndex
+            statsService.endSession(
+                pagesRead: chaptersRead,
+                chaptersRead: chaptersRead,
+                wordsRead: 0,
+                modelContext: modelContext
+            )
         }
         .sheet(isPresented: $viewModel.showTableOfContents) {
             TableOfContentsView(

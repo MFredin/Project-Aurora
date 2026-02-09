@@ -7,6 +7,9 @@ struct AuroraReaderApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [Book.self, ReadingProgress.self, Bookmark.self, UserPreferences.self])
+        .modelContainer(for: [
+            Book.self, ReadingProgress.self, Bookmark.self, UserPreferences.self,
+            ReadingSession.self, ReadingStreak.self, Achievement.self, FriendProfile.self
+        ])
     }
 }

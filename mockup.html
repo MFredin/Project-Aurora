@@ -229,7 +229,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
 
 <h1 class="page-title">Aurora Reader</h1>
 <p class="subtitle">iOS Ebook Reader &mdash; Northern Lights Edition</p>
-<div class="version-badge"><span>v2.0 &bull; 11 Formats &bull; Cloud + GoodReads</span></div>
+<div class="version-badge"><span>v3.0 &bull; 11 Formats &bull; Cloud + GoodReads + Activity Tracking</span></div>
 
 <div class="screens-row">
 
@@ -252,6 +252,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
   </div>
   <div class="tab-bar">
     <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
     <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
     <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
@@ -291,6 +292,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
   </div>
   <div class="tab-bar">
     <div class="tab-item active"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
     <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
     <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
@@ -375,7 +377,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
 
   <div style="padding:0 16px;overflow-y:auto;height:calc(100% - 106px - 83px)">
     <div class="cloud-card">
-      <div class="cloud-icon">&#9729;</div>
+      <div class="cloud-icon" style="background:rgba(0,97,254,0.15);color:#0061FE;font-weight:800;font-size:16px">db</div>
       <div style="flex:1">
         <div class="cloud-name">Dropbox</div>
         <div class="cloud-status connected">Connected &bull; 12 books found</div>
@@ -383,7 +385,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
       <span style="color:var(--text-tertiary)">&#9656;</span>
     </div>
     <div class="cloud-card">
-      <div class="cloud-icon" style="background:rgba(64,120,242,0.15)">&#9729;</div>
+      <div class="cloud-icon" style="background:rgba(64,120,242,0.15);color:#4285F4;font-weight:800;font-size:16px">G</div>
       <div style="flex:1">
         <div class="cloud-name">Google Drive</div>
         <div class="cloud-status connected">Connected &bull; 8 books found</div>
@@ -391,7 +393,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
       <span style="color:var(--text-tertiary)">&#9656;</span>
     </div>
     <div class="cloud-card">
-      <div class="cloud-icon" style="background:rgba(148,76,242,0.15);color:var(--aurora-purple)">&#9889;</div>
+      <div class="cloud-icon" style="background:rgba(109,77,238,0.15);color:#6D4DEE;font-weight:800;font-size:16px">P</div>
       <div style="flex:1">
         <div class="cloud-name">Proton Drive</div>
         <div class="cloud-status not-connected">Not connected</div>
@@ -438,6 +440,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
 
   <div class="tab-bar">
     <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item active"><div class="tab-icon">&#9729;</div>Cloud</div>
     <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
     <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
@@ -526,6 +529,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
 
   <div class="tab-bar">
     <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
     <div class="tab-item active"><div class="tab-icon">&#10024;</div>Discover</div>
     <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
@@ -605,7 +609,201 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
 <div class="screen-label">Reader Settings</div>
 </div>
 
-<!-- SCREEN 8: Settings (Aurora) -->
+<!-- SCREEN 8: Activity / Stats -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1"></div><div class="glow3" style="background:radial-gradient(circle,rgba(46,222,143,0.10) 0%,transparent 70%)"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
+  <div class="nav-bar"><span style="font-size:28px">Activity</span></div>
+
+  <div style="overflow-y:auto;height:calc(100% - 106px - 83px);padding:0 16px">
+
+    <!-- Streak Card -->
+    <div style="display:flex;background:var(--surface);border-radius:16px;padding:20px 0;margin-bottom:16px;border:0.5px solid rgba(255,255,255,0.05)">
+      <div style="flex:1;text-align:center">
+        <div style="font-size:32px">&#128293;</div>
+        <div style="font-size:24px;font-weight:700;color:var(--text-primary)">12</div>
+        <div style="font-size:11px;color:var(--text-secondary)">Day Streak</div>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.06)"></div>
+      <div style="flex:1;text-align:center">
+        <div style="position:relative;width:50px;height:50px;margin:0 auto 4px">
+          <svg width="50" height="50" style="transform:rotate(-90deg)">
+            <circle cx="25" cy="25" r="20" fill="none" stroke="var(--surface-elev)" stroke-width="5"/>
+            <circle cx="25" cy="25" r="20" fill="none" stroke="url(#grad)" stroke-width="5" stroke-dasharray="94" stroke-dashoffset="28" stroke-linecap="round"/>
+            <defs><linearGradient id="grad"><stop offset="0%" stop-color="var(--aurora-teal)"/><stop offset="100%" stop-color="var(--aurora-green)"/></linearGradient></defs>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-primary)">70%</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-secondary)">Daily Goal</div>
+        <div style="font-size:10px;color:var(--text-tertiary)">21/30 min</div>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.06)"></div>
+      <div style="flex:1;text-align:center">
+        <div style="font-size:24px;color:var(--aurora-warm)">&#127942;</div>
+        <div style="font-size:20px;font-weight:700;color:var(--text-primary)">28</div>
+        <div style="font-size:11px;color:var(--text-secondary)">Best Streak</div>
+      </div>
+    </div>
+
+    <!-- This Week Card -->
+    <div style="background:var(--surface);border-radius:16px;padding:16px;margin-bottom:16px;border:0.5px solid rgba(255,255,255,0.05)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:16px;font-weight:600;color:var(--text-primary)">This Week</span>
+        <span style="font-size:12px;color:var(--aurora-green);background:rgba(46,222,143,0.12);padding:3px 8px;border-radius:10px">&#8593; +23%</span>
+      </div>
+      <div style="display:flex;text-align:center">
+        <div style="flex:1"><div style="font-size:18px;font-weight:700;color:var(--aurora-teal)">142</div><div style="font-size:10px;color:var(--text-tertiary)">Minutes</div></div>
+        <div style="flex:1"><div style="font-size:18px;font-weight:700;color:var(--aurora-green)">87</div><div style="font-size:10px;color:var(--text-tertiary)">Pages</div></div>
+        <div style="flex:1"><div style="font-size:18px;font-weight:700;color:var(--aurora-blue)">5</div><div style="font-size:10px;color:var(--text-tertiary)">Sessions</div></div>
+        <div style="flex:1"><div style="font-size:18px;font-weight:700;color:var(--aurora-purple)">28</div><div style="font-size:10px;color:var(--text-tertiary)">Avg/Session</div></div>
+      </div>
+    </div>
+
+    <!-- Reading Chart -->
+    <div style="background:var(--surface);border-radius:16px;padding:16px;margin-bottom:16px;border:0.5px solid rgba(255,255,255,0.05)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:16px;font-weight:600;color:var(--text-primary)">Reading Activity</span>
+        <div style="display:flex;gap:4px">
+          <span style="font-size:11px;padding:3px 8px;border-radius:8px;background:var(--aurora-teal);color:#fff">Week</span>
+          <span style="font-size:11px;padding:3px 8px;border-radius:8px;background:var(--surface-elev);color:var(--text-tertiary)">Month</span>
+          <span style="font-size:11px;padding:3px 8px;border-radius:8px;background:var(--surface-elev);color:var(--text-tertiary)">Year</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px">
+        <div style="flex:1;text-align:center"><div style="height:35px;background:linear-gradient(to top,var(--aurora-teal),var(--aurora-green));border-radius:3px;opacity:0.8"></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Mo</div></div>
+        <div style="flex:1;text-align:center"><div style="height:55px;background:linear-gradient(to top,var(--aurora-teal),var(--aurora-green));border-radius:3px;opacity:0.8"></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Tu</div></div>
+        <div style="flex:1;text-align:center"><div style="height:20px;background:linear-gradient(to top,var(--aurora-teal),var(--aurora-green));border-radius:3px;opacity:0.8"></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">We</div></div>
+        <div style="flex:1;text-align:center"><div style="height:70px;background:linear-gradient(to top,var(--aurora-teal),var(--aurora-green));border-radius:3px;opacity:0.8"></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Th</div></div>
+        <div style="flex:1;text-align:center"><div style="height:45px;background:linear-gradient(to top,var(--aurora-teal),var(--aurora-green));border-radius:3px;opacity:0.8"></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Fr</div></div>
+        <div style="flex:1;text-align:center"><div style="height:80px;background:linear-gradient(to top,var(--aurora-teal),var(--aurora-green));border-radius:3px;opacity:0.8"></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Sa</div></div>
+        <div style="flex:1;text-align:center"><div style="height:25px;background:linear-gradient(to top,var(--aurora-teal),var(--aurora-green));border-radius:3px"></div><div style="font-size:9px;color:var(--aurora-teal);margin-top:4px">Su</div></div>
+      </div>
+    </div>
+
+    <!-- Achievements Preview -->
+    <div style="background:var(--surface);border-radius:16px;padding:16px;margin-bottom:16px;border:0.5px solid rgba(255,255,255,0.05)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:16px;font-weight:600;color:var(--text-primary)">Achievements</span>
+        <span style="font-size:12px;color:var(--text-secondary)">6/18 &#9656;</span>
+      </div>
+      <div style="display:flex;gap:14px;margin-bottom:12px">
+        <div style="text-align:center"><div style="font-size:22px">&#11088;</div><div style="font-size:10px;color:var(--text-secondary)">First Steps</div></div>
+        <div style="text-align:center"><div style="font-size:22px">&#128293;</div><div style="font-size:10px;color:var(--text-secondary)">3-Day</div></div>
+        <div style="text-align:center"><div style="font-size:22px">&#9200;</div><div style="font-size:10px;color:var(--text-secondary)">First Hour</div></div>
+        <div style="text-align:center"><div style="font-size:22px">&#128214;</div><div style="font-size:10px;color:var(--text-secondary)">Bookworm</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(38,199,209,0.05);border-radius:10px">
+        <span style="font-size:16px;color:var(--text-tertiary)">&#128293;</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:500;color:var(--text-primary)">Consistent Reader</div>
+          <div style="height:3px;background:var(--surface-elev);border-radius:2px;margin-top:4px"><div style="width:57%;height:100%;background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green));border-radius:2px"></div></div>
+        </div>
+        <span style="font-size:10px;color:var(--text-tertiary)">4/7</span>
+      </div>
+    </div>
+
+    <!-- Friends Preview -->
+    <div style="background:var(--surface);border-radius:16px;padding:16px;margin-bottom:16px;border:0.5px solid rgba(255,255,255,0.05)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:16px;font-weight:600;color:var(--text-primary)">Friends</span>
+        <span style="font-size:12px;color:var(--text-secondary)">3 friends &#9656;</span>
+      </div>
+      <div style="display:flex;gap:-4px;margin-bottom:10px">
+        <span style="font-size:20px;margin-right:4px">&#128218;</span>
+        <span style="font-size:20px;margin-right:4px">&#128640;</span>
+        <span style="font-size:20px">&#127775;</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(38,199,209,0.05);border-radius:8px">
+        <span style="font-size:16px">&#128640;</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:500;color:var(--text-primary)">Sarah K.</div>
+          <div style="font-size:10px;color:var(--text-tertiary)">124 pages this week</div>
+        </div>
+        <span style="font-size:10px;color:var(--aurora-warm)">&#128293; 15</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item active"><div class="tab-icon">&#128200;</div>Activity</div>
+    <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
+    <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div>Settings</div>
+  </div>
+</div>
+<div class="screen-label">Activity &amp; Stats</div>
+</div>
+
+<!-- SCREEN 9: Achievements -->
+<div class="screen-wrapper">
+<div class="phone-frame">
+  <div class="aurora-bg"><div class="glow1" style="background:radial-gradient(circle,rgba(242,115,64,0.10) 0%,transparent 70%)"></div></div>
+  <div class="status-bar"><span>9:41</span><div class="status-icons"><span style="font-size:12px">5G</span> <span>&#128267;</span></div></div>
+  <div style="display:flex;align-items:center;padding:0 16px;height:52px;">
+    <span style="color:var(--aurora-teal);font-size:16px">&#8249; Activity</span>
+    <span style="flex:1;text-align:center;font-size:17px;font-weight:600;color:var(--text-primary)">Achievements</span>
+    <span style="width:60px"></span>
+  </div>
+
+  <div style="overflow-y:auto;height:calc(100% - 106px);padding:0 16px">
+    <!-- Summary -->
+    <div style="text-align:center;padding:16px 0">
+      <div style="font-size:36px">&#127942;</div>
+      <div style="font-size:24px;font-weight:700;color:var(--text-primary);margin-top:4px">6 of 18</div>
+      <div style="font-size:14px;color:var(--text-secondary)">Achievements Unlocked</div>
+      <div style="height:4px;background:var(--surface);border-radius:2px;margin:12px 40px 0"><div style="width:33%;height:100%;background:linear-gradient(90deg,var(--aurora-warm),var(--aurora-pink));border-radius:2px"></div></div>
+    </div>
+
+    <!-- Milestones -->
+    <div style="font-size:12px;color:var(--aurora-teal);font-weight:600;letter-spacing:1px;margin:12px 0 8px">MILESTONES</div>
+    <div style="background:var(--surface);border-radius:14px;padding:12px;margin-bottom:8px;border:0.5px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(242,115,64,0.15);display:flex;align-items:center;justify-content:center;font-size:18px">&#11088;</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">First Steps <span style="font-size:10px;color:var(--aurora-green)">&#10003;</span></div><div style="font-size:12px;color:var(--text-tertiary)">Finish your first book</div></div>
+      <span style="font-size:10px;color:var(--text-tertiary)">Jan 15</span>
+    </div>
+    <div style="background:var(--surface);border-radius:14px;padding:12px;margin-bottom:8px;border:0.5px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(242,115,64,0.15);display:flex;align-items:center;justify-content:center;font-size:18px">&#128214;</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">Bookworm <span style="font-size:10px;color:var(--aurora-green)">&#10003;</span></div><div style="font-size:12px;color:var(--text-tertiary)">Finish 5 books</div></div>
+      <span style="font-size:10px;color:var(--text-tertiary)">Feb 1</span>
+    </div>
+    <div style="background:var(--surface);border-radius:14px;padding:12px;margin-bottom:8px;border:0.5px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px;opacity:0.6">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-elev);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-tertiary)">&#128218;</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:var(--text-secondary)">Bibliophile</div>
+        <div style="font-size:12px;color:var(--text-tertiary)">Finish 25 books</div>
+        <div style="height:3px;background:var(--surface-elev);border-radius:2px;margin-top:4px"><div style="width:20%;height:100%;background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green));border-radius:2px"></div></div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">5/25</div>
+      </div>
+    </div>
+
+    <!-- Streaks -->
+    <div style="font-size:12px;color:var(--aurora-teal);font-weight:600;letter-spacing:1px;margin:16px 0 8px">STREAKS</div>
+    <div style="background:var(--surface);border-radius:14px;padding:12px;margin-bottom:8px;border:0.5px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(242,115,64,0.15);display:flex;align-items:center;justify-content:center;font-size:18px">&#128293;</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">Getting Started <span style="font-size:10px;color:var(--aurora-green)">&#10003;</span></div><div style="font-size:12px;color:var(--text-tertiary)">Read 3 days in a row</div></div>
+    </div>
+    <div style="background:var(--surface);border-radius:14px;padding:12px;margin-bottom:8px;border:0.5px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(242,115,64,0.15);display:flex;align-items:center;justify-content:center;font-size:18px">&#128293;</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">Consistent Reader <span style="font-size:10px;color:var(--aurora-green)">&#10003;</span></div><div style="font-size:12px;color:var(--text-tertiary)">Read 7 days in a row</div></div>
+    </div>
+    <div style="background:var(--surface);border-radius:14px;padding:12px;margin-bottom:20px;border:0.5px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px;opacity:0.6">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-elev);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-tertiary)">&#128293;</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:var(--text-secondary)">Reading Machine</div>
+        <div style="font-size:12px;color:var(--text-tertiary)">Read 30 days in a row</div>
+        <div style="height:3px;background:var(--surface-elev);border-radius:2px;margin-top:4px"><div style="width:40%;height:100%;background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-green));border-radius:2px"></div></div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">12/30</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="screen-label">Achievements</div>
+</div>
+
+<!-- SCREEN 10: Settings (Aurora) -->
 <div class="screen-wrapper">
 <div class="phone-frame">
   <div class="aurora-bg"><div class="glow1" style="opacity:0.3"></div></div>
@@ -620,12 +818,12 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
     <div class="setting-row"><span class="label">Comics</span><span style="color:var(--aurora-teal)">1</span></div>
 
     <div class="section-header">Cloud Storage</div>
-    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-blue)">&#9729;</span> Dropbox</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
-    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-blue)">&#9729;</span> Google Drive</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
-    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-purple)">&#9889;</span> Proton Drive</span><span style="font-size:12px;color:var(--text-tertiary)">Not Connected</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:5px;background:rgba(0,97,254,0.15);color:#0061FE;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">db</span> Dropbox</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:5px;background:rgba(64,120,242,0.15);color:#4285F4;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">G</span> Google Drive</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:5px;background:rgba(109,77,238,0.15);color:#6D4DEE;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">P</span> Proton Drive</span><span style="font-size:12px;color:var(--text-tertiary)">Not Connected</span></div>
 
     <div class="section-header">Integrations</div>
-    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-warm)">&#9733;</span> GoodReads</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
+    <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:50%;background:rgba(224,210,180,0.15);color:#3d3327;font-size:12px;font-weight:700;font-family:Georgia,serif;display:flex;align-items:center;justify-content:center">g</span> GoodReads</span><span style="font-size:12px;color:var(--aurora-green)">Connected</span></div>
 
     <div class="section-header">Supported Formats (11)</div>
     <div class="setting-row"><span class="label" style="display:flex;align-items:center;gap:8px"><span style="color:var(--aurora-teal)">&#128214;</span> EPUB</span><span class="badge">.epub</span></div>
@@ -647,6 +845,7 @@ p.subtitle { width: 100%; text-align: center; color: var(--text-secondary); font
 
   <div class="tab-bar">
     <div class="tab-item"><div class="tab-icon">&#128218;</div>Library</div>
+    <div class="tab-item"><div class="tab-icon">&#128200;</div>Activity</div>
     <div class="tab-item"><div class="tab-icon">&#9729;</div>Cloud</div>
     <div class="tab-item"><div class="tab-icon">&#10024;</div>Discover</div>
     <div class="tab-item active"><div class="tab-icon">&#9881;</div>Settings</div>
