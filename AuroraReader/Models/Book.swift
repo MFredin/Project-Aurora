@@ -124,6 +124,7 @@ final class Book {
 
     @Relationship(deleteRule: .cascade) var readingProgress: ReadingProgress?
     @Relationship(deleteRule: .cascade) var bookmarks: [Bookmark]
+    @Relationship(deleteRule: .cascade) var highlights: [Highlight]
 
     var bookFormat: BookFormat {
         get { BookFormat(rawValue: format) ?? .plainText }
@@ -150,6 +151,7 @@ final class Book {
         self.fileSize = fileSize
         self.cloudSource = cloudSource
         self.bookmarks = []
+        self.highlights = []
     }
 
     var fileURLValue: URL? {

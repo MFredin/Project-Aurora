@@ -9,7 +9,9 @@ struct AuroraReaderApp: App {
         }
         .modelContainer(for: [
             Book.self, ReadingProgress.self, Bookmark.self, UserPreferences.self,
-            ReadingSession.self, ReadingStreak.self, Achievement.self, FriendProfile.self
+            ReadingSession.self, ReadingStreak.self, Achievement.self, FriendProfile.self,
+            Highlight.self, VocabularyEntry.self, KnowledgeNode.self,
+            BookClub.self, ClubDiscussion.self
         ])
     }
 }

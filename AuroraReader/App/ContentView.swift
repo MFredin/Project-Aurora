@@ -17,17 +17,17 @@ struct ContentView: View {
                 }
                 .tag(AppTab.activity)
 
+            KnowledgeGraphView()
+                .tabItem {
+                    Label("Knowledge", systemImage: "brain.head.profile.fill")
+                }
+                .tag(AppTab.knowledge)
+
             CloudLibraryView()
                 .tabItem {
                     Label("Cloud", systemImage: "icloud.fill")
                 }
                 .tag(AppTab.cloud)
-
-            GoodReadsView()
-                .tabItem {
-                    Label("Discover", systemImage: "text.magnifyingglass")
-                }
-                .tag(AppTab.discover)
 
             SettingsView()
                 .tabItem {
@@ -42,8 +42,8 @@ struct ContentView: View {
 enum AppTab: Hashable {
     case library
     case activity
+    case knowledge
     case cloud
-    case discover
     case settings
 }
 
@@ -51,6 +51,8 @@ enum AppTab: Hashable {
     ContentView()
         .modelContainer(for: [
             Book.self, ReadingProgress.self, Bookmark.self, UserPreferences.self,
-            ReadingSession.self, ReadingStreak.self, Achievement.self, FriendProfile.self
+            ReadingSession.self, ReadingStreak.self, Achievement.self, FriendProfile.self,
+            Highlight.self, VocabularyEntry.self, KnowledgeNode.self,
+            BookClub.self, ClubDiscussion.self
         ], inMemory: true)
 }

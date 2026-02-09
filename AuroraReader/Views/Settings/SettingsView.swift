@@ -5,8 +5,12 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var preferences: [UserPreferences]
     @Query private var books: [Book]
+    @Query private var highlights: [Highlight]
+    @Query private var vocabEntries: [VocabularyEntry]
     @State private var cloudManager = CloudStorageManager.shared
     @State private var goodreadsService = GoodReadsService.shared
+    @State private var syncService = SyncService.shared
+    @State private var metadataService = MetadataService.shared
 
     private var currentPreferences: UserPreferences {
         if let existing = preferences.first {
@@ -27,6 +31,8 @@ struct SettingsView: View {
                     // Library Stats
                     Section {
                         statRow("Total Books", value: "\(books.count)")
+                        statRow("Highlights", value: "\(highlights.count)")
+                        statRow("Vocabulary Words", value: "\(vocabEntries.count)")
                         let categories = Dictionary(grouping: books) { $0.bookFormat.category }
                         ForEach(BookFormat.FormatCategory.allCases, id: \.self) { category in
                             let count = categories[category]?.count ?? 0
@@ -36,6 +42,142 @@ struct SettingsView: View {
                         }
                     } header: {
                         Text("Library").foregroundStyle(AuroraTheme.auroraTeal)
+                    }
+                    .listRowBackground(AuroraTheme.surface)
+
+                    // iCloud Sync
+                    Section {
+                        HStack(spacing: 10) {
+                            Image(systemName: syncService.syncStatus.iconName)
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(syncStatusColor)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("iCloud Sync")
+                                    .foregroundStyle(AuroraTheme.textPrimary)
+                                Text(syncService.isSyncEnabled ? syncService.syncStatus.rawValue : "Disabled")
+                                    .font(.caption)
+                                    .foregroundStyle(AuroraTheme.textTertiary)
+                            }
+                            Spacer()
+                            Toggle("", isOn: Binding(
+                                get: { syncService.isSyncEnabled },
+                                set: { enabled in
+                                    if enabled { syncService.enableSync() }
+                                    else { syncService.disableSync() }
+                                }
+                            ))
+                            .tint(AuroraTheme.auroraTeal)
+                            .labelsHidden()
+                        }
+
+                        if syncService.isSyncEnabled {
+                            HStack {
+                                Text("Last Synced")
+                                    .foregroundStyle(AuroraTheme.textPrimary)
+                                Spacer()
+                                Text(syncService.lastSyncText)
+                                    .foregroundStyle(AuroraTheme.textSecondary)
+                            }
+
+                            Button {
+                                Task { await syncService.performSync() }
+                            } label: {
+                                HStack {
+                                    Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
+                                        .symbolRenderingMode(.hierarchical)
+                                    Text("Sync Now")
+                                }
+                                .foregroundStyle(AuroraTheme.auroraTeal)
+                            }
+                        }
+                    } header: {
+                        Text("Sync").foregroundStyle(AuroraTheme.auroraTeal)
+                    }
+                    .listRowBackground(AuroraTheme.surface)
+
+                    // Features
+                    Section {
+                        NavigationLink {
+                            VocabularyListView()
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "text.book.closed.fill")
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(AuroraTheme.auroraTeal)
+                                    .frame(width: 24)
+                                Text("Vocabulary Builder")
+                                    .foregroundStyle(AuroraTheme.textPrimary)
+                                Spacer()
+                                Text("\(vocabEntries.count) words")
+                                    .font(.caption)
+                                    .foregroundStyle(AuroraTheme.textTertiary)
+                            }
+                        }
+
+                        NavigationLink {
+                            BookClubView()
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.3.fill")
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(AuroraTheme.auroraPurple)
+                                    .frame(width: 24)
+                                Text("Book Clubs")
+                                    .foregroundStyle(AuroraTheme.textPrimary)
+                            }
+                        }
+
+                        NavigationLink {
+                            GoodReadsView()
+                        } label: {
+                            HStack(spacing: 10) {
+                                BrandAssets.BrandIcon(brand: .goodReads, size: 24)
+                                Text("GoodReads")
+                                    .foregroundStyle(AuroraTheme.textPrimary)
+                                Spacer()
+                                Text(goodreadsService.isAuthenticated ? "Connected" : "Not Connected")
+                                    .font(.caption)
+                                    .foregroundStyle(goodreadsService.isAuthenticated ? AuroraTheme.auroraGreen : AuroraTheme.textTertiary)
+                            }
+                        }
+                    } header: {
+                        Text("Features").foregroundStyle(AuroraTheme.auroraTeal)
+                    }
+                    .listRowBackground(AuroraTheme.surface)
+
+                    // Smart Import
+                    Section {
+                        Button {
+                            Task {
+                                await metadataService.enrichLibrary(books: books, modelContext: modelContext)
+                            }
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "sparkle.magnifyingglass")
+                                    .foregroundStyle(AuroraTheme.auroraGreen)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Enrich Library Metadata")
+                                        .foregroundStyle(AuroraTheme.textPrimary)
+                                    Text("Auto-fetch covers, ISBNs, and ratings")
+                                        .font(.caption)
+                                        .foregroundStyle(AuroraTheme.textTertiary)
+                                }
+                                Spacer()
+                                if metadataService.isEnriching {
+                                    ProgressView()
+                                        .tint(AuroraTheme.auroraTeal)
+                                }
+                            }
+                        }
+                        .disabled(metadataService.isEnriching)
+
+                        if metadataService.isEnriching {
+                            ProgressView(value: metadataService.enrichmentProgress)
+                                .tint(AuroraTheme.auroraGreen)
+                        }
+                    } header: {
+                        Text("Smart Import").foregroundStyle(AuroraTheme.auroraTeal)
                     }
                     .listRowBackground(AuroraTheme.surface)
 
@@ -54,22 +196,6 @@ struct SettingsView: View {
                         }
                     } header: {
                         Text("Cloud Storage").foregroundStyle(AuroraTheme.auroraTeal)
-                    }
-                    .listRowBackground(AuroraTheme.surface)
-
-                    // GoodReads
-                    Section {
-                        HStack(spacing: 10) {
-                            BrandAssets.BrandIcon(brand: .goodReads, size: 28)
-                            Text("GoodReads")
-                                .foregroundStyle(AuroraTheme.textPrimary)
-                            Spacer()
-                            Text(goodreadsService.isAuthenticated ? "Connected" : "Not Connected")
-                                .font(.caption)
-                                .foregroundStyle(goodreadsService.isAuthenticated ? AuroraTheme.auroraGreen : AuroraTheme.textTertiary)
-                        }
-                    } header: {
-                        Text("Integrations").foregroundStyle(AuroraTheme.auroraTeal)
                     }
                     .listRowBackground(AuroraTheme.surface)
 
@@ -140,7 +266,7 @@ struct SettingsView: View {
                         HStack {
                             Text("Version").foregroundStyle(AuroraTheme.textPrimary)
                             Spacer()
-                            Text("2.0.0").foregroundStyle(AuroraTheme.textSecondary)
+                            Text("3.0.0").foregroundStyle(AuroraTheme.textSecondary)
                         }
                     } header: {
                         Text("About").foregroundStyle(AuroraTheme.auroraTeal)
@@ -162,9 +288,21 @@ struct SettingsView: View {
             Text(value).foregroundStyle(AuroraTheme.auroraTeal)
         }
     }
+
+    private var syncStatusColor: Color {
+        switch syncService.syncStatus {
+        case .idle: return AuroraTheme.auroraGreen
+        case .syncing: return AuroraTheme.auroraBlue
+        case .error: return AuroraTheme.auroraWarm
+        case .conflict: return AuroraTheme.auroraWarm
+        }
+    }
 }
 
 #Preview {
     SettingsView()
-        .modelContainer(for: [Book.self, ReadingProgress.self, Bookmark.self, UserPreferences.self], inMemory: true)
+        .modelContainer(for: [
+            Book.self, ReadingProgress.self, Bookmark.self, UserPreferences.self,
+            Highlight.self, VocabularyEntry.self
+        ], inMemory: true)
 }
