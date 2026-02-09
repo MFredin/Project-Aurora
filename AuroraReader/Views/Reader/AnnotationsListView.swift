@@ -413,19 +413,22 @@ struct ExportAnnotationsSheet: View {
     }
 
     private func generateJSON() -> String {
-        let items = highlights.map { h in
-            """
-            {
-              "text": "\(h.highlightedText.replacingOccurrences(of: "\"", with: "\\\""))",
-              "note": "\(h.note.replacingOccurrences(of: "\"", with: "\\\""))",
-              "color": "\(h.highlightColor.rawValue)",
-              "book": "\(h.book?.title ?? "")",
-              "chapter": \(h.chapterIndex),
-              "tags": [\(h.tags.map { "\"\($0)\"" }.joined(separator: ", "))]
-            }
-            """
+        let items: [[String: Any]] = highlights.map { h in
+            [
+                "text": h.highlightedText,
+                "note": h.note,
+                "color": h.highlightColor.rawValue,
+                "book": h.book?.title ?? "",
+                "chapter": h.chapterIndex,
+                "tags": h.tags
+            ] as [String: Any]
         }
-        return "[\n\(items.joined(separator: ",\n"))\n]"
+
+        guard let data = try? JSONSerialization.data(withJSONObject: items, options: .prettyPrinted),
+              let json = String(data: data, encoding: .utf8) else {
+            return "[]"
+        }
+        return json
     }
 }
 

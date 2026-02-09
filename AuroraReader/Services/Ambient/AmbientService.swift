@@ -3,7 +3,7 @@ import SwiftUI
 import AVFoundation
 
 /// Ambient immersion engine — dynamic soundscapes, time-aware themes, haptics
-@Observable
+@MainActor @Observable
 final class AmbientService {
     static let shared = AmbientService()
 

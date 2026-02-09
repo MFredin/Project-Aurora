@@ -111,7 +111,7 @@ final class Book {
     var id: UUID
     var title: String
     var author: String
-    var coverImageData: Data?
+    @Attribute(.externalStorage) var coverImageData: Data?
     var fileURL: String
     var format: String
     var dateAdded: Date
@@ -155,7 +155,10 @@ final class Book {
     }
 
     var fileURLValue: URL? {
-        URL(string: fileURL)
+        if fileURL.hasPrefix("file://") || fileURL.hasPrefix("/") {
+            return URL(fileURLWithPath: fileURL.replacingOccurrences(of: "file://", with: ""))
+        }
+        return URL(string: fileURL)
     }
 
     var formattedFileSize: String {

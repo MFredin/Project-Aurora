@@ -213,7 +213,7 @@ final class ProtonDriveService: CloudStorageServiceProtocol {
 
 // MARK: - Cloud Storage Manager
 
-@Observable
+@MainActor @Observable
 final class CloudStorageManager {
     static let shared = CloudStorageManager()
 

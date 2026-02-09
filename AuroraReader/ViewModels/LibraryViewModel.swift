@@ -3,7 +3,7 @@ import SwiftUI
 import SwiftData
 
 /// View model for the Library screen
-@Observable
+@MainActor @Observable
 final class LibraryViewModel {
     var searchText: String = ""
     var sortOrder: SortOrder = .dateAdded

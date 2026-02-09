@@ -1,7 +1,7 @@
 import Foundation
 
 /// Hybrid book formatting service: rule-based quick fixes + Claude API deep clean
-@Observable
+@MainActor @Observable
 final class BookFormattingService {
     static let shared = BookFormattingService()
 

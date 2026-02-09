@@ -14,17 +14,10 @@ final class CBZParser: BookParser {
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
 
         // CBZ is a ZIP archive containing images
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
-        process.arguments = ["-o", "-q", fileURL.path, "-d", tempDir.path]
-        process.standardOutput = Pipe()
-        process.standardError = Pipe()
-
         do {
-            try process.run()
-            process.waitUntilExit()
+            try ZIPExtractor.extract(archiveURL: fileURL, to: tempDir)
         } catch {
-            throw BookParserError.parsingFailed("Could not extract CBZ archive")
+            throw BookParserError.parsingFailed("Could not extract CBZ archive: \(error.localizedDescription)")
         }
 
         // Find all image files, sorted by name

@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 /// AI-powered reading companion providing summaries, character maps, vocab, and Q&A
-@Observable
+@MainActor @Observable
 final class AICompanionService {
     static let shared = AICompanionService()
 

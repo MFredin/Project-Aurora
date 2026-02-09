@@ -1,7 +1,7 @@
 import Foundation
 
 /// GoodReads integration for book discovery, ratings, reviews, and shelves
-@Observable
+@MainActor @Observable
 final class GoodReadsService {
     static let shared = GoodReadsService()
 

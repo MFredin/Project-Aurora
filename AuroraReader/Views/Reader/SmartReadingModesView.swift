@@ -127,9 +127,29 @@ struct BionicTextView: View {
     let fontFamily: String
     let textColor: Color
 
+    // Cache the attributed string to avoid reprocessing on every render
+    @State private var cachedText: AttributedString?
+    @State private var cacheKey = ""
+
     var body: some View {
+        let key = "\(text.hashValue)-\(fontSize)-\(fontFamily)"
+
+        if let cached = cachedText, cacheKey == key {
+            Text(cached)
+                .textSelection(.enabled)
+        } else {
+            Text(buildBionicText())
+                .textSelection(.enabled)
+                .onAppear {
+                    cacheKey = key
+                    cachedText = buildBionicText()
+                }
+        }
+    }
+
+    private func buildBionicText() -> AttributedString {
         let words = text.components(separatedBy: .whitespacesAndNewlines)
-        let bionicText = words.map { word -> AttributedString in
+        return words.map { word -> AttributedString in
             guard !word.isEmpty else { return AttributedString(" ") }
             let boldCount = max(1, word.count / 2)
             let boldPart = String(word.prefix(boldCount))
@@ -145,9 +165,6 @@ struct BionicTextView: View {
 
             return bold + normal
         }.reduce(AttributedString()) { $0 + $1 }
-
-        Text(bionicText)
-            .textSelection(.enabled)
     }
 }
 
@@ -247,6 +264,11 @@ struct SpeedReadingView: View {
                 }
             }
             .padding(.bottom, 20)
+        }
+        .onDisappear {
+            timer?.invalidate()
+            timer = nil
+            isPlaying = false
         }
     }
 

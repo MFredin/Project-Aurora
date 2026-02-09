@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 /// Full-text search across books and within individual books
-@Observable
+@MainActor @Observable
 final class SearchService {
     static let shared = SearchService()
 

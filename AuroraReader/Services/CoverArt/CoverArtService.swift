@@ -3,7 +3,7 @@ import SwiftData
 
 /// Multi-source book cover discovery and download service
 /// Searches Open Library and Google Books to find accurate covers by ISBN, title, and author
-@Observable
+@MainActor @Observable
 final class CoverArtService {
     static let shared = CoverArtService()
 

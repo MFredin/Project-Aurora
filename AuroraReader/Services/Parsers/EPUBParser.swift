@@ -60,41 +60,12 @@ final class EPUBParser: BookParser {
     // MARK: - EPUB Extraction
 
     private func extractEPUB(at sourceURL: URL, to destinationURL: URL) throws {
-        try FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true)
-
-        // EPUB files are ZIP archives - use built-in archive support
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
-        process.arguments = ["-o", "-q", sourceURL.path, "-d", destinationURL.path]
-
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
-
+        // EPUB files are ZIP archives — use pure-Swift ZIP extraction (iOS compatible)
         do {
-            try process.run()
-            process.waitUntilExit()
-        } catch {
-            // Fallback: try to read as ZIP using Foundation
-            try extractEPUBFallback(at: sourceURL, to: destinationURL)
+            try ZIPExtractor.extract(archiveURL: sourceURL, to: destinationURL)
+        } catch let error as ZIPExtractor.ZIPError {
+            throw BookParserError.parsingFailed("EPUB extraction failed: \(error.localizedDescription)")
         }
-    }
-
-    private func extractEPUBFallback(at sourceURL: URL, to destinationURL: URL) throws {
-        // Basic ZIP extraction using FileManager
-        let data = try Data(contentsOf: sourceURL)
-        guard data.count > 4 else {
-            throw BookParserError.corruptedFile("File too small to be a valid EPUB")
-        }
-
-        // Check for ZIP magic bytes (PK\x03\x04)
-        let magic = data.prefix(4)
-        guard magic[magic.startIndex] == 0x50,
-              magic[magic.startIndex + 1] == 0x4B else {
-            throw BookParserError.invalidFormat("File is not a valid EPUB (ZIP) archive")
-        }
-
-        throw BookParserError.parsingFailed("ZIP extraction requires system unzip utility")
     }
 
     // MARK: - XML Parsing

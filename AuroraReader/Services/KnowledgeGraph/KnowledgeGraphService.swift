@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 /// Service for building and managing the cross-book knowledge graph
-@Observable
+@MainActor @Observable
 final class KnowledgeGraphService {
     static let shared = KnowledgeGraphService()
 

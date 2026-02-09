@@ -60,8 +60,7 @@ struct BookListRow: View {
 
     @ViewBuilder
     private var bookThumbnail: some View {
-        if let imageData = book.coverImageData,
-           let uiImage = UIImage(data: imageData) {
+        if let uiImage = ImageCache.shared.image(for: book.id, data: book.coverImageData) {
             Image(uiImage: uiImage)
                 .resizable()
                 .aspectRatio(contentMode: .fill)

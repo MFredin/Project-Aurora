@@ -3,7 +3,7 @@ import SwiftUI
 import SwiftData
 
 /// View model for the Book Reader screen
-@Observable
+@MainActor @Observable
 final class ReaderViewModel {
     var book: Book
     var chapters: [BookChapter] = []

@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 /// Service for computing reading analytics and managing gamification
-@Observable
+@MainActor @Observable
 final class ReadingStatsService {
     static let shared = ReadingStatsService()
 
@@ -58,11 +58,19 @@ final class ReadingStatsService {
     private func updateAchievements(modelContext: ModelContext) {
         ensureAchievementsExist(modelContext: modelContext)
 
-        let achievementDescriptor = FetchDescriptor<Achievement>()
+        // Only fetch unlocked achievements to reduce work
+        let achievementDescriptor = FetchDescriptor<Achievement>(
+            predicate: #Predicate { !$0.isUnlocked }
+        )
         let achievements = (try? modelContext.fetch(achievementDescriptor)) ?? []
 
-        let sessionDescriptor = FetchDescriptor<ReadingSession>()
-        let sessions = (try? modelContext.fetch(sessionDescriptor)) ?? []
+        guard !achievements.isEmpty else { return }
+
+        // Fetch only completed sessions (filter at query level)
+        let sessionDescriptor = FetchDescriptor<ReadingSession>(
+            predicate: #Predicate { $0.endTime != nil }
+        )
+        let completedSessions = (try? modelContext.fetch(sessionDescriptor)) ?? []
 
         let streakDescriptor = FetchDescriptor<ReadingStreak>()
         let streak = (try? modelContext.fetch(streakDescriptor))?.first
@@ -72,9 +80,6 @@ final class ReadingStatsService {
 
         let friendDescriptor = FetchDescriptor<FriendProfile>()
         let friends = (try? modelContext.fetch(friendDescriptor)) ?? []
-
-        // Calculate totals
-        let completedSessions = sessions.filter { $0.endTime != nil }
         let totalMinutes = completedSessions.reduce(0) { $0 + $1.durationSeconds } / 60
         let totalPages = completedSessions.reduce(0) { $0 + $1.pagesRead }
         let booksFinished = books.filter { ($0.readingProgress?.progressPercentage ?? 0) >= 1.0 }.count

@@ -5,7 +5,7 @@ struct BookChapter: Identifiable {
     let id: UUID
     let index: Int
     let title: String
-    let content: String
+    var content: String
 
     init(index: Int, title: String, content: String) {
         self.id = UUID()

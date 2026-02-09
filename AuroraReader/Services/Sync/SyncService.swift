@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 /// iCloud sync service for reading position, bookmarks, annotations, and preferences
-@Observable
+@MainActor @Observable
 final class SyncService {
     static let shared = SyncService()
 

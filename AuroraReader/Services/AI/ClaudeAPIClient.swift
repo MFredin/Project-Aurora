@@ -1,6 +1,7 @@
 import Foundation
 
 /// Client for interacting with the Anthropic Claude API
+/// API key is stored securely in the iOS Keychain
 actor ClaudeAPIClient {
     static let shared = ClaudeAPIClient()
 
@@ -9,7 +10,7 @@ actor ClaudeAPIClient {
     private let apiKeyKey = "aurora_claude_api_key"
 
     var apiKey: String {
-        UserDefaults.standard.string(forKey: apiKeyKey) ?? ""
+        KeychainHelper.load(key: apiKeyKey) ?? ""
     }
 
     var isConfigured: Bool {
@@ -17,11 +18,11 @@ actor ClaudeAPIClient {
     }
 
     func setAPIKey(_ key: String) {
-        UserDefaults.standard.set(key, forKey: apiKeyKey)
+        KeychainHelper.save(key: apiKeyKey, value: key)
     }
 
     func clearAPIKey() {
-        UserDefaults.standard.removeObject(forKey: apiKeyKey)
+        KeychainHelper.delete(key: apiKeyKey)
     }
 
     /// Sends a message to the Claude API and returns the text response

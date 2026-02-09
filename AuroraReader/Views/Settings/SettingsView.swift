@@ -23,13 +23,7 @@ struct SettingsView: View {
     }
 
     private var currentPreferences: UserPreferences {
-        if let existing = preferences.first {
-            return existing
-        }
-        let prefs = UserPreferences()
-        modelContext.insert(prefs)
-        try? modelContext.save()
-        return prefs
+        preferences.first ?? UserPreferences()
     }
 
     var body: some View {
@@ -390,6 +384,13 @@ struct SettingsView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
         }
         .preferredColorScheme(.dark)
+        .onAppear {
+            if preferences.isEmpty {
+                let prefs = UserPreferences()
+                modelContext.insert(prefs)
+                try? modelContext.save()
+            }
+        }
     }
 
     private func statRow(_ label: String, value: String) -> some View {

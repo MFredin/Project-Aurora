@@ -3,7 +3,7 @@ import SwiftData
 
 /// Smart import & metadata enrichment service
 /// Fetches covers, descriptions, ratings from OpenLibrary and Google Books
-@Observable
+@MainActor @Observable
 final class MetadataService {
     static let shared = MetadataService()
 
@@ -30,7 +30,7 @@ final class MetadataService {
         // Try by ISBN first, then by title + author
         if let isbn = book.isbn, !isbn.isEmpty {
             if let metadata = await fetchByISBN(isbn) {
-                applyMetadata(metadata, to: book, modelContext: modelContext)
+                await applyMetadata(metadata, to: book, modelContext: modelContext)
                 return
             }
         }
@@ -39,7 +39,7 @@ final class MetadataService {
 
         // Search by title and author
         if let metadata = await searchByTitleAuthor(title: book.title, author: book.author) {
-            applyMetadata(metadata, to: book, modelContext: modelContext)
+            await applyMetadata(metadata, to: book, modelContext: modelContext)
             return
         }
 
@@ -235,7 +235,7 @@ final class MetadataService {
         )
     }
 
-    private func applyMetadata(_ metadata: BookMetadata, to book: Book, modelContext: ModelContext) {
+    private func applyMetadata(_ metadata: BookMetadata, to book: Book, modelContext: ModelContext) async {
         if let isbn = metadata.isbn, book.isbn == nil {
             book.isbn = isbn
         }
@@ -245,12 +245,9 @@ final class MetadataService {
 
         // Download cover image if we don't have one
         if book.coverImageData == nil, let coverURL = metadata.coverURL {
-            Task {
-                if let url = URL(string: coverURL),
-                   let (data, _) = try? await URLSession.shared.data(from: url) {
-                    book.coverImageData = data
-                    try? modelContext.save()
-                }
+            if let url = URL(string: coverURL),
+               let (data, _) = try? await URLSession.shared.data(from: url) {
+                book.coverImageData = data
             }
         }
 
