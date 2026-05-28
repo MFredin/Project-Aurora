@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
@@ -22,8 +23,11 @@ class _CloudScreenState extends State<CloudScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(20),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: ListView(
+                padding: const EdgeInsets.all(20),
             children: [
               const Text(
                 'Cloud',
@@ -246,6 +250,8 @@ class _CloudScreenState extends State<CloudScreen> {
               ),
               const SizedBox(height: 100),
             ],
+              ),
+            ),
           ),
         ),
       ),

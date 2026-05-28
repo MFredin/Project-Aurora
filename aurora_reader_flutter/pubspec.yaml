@@ -51,6 +51,9 @@ dependencies:
   just_audio: ^0.9.36
   flutter_tts: ^4.0.2
 
+  # Web platform support
+  web: ^1.0.0
+
   # UI Components
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.9

@@ -1,7 +1,9 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:io' if (dart.library.html) 'platform/web_stub_io.dart';
 import 'dart:typed_data';
 
 import 'package:epubx/epubx.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:html/parser.dart' as html_parser;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -117,9 +119,15 @@ class BookParserService {
 
   /// Parse a book file at [filePath] and return structured data.
   ///
+  /// On web this throws [UnsupportedError]; use [parseBookFromBytes] instead.
+  ///
   /// Throws [FormatException] for unsupported file types and
   /// [FileSystemException] when the file cannot be read.
   Future<ParsedBookResult> parseBook(String filePath) async {
+    if (kIsWeb) {
+      throw UnsupportedError('Use parseBookFromBytes on web');
+    }
+
     final file = File(filePath);
     if (!await file.exists()) {
       throw FileSystemException('File not found', filePath);
@@ -132,28 +140,69 @@ class BookParserService {
       throw FormatException('Unsupported ebook format: $filePath');
     }
 
+    final bytes = Uint8List.fromList(await file.readAsBytes());
+    final fileName = file.uri.pathSegments.last;
+
     switch (format) {
       case BookFormat.epub:
-        return _parseEpub(file);
+        return _parseEpubFromBytes(bytes, fileName);
       case BookFormat.pdf:
-        return _parsePdf(file);
+        return _parsePdf(bytes, fileName);
       case BookFormat.txt:
-        return _parseTxt(file);
+        return _parseTxtFromBytes(bytes, fileName);
       case BookFormat.fb2:
-        return _parseFb2(file);
+        return _parseFb2(bytes, fileName);
       case BookFormat.mobi:
-        return _parseMobi(file);
+        return _parseMobi(bytes, fileName);
       case BookFormat.cbz:
       case BookFormat.cbr:
-        return _parseComicArchive(file, format);
+        return _parseComicArchive(bytes, fileName, format);
       case BookFormat.rtf:
-        return _parseRtf(file);
+        return _parseRtf(bytes, fileName);
       case BookFormat.djvu:
-        return _parseDjvu(file);
+        return _parseDjvu(bytes, fileName);
       case BookFormat.azw3:
-        return _parseAzw3(file);
+        return _parseAzw3(bytes, fileName);
       case BookFormat.docx:
-        return _parseDocx(file);
+        return _parseDocx(bytes, fileName);
+    }
+  }
+
+  /// Parse a book from raw bytes. Works on all platforms including web.
+  ///
+  /// [filename] is used to determine the format from its extension and as
+  /// a fallback title.
+  Future<ParsedBookResult> parseBookFromBytes(
+      Uint8List bytes, String filename) async {
+    final format = BookFormat.fromExtension(
+      filename.split('.').last,
+    );
+    if (format == null) {
+      throw FormatException('Unsupported ebook format: $filename');
+    }
+
+    switch (format) {
+      case BookFormat.epub:
+        return _parseEpubFromBytes(bytes, filename);
+      case BookFormat.txt:
+        return _parseTxtFromBytes(bytes, filename);
+      case BookFormat.pdf:
+        return _parsePdf(bytes, filename);
+      case BookFormat.fb2:
+        return _parseFb2(bytes, filename);
+      case BookFormat.mobi:
+        return _parseMobi(bytes, filename);
+      case BookFormat.cbz:
+      case BookFormat.cbr:
+        return _parseComicArchive(bytes, filename, format);
+      case BookFormat.rtf:
+        return _parseRtf(bytes, filename);
+      case BookFormat.djvu:
+        return _parseDjvu(bytes, filename);
+      case BookFormat.azw3:
+        return _parseAzw3(bytes, filename);
+      case BookFormat.docx:
+        return _parseDocx(bytes, filename);
     }
   }
 
@@ -199,11 +248,18 @@ class BookParserService {
   // ── EPUB (full implementation) ──────────────────────────────────────────
 
   Future<ParsedBookResult> _parseEpub(File file) async {
-    final bytes = await file.readAsBytes();
+    final bytes = Uint8List.fromList(await file.readAsBytes());
+    final fileName = file.uri.pathSegments.last;
+    return _parseEpubFromBytes(bytes, fileName);
+  }
+
+  Future<ParsedBookResult> _parseEpubFromBytes(
+      Uint8List bytes, String filename) async {
     final epubBook = await EpubReader.readBook(bytes);
 
     // Extract metadata
-    final title = epubBook.Title ?? _fileNameWithoutExtension(file);
+    final title =
+        epubBook.Title ?? _fileNameWithoutExtension(filename);
     final author = epubBook.Author ?? 'Unknown Author';
 
     // Attempt to pull ISBN from Dublin Core identifiers
@@ -288,9 +344,8 @@ class BookParserService {
 
   // ── PDF (metadata extraction) ───────────────────────────────────────────
 
-  Future<ParsedBookResult> _parsePdf(File file) async {
-    final fileSize = await file.length();
-    final fileName = _fileNameWithoutExtension(file);
+  Future<ParsedBookResult> _parsePdf(Uint8List bytes, String filename) async {
+    final fileName = _fileNameWithoutExtension(filename);
 
     // PDF metadata extraction would require a native PDF library.
     // For now we extract what we can from the file itself and provide
@@ -301,7 +356,7 @@ class BookParserService {
         title: fileName,
         author: 'Unknown Author',
         format: BookFormat.pdf,
-        fileSize: fileSize,
+        fileSize: bytes.length,
       ),
       chapters: [
         ParsedChapter(
@@ -316,9 +371,15 @@ class BookParserService {
   // ── Plain text ──────────────────────────────────────────────────────────
 
   Future<ParsedBookResult> _parseTxt(File file) async {
-    final content = await file.readAsString();
-    final fileSize = await file.length();
-    final fileName = _fileNameWithoutExtension(file);
+    final bytes = Uint8List.fromList(await file.readAsBytes());
+    final fileName = file.uri.pathSegments.last;
+    return _parseTxtFromBytes(bytes, fileName);
+  }
+
+  Future<ParsedBookResult> _parseTxtFromBytes(
+      Uint8List bytes, String filename) async {
+    final content = utf8.decode(bytes);
+    final fileName = _fileNameWithoutExtension(filename);
 
     // Split into chapters by common delimiters (double newline sections,
     // or "Chapter X" headings). Fall back to a single chapter.
@@ -329,7 +390,7 @@ class BookParserService {
         title: fileName,
         author: 'Unknown Author',
         format: BookFormat.txt,
-        fileSize: fileSize,
+        fileSize: bytes.length,
       ),
       chapters: chapters.isNotEmpty
           ? chapters
@@ -345,76 +406,76 @@ class BookParserService {
 
   // ── FB2 (stub) ──────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseFb2(File file) async {
-    return _stubResult(file, BookFormat.fb2,
+  Future<ParsedBookResult> _parseFb2(Uint8List bytes, String filename) async {
+    return _stubResult(bytes.length, filename, BookFormat.fb2,
         note: 'FB2 parsing will use XML extraction in a future release.');
   }
 
   // ── MOBI (stub) ─────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseMobi(File file) async {
-    return _stubResult(file, BookFormat.mobi,
+  Future<ParsedBookResult> _parseMobi(Uint8List bytes, String filename) async {
+    return _stubResult(bytes.length, filename, BookFormat.mobi,
         note: 'MOBI/KF7 parsing is not yet implemented.');
   }
 
   // ── Comic archives CBZ / CBR (stub) ─────────────────────────────────────
 
   Future<ParsedBookResult> _parseComicArchive(
-      File file, BookFormat format) async {
-    return _stubResult(file, format,
+      Uint8List bytes, String filename, BookFormat format) async {
+    return _stubResult(bytes.length, filename, format,
         note:
             '${format.label} comic archive support is planned for a future release.');
   }
 
   // ── RTF (stub) ──────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseRtf(File file) async {
-    return _stubResult(file, BookFormat.rtf,
+  Future<ParsedBookResult> _parseRtf(Uint8List bytes, String filename) async {
+    return _stubResult(bytes.length, filename, BookFormat.rtf,
         note: 'RTF parsing is not yet implemented.');
   }
 
   // ── DjVu (stub) ─────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseDjvu(File file) async {
-    return _stubResult(file, BookFormat.djvu,
+  Future<ParsedBookResult> _parseDjvu(Uint8List bytes, String filename) async {
+    return _stubResult(bytes.length, filename, BookFormat.djvu,
         note: 'DjVu parsing is not yet implemented.');
   }
 
   // ── AZW3 (stub) ─────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseAzw3(File file) async {
-    return _stubResult(file, BookFormat.azw3,
+  Future<ParsedBookResult> _parseAzw3(Uint8List bytes, String filename) async {
+    return _stubResult(bytes.length, filename, BookFormat.azw3,
         note: 'AZW3/KF8 parsing is not yet implemented.');
   }
 
   // ── DOCX (stub) ─────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseDocx(File file) async {
-    return _stubResult(file, BookFormat.docx,
+  Future<ParsedBookResult> _parseDocx(Uint8List bytes, String filename) async {
+    return _stubResult(bytes.length, filename, BookFormat.docx,
         note: 'DOCX parsing is not yet implemented.');
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
   /// Generate a minimal stub result for formats not yet fully implemented.
-  Future<ParsedBookResult> _stubResult(
-    File file,
+  ParsedBookResult _stubResult(
+    int fileSize,
+    String fileName,
     BookFormat format, {
     required String note,
-  }) async {
-    final fileSize = await file.length();
-    final fileName = _fileNameWithoutExtension(file);
+  }) {
+    final name = _fileNameWithoutExtension(fileName);
 
     return ParsedBookResult(
       metadata: ParsedBookMetadata(
-        title: fileName,
+        title: name,
         author: 'Unknown Author',
         format: format,
         fileSize: fileSize,
       ),
       chapters: [
         ParsedChapter(
-          title: fileName,
+          title: name,
           content: note,
           index: 0,
         ),
@@ -447,8 +508,7 @@ class BookParserService {
     return chapters;
   }
 
-  String _fileNameWithoutExtension(File file) {
-    final name = file.uri.pathSegments.last;
+  String _fileNameWithoutExtension(String name) {
     final dotIndex = name.lastIndexOf('.');
     return dotIndex > 0 ? name.substring(0, dotIndex) : name;
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
@@ -174,94 +176,125 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
   }
 
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.arrowLeft ||
+        key == LogicalKeyboardKey.pageUp) {
+      _previousChapter();
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.arrowRight ||
+        key == LogicalKeyboardKey.pageDown) {
+      _nextChapter();
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.escape) {
+      Navigator.of(context).maybePop();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AuroraColors.deepSpace.withOpacity(_brightness),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Reading content area
-            GestureDetector(
-              onTap: () => setState(() => _showToolbar = !_showToolbar),
-              child: Column(
-                children: [
-                  // Top progress bar
-                  _buildProgressBar(),
+    final isMobile = ResponsiveHelper.isMobile(context);
+    return Focus(
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
+      child: Scaffold(
+        backgroundColor: AuroraColors.deepSpace.withOpacity(_brightness),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              // Reading content area
+              GestureDetector(
+                onTap: () => setState(() => _showToolbar = !_showToolbar),
+                child: Column(
+                  children: [
+                    // Top progress bar
+                    _buildProgressBar(),
 
-                  // Content
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 80),
-                      child: SelectableText(
-                        _currentContent,
-                        style: TextStyle(
-                          color: AuroraColors.textPrimary
-                              .withOpacity(0.9 * _brightness),
-                          fontSize: _fontSize,
-                          height: 1.75,
-                          fontFamily: 'Georgia',
+                    // Content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 80),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: isMobile ? double.infinity : 720,
+                            ),
+                            child: SelectableText(
+                              _currentContent,
+                              style: TextStyle(
+                                color: AuroraColors.textPrimary
+                                    .withOpacity(0.9 * _brightness),
+                                fontSize: _fontSize,
+                                height: 1.75,
+                                fontFamily: 'Georgia',
+                              ),
+                              onSelectionChanged: (selection, cause) {
+                                if (selection.baseOffset !=
+                                    selection.extentOffset) {
+                                  final text = _currentContent.substring(
+                                    selection.baseOffset,
+                                    selection.extentOffset,
+                                  );
+                                  setState(() => _selectedText = text);
+                                } else {
+                                  setState(() => _selectedText = null);
+                                }
+                              },
+                            ),
+                          ),
                         ),
-                        onSelectionChanged: (selection, cause) {
-                          if (selection.baseOffset != selection.extentOffset) {
-                            final text = _currentContent.substring(
-                              selection.baseOffset,
-                              selection.extentOffset,
-                            );
-                            setState(() => _selectedText = text);
-                          } else {
-                            setState(() => _selectedText = null);
-                          }
-                        },
                       ),
                     ),
+                  ],
+                ),
+              ),
+
+              // Navigation tap zones (left/right thirds)
+              if (!_isScrollMode) ...[
+                // Left tap zone - previous page
+                Positioned(
+                  left: 0,
+                  top: 60,
+                  bottom: 80,
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  child: GestureDetector(
+                    onTap: _previousChapter,
+                    behavior: HitTestBehavior.translucent,
+                    child: Container(color: Colors.transparent),
                   ),
-                ],
-              ),
-            ),
+                ),
+                // Right tap zone - next page
+                Positioned(
+                  right: 0,
+                  top: 60,
+                  bottom: 80,
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  child: GestureDetector(
+                    onTap: _nextChapter,
+                    behavior: HitTestBehavior.translucent,
+                    child: Container(color: Colors.transparent),
+                  ),
+                ),
+              ],
 
-            // Navigation tap zones (left/right thirds)
-            if (!_isScrollMode) ...[
-              // Left tap zone - previous page
-              Positioned(
-                left: 0,
-                top: 60,
-                bottom: 80,
-                width: MediaQuery.of(context).size.width * 0.3,
-                child: GestureDetector(
-                  onTap: _previousChapter,
-                  behavior: HitTestBehavior.translucent,
-                  child: Container(color: Colors.transparent),
-                ),
-              ),
-              // Right tap zone - next page
-              Positioned(
-                right: 0,
-                top: 60,
-                bottom: 80,
-                width: MediaQuery.of(context).size.width * 0.3,
-                child: GestureDetector(
-                  onTap: _nextChapter,
-                  behavior: HitTestBehavior.translucent,
-                  child: Container(color: Colors.transparent),
-                ),
-              ),
+              // Top app bar
+              if (_showToolbar) _buildTopBar(),
+
+              // Bottom toolbar
+              if (_showToolbar) _buildBottomToolbar(),
+
+              // Settings panel
+              if (_showSettings) _buildSettingsPanel(),
+
+              // Highlight toolbar (appears when text is selected)
+              if (_selectedText != null && _selectedText!.isNotEmpty)
+                _buildHighlightToolbar(),
             ],
-
-            // Top app bar
-            if (_showToolbar) _buildTopBar(),
-
-            // Bottom toolbar
-            if (_showToolbar) _buildBottomToolbar(),
-
-            // Settings panel
-            if (_showSettings) _buildSettingsPanel(),
-
-            // Highlight toolbar (appears when text is selected)
-            if (_selectedText != null && _selectedText!.isNotEmpty)
-              _buildHighlightToolbar(),
-          ],
+          ),
         ),
       ),
     );
@@ -418,99 +451,107 @@ class _ReaderScreenState extends State<ReaderScreen> {
   Widget _buildSettingsPanel() {
     return Positioned(
       bottom: 70,
-      left: 16,
-      right: 16,
-      child: AuroraCard(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Font size
-            Row(
-              children: [
-                const Icon(Icons.text_fields_rounded,
-                    color: AuroraColors.auroraTeal, size: 20),
-                const SizedBox(width: 12),
-                const Text('Font Size',
-                    style: TextStyle(color: AuroraColors.textPrimary)),
-                const Spacer(),
-                Text(
-                  '${_fontSize.toInt()}',
-                  style: const TextStyle(
-                    color: AuroraColors.auroraTeal,
-                    fontWeight: FontWeight.w600,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: AuroraCard(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Font size
+                  Row(
+                    children: [
+                      const Icon(Icons.text_fields_rounded,
+                          color: AuroraColors.auroraTeal, size: 20),
+                      const SizedBox(width: 12),
+                      const Text('Font Size',
+                          style: TextStyle(color: AuroraColors.textPrimary)),
+                      const Spacer(),
+                      Text(
+                        '${_fontSize.toInt()}',
+                        style: const TextStyle(
+                          color: AuroraColors.auroraTeal,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            Slider(
-              value: _fontSize,
-              min: 12,
-              max: 32,
-              divisions: 20,
-              onChanged: (v) => setState(() => _fontSize = v),
-            ),
-            const SizedBox(height: 12),
-
-            // Brightness
-            Row(
-              children: [
-                const Icon(Icons.brightness_6_rounded,
-                    color: AuroraColors.auroraTeal, size: 20),
-                const SizedBox(width: 12),
-                const Text('Brightness',
-                    style: TextStyle(color: AuroraColors.textPrimary)),
-                const Spacer(),
-                Text(
-                  '${(_brightness * 100).toInt()}%',
-                  style: const TextStyle(
-                    color: AuroraColors.auroraTeal,
-                    fontWeight: FontWeight.w600,
+                  Slider(
+                    value: _fontSize,
+                    min: 12,
+                    max: 32,
+                    divisions: 20,
+                    onChanged: (v) => setState(() => _fontSize = v),
                   ),
-                ),
-              ],
-            ),
-            Slider(
-              value: _brightness,
-              min: 0.3,
-              max: 1.0,
-              divisions: 14,
-              onChanged: (v) => setState(() => _brightness = v),
-            ),
-            const SizedBox(height: 8),
+                  const SizedBox(height: 12),
 
-            // Theme presets
-            const Text('Reading Theme',
-                style: TextStyle(
-                    color: AuroraColors.textPrimary,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _ThemePreset(
-                    label: 'Dark',
-                    bg: AuroraColors.deepSpace,
-                    fg: AuroraColors.textPrimary,
-                    isSelected: true),
-                _ThemePreset(
-                    label: 'Sepia',
-                    bg: const Color(0xFF3B2F1E),
-                    fg: const Color(0xFFE8D5B5),
-                    isSelected: false),
-                _ThemePreset(
-                    label: 'Light',
-                    bg: const Color(0xFFF5F5F0),
-                    fg: const Color(0xFF2A2A2A),
-                    isSelected: false),
-                _ThemePreset(
-                    label: 'Green',
-                    bg: const Color(0xFF0D2818),
-                    fg: const Color(0xFFA8E6C3),
-                    isSelected: false),
-              ],
+                  // Brightness
+                  Row(
+                    children: [
+                      const Icon(Icons.brightness_6_rounded,
+                          color: AuroraColors.auroraTeal, size: 20),
+                      const SizedBox(width: 12),
+                      const Text('Brightness',
+                          style: TextStyle(color: AuroraColors.textPrimary)),
+                      const Spacer(),
+                      Text(
+                        '${(_brightness * 100).toInt()}%',
+                        style: const TextStyle(
+                          color: AuroraColors.auroraTeal,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Slider(
+                    value: _brightness,
+                    min: 0.3,
+                    max: 1.0,
+                    divisions: 14,
+                    onChanged: (v) => setState(() => _brightness = v),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Theme presets
+                  const Text('Reading Theme',
+                      style: TextStyle(
+                          color: AuroraColors.textPrimary,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _ThemePreset(
+                          label: 'Dark',
+                          bg: AuroraColors.deepSpace,
+                          fg: AuroraColors.textPrimary,
+                          isSelected: true),
+                      _ThemePreset(
+                          label: 'Sepia',
+                          bg: const Color(0xFF3B2F1E),
+                          fg: const Color(0xFFE8D5B5),
+                          isSelected: false),
+                      _ThemePreset(
+                          label: 'Light',
+                          bg: const Color(0xFFF5F5F0),
+                          fg: const Color(0xFF2A2A2A),
+                          isSelected: false),
+                      _ThemePreset(
+                          label: 'Green',
+                          bg: const Color(0xFF0D2818),
+                          fg: const Color(0xFFA8E6C3),
+                          isSelected: false),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -591,6 +632,11 @@ class _ReaderScreenState extends State<ReaderScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: AuroraColors.surfaceElevated,
+      constraints: BoxConstraints(
+        maxWidth: ResponsiveHelper.isMobile(context)
+            ? double.infinity
+            : 500,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

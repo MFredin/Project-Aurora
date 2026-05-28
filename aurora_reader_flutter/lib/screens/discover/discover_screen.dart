@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
@@ -82,11 +83,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             onPressed: () => Navigator.of(context).maybePop(),
           ),
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            // Search bar
-            Container(
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                // Search bar
+                Container(
               decoration: BoxDecoration(
                 color: AuroraColors.surface,
                 borderRadius: BorderRadius.circular(12),
@@ -149,6 +153,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ],
             const SizedBox(height: 100),
           ],
+            ),
+          ),
         ),
       ),
     );
@@ -323,7 +329,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         ),
         const SizedBox(height: 12),
         GridView.count(
-          crossAxisCount: 2,
+          crossAxisCount: ResponsiveHelper.gridColumns(context),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 10,

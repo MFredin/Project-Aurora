@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
@@ -44,9 +45,12 @@ class _ExportScreenState extends State<ExportScreen> {
             onPressed: () => Navigator.of(context).maybePop(),
           ),
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 700),
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
             // Content selection
             const Text(
               'SELECT CONTENT',
@@ -248,6 +252,8 @@ class _ExportScreenState extends State<ExportScreen> {
             ),
             const SizedBox(height: 100),
           ],
+        ),
+          ),
         ),
       ),
     );

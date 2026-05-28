@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
 
 import '../../core/database/database.dart';
+import 'platform/export_native.dart'
+    if (dart.library.html) 'platform/export_web.dart' as platform;
 
 /// Exports user data (highlights, notes, vocabulary, reading stats) to
 /// various formats (JSON, CSV, Markdown) for backup and portability.
@@ -99,11 +100,9 @@ class DataExportService {
 
   Future<String> _writeJsonFile(
       String name, List<Map<String, dynamic>> data) async {
-    final dir = await getApplicationDocumentsDirectory();
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-    final file = File('${dir.path}/aurora_export_${name}_$timestamp.json');
-    await file.writeAsString(const JsonEncoder.withIndent('  ').convert(data));
-    return file.path;
+    final content = const JsonEncoder.withIndent('  ').convert(data);
+    return platform.writeFile('${name}_$timestamp', content, 'json');
   }
 
   Future<String> _writeCsvFile(String name, String content) async {
@@ -112,10 +111,7 @@ class DataExportService {
 
   Future<String> _writeTextFile(
       String name, String content, String ext) async {
-    final dir = await getApplicationDocumentsDirectory();
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-    final file = File('${dir.path}/aurora_export_${name}_$timestamp.$ext');
-    await file.writeAsString(content);
-    return file.path;
+    return platform.writeFile('${name}_$timestamp', content, ext);
   }
 }

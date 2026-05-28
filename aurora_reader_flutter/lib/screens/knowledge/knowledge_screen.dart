@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
@@ -78,44 +79,49 @@ class _KnowledgeScreenState extends State<KnowledgeScreen>
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
-                child: Text(
-                  'Knowledge',
-                  style: TextStyle(
-                    color: AuroraColors.textPrimary,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: ResponsiveHelper.contentMaxWidth(context)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
+                    child: Text(
+                      'Knowledge',
+                      style: TextStyle(
+                        color: AuroraColors.textPrimary,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              // Tab bar
-              TabBar(
-                controller: _tabController,
-                indicatorColor: AuroraColors.auroraTeal,
-                labelColor: AuroraColors.auroraTeal,
-                unselectedLabelColor: AuroraColors.textTertiary,
-                indicatorSize: TabBarIndicatorSize.label,
-                tabs: const [
-                  Tab(text: 'Themes'),
-                  Tab(text: 'Vocabulary'),
-                  Tab(text: 'Highlights'),
+                  // Tab bar
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: AuroraColors.auroraTeal,
+                    labelColor: AuroraColors.auroraTeal,
+                    unselectedLabelColor: AuroraColors.textTertiary,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    tabs: const [
+                      Tab(text: 'Themes'),
+                      Tab(text: 'Vocabulary'),
+                      Tab(text: 'Highlights'),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildThemesTab(),
+                        _buildVocabularyTab(),
+                        _buildHighlightsTab(),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildThemesTab(),
-                    _buildVocabularyTab(),
-                    _buildHighlightsTab(),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

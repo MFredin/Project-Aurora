@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
@@ -125,8 +126,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: CustomScrollView(
-            slivers: [
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxWidth: ResponsiveHelper.contentMaxWidth(context)),
+              child: CustomScrollView(
+                slivers: [
               // Header
               const SliverToBoxAdapter(
                 child: Padding(
@@ -162,6 +167,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
+          ),
+            ),
           ),
         ),
       ),
@@ -774,7 +781,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             ),
           ),
           GridView.count(
-            crossAxisCount: 3,
+            crossAxisCount: ResponsiveHelper.gridColumns(context).clamp(2, 4),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 12,

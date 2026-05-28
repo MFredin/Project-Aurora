@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
+import '../../core/layout/responsive.dart';
 
 /// Mock book data for the library
 class _MockBook {
@@ -328,10 +330,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   Widget _buildGridView(List<_MockBook> books) {
+    final columns = ResponsiveHelper.gridColumns(context);
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
         childAspectRatio: 0.58,

@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+import 'connection/connection.dart' as impl;
 
 part 'database.g.dart';
 
@@ -225,7 +222,7 @@ class UserPreferencesTable extends Table {
   UserPreferencesTable,
 ])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(impl.openConnection());
 
   @override
   int get schemaVersion => 1;
@@ -278,12 +275,4 @@ class AppDatabase extends _$AppDatabase {
 
   Stream<List<VocabularyEntry>> watchAllVocabulary() =>
       select(vocabularyEntries).watch();
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'aurora_reader.db'));
-    return NativeDatabase.createInBackground(file);
-  });
 }
