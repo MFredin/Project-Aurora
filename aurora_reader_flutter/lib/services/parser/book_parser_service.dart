@@ -251,7 +251,7 @@ class BookParserService {
     final coverRef = epubBook.CoverImage;
     if (coverRef != null) {
       try {
-        coverImage = img.encodePng(coverRef);
+        coverImage = Uint8List.fromList(img.encodePng(coverRef));
       } catch (_) {
         // Skip cover if encoding fails
       }
