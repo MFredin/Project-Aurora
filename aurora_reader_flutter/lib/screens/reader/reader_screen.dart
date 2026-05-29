@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -219,7 +220,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     Expanded(
                       child: SingleChildScrollView(
                         controller: _scrollController,
-                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 80),
+                        padding: EdgeInsets.fromLTRB(
+                            24, _showToolbar ? 64 : 16, 24, 100),
                         child: Center(
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
@@ -326,81 +328,86 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       top: 0,
       left: 0,
       right: 0,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AuroraColors.deepSpace,
-              AuroraColors.deepSpace.withOpacity(0.0),
-            ],
-          ),
-        ),
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
-        child: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back_rounded,
-                  color: AuroraColors.textPrimary),
-              onPressed: () => Navigator.of(context).maybePop(),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    currentTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AuroraColors.textPrimary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '${book.title} • Chapter ${_currentChapter + 1} of ${book.chapters.length}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AuroraColors.textTertiary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AuroraColors.deepSpace.withOpacity(0.85),
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.white.withOpacity(0.06),
+                  width: 0.5,
+                ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.bookmark_border_rounded,
-                  color: AuroraColors.auroraTeal),
-              onPressed: () {
-                final content = book.chapters[_currentChapter].content;
-                ref.read(bookRepositoryProvider.notifier).addBookmark(
-                      widget.bookId,
-                      BookmarkModel(
-                        id: UniqueKey().toString(),
-                        bookId: widget.bookId,
-                        title: 'Chapter ${_currentChapter + 1}',
-                        chapter: _currentChapter,
-                        textSnippet: content.length > 100
-                            ? content.substring(0, 100)
-                            : content,
-                        dateCreated: DateTime.now(),
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded,
+                      color: AuroraColors.textPrimary, size: 22),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        book.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AuroraColors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
+                      const SizedBox(height: 1),
+                      Text(
+                        'Chapter ${_currentChapter + 1} of ${book.chapters.length}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AuroraColors.textTertiary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.bookmark_border_rounded,
+                      color: AuroraColors.auroraTeal, size: 22),
+                  onPressed: () {
+                    final content = book.chapters[_currentChapter].content;
+                    ref.read(bookRepositoryProvider.notifier).addBookmark(
+                          widget.bookId,
+                          BookmarkModel(
+                            id: UniqueKey().toString(),
+                            bookId: widget.bookId,
+                            title: 'Chapter ${_currentChapter + 1}',
+                            chapter: _currentChapter,
+                            textSnippet: content.length > 100
+                                ? content.substring(0, 100)
+                                : content,
+                            dateCreated: DateTime.now(),
+                          ),
+                        );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Bookmark added')),
                     );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Bookmark added')),
-                );
-              },
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.format_list_bulleted_rounded,
+                      color: AuroraColors.textSecondary, size: 22),
+                  onPressed: () => _showChapterList(book),
+                ),
+              ],
             ),
-            IconButton(
-              icon: const Icon(Icons.format_list_bulleted_rounded,
-                  color: AuroraColors.textSecondary),
-              onPressed: () => _showChapterList(book),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -411,19 +418,21 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [
-              AuroraColors.deepSpace,
-              AuroraColors.deepSpace.withOpacity(0.0),
-            ],
-          ),
-        ),
-        padding: const EdgeInsets.fromLTRB(16, 32, 16, 12),
-        child: Row(
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AuroraColors.deepSpace.withOpacity(0.85),
+              border: Border(
+                top: BorderSide(
+                  color: Colors.white.withOpacity(0.06),
+                  width: 0.5,
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // Previous chapter
@@ -465,6 +474,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   : null,
             ),
           ],
+        ),
+      ),
         ),
       ),
     );
