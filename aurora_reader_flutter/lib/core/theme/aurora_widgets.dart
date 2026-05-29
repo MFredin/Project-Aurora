@@ -1,40 +1,55 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'aurora_theme.dart';
 
-/// Aurora-styled card with frosted glass border
+/// Frosted glass card with blur effect
 class AuroraCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
+  final double blurAmount;
 
-  const AuroraCard({super.key, required this.child, this.padding, this.onTap});
+  const AuroraCard({
+    super.key,
+    required this.child,
+    this.padding,
+    this.onTap,
+    this.blurAmount = 12,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: padding ?? const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AuroraColors.surface.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.08),
-            width: 0.5,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurAmount, sigmaY: blurAmount),
+          child: Container(
+            padding: padding ?? const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AuroraColors.surface.withOpacity(0.55),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.1),
+                width: 0.5,
+              ),
+            ),
+            child: child,
           ),
         ),
-        child: child,
       ),
     );
   }
 }
 
-/// Aurora gradient button (capsule shape)
-class AuroraButton extends StatelessWidget {
+/// Aurora gradient button with glow
+class AuroraButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
   final LinearGradient gradient;
   final IconData? icon;
+  final bool compact;
 
   const AuroraButton({
     super.key,
@@ -44,46 +59,80 @@ class AuroraButton extends StatelessWidget {
       colors: [AuroraColors.auroraTeal, AuroraColors.auroraGreen],
     ),
     this.icon,
+    this.compact = false,
   });
 
   @override
+  State<AuroraButton> createState() => _AuroraButtonState();
+}
+
+class _AuroraButtonState extends State<AuroraButton> {
+  bool _hovering = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(100),
-          boxShadow: [
-            BoxShadow(
-              color: AuroraColors.auroraTeal.withOpacity(0.3),
-              blurRadius: 8,
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, color: Colors.white, size: 18),
-              const SizedBox(width: 8),
-            ],
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+    final disabled = widget.onPressed == null;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: disabled ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.compact ? 16 : 24,
+            vertical: widget.compact ? 10 : 14,
+          ),
+          decoration: BoxDecoration(
+            gradient: disabled ? null : widget.gradient,
+            color: disabled ? AuroraColors.surface : null,
+            borderRadius: BorderRadius.circular(100),
+            boxShadow: _hovering && !disabled
+                ? [
+                    BoxShadow(
+                      color: AuroraColors.auroraTeal.withOpacity(0.5),
+                      blurRadius: 16,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: AuroraColors.auroraTeal.withOpacity(0.2),
+                      blurRadius: 8,
+                    ),
+                  ],
+          ),
+          transform: _hovering && !disabled
+              ? (Matrix4.identity()..scale(1.03))
+              : Matrix4.identity(),
+          transformAlignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.icon != null) ...[
+                Icon(widget.icon, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                widget.label,
+                style: TextStyle(
+                  color: disabled
+                      ? AuroraColors.textTertiary
+                      : Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: widget.compact ? 13 : 15,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Aurora background with blurred gradient circles
+/// Animated aurora background with layered glows
 class AuroraBackground extends StatelessWidget {
   final Widget child;
 
@@ -93,43 +142,84 @@ class AuroraBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(color: AuroraColors.deepSpace),
-        // Top-left green/teal glow
-        Positioned(
-          left: -100,
-          top: -200,
-          child: Container(
-            width: 300,
-            height: 300,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AuroraColors.auroraGreen.withOpacity(0.12),
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF0D0D28),
+                AuroraColors.deepSpace,
+                Color(0xFF080818),
+              ],
             ),
           ),
         ),
-        // Center blue glow
         Positioned(
-          left: 50,
-          top: -50,
-          child: Container(
-            width: 250,
-            height: 250,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AuroraColors.auroraBlue.withOpacity(0.10),
-            ),
-          ),
-        ),
-        // Bottom-right purple glow
-        Positioned(
-          right: -50,
-          bottom: -100,
+          left: -120,
+          top: -180,
           child: Container(
             width: 350,
             height: 350,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AuroraColors.auroraPurple.withOpacity(0.10),
+              gradient: RadialGradient(
+                colors: [
+                  AuroraColors.auroraGreen.withOpacity(0.15),
+                  AuroraColors.auroraGreen.withOpacity(0.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          right: -60,
+          top: -80,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  AuroraColors.auroraBlue.withOpacity(0.12),
+                  AuroraColors.auroraBlue.withOpacity(0.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          right: -80,
+          bottom: -120,
+          child: Container(
+            width: 400,
+            height: 400,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  AuroraColors.auroraPurple.withOpacity(0.12),
+                  AuroraColors.auroraPurple.withOpacity(0.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: -40,
+          bottom: -60,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  AuroraColors.auroraTeal.withOpacity(0.08),
+                  AuroraColors.auroraTeal.withOpacity(0.0),
+                ],
+              ),
             ),
           ),
         ),
@@ -140,7 +230,7 @@ class AuroraBackground extends StatelessWidget {
 }
 
 /// Filter chip styled for Aurora theme
-class AuroraFilterChip extends StatelessWidget {
+class AuroraFilterChip extends StatefulWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
@@ -153,25 +243,45 @@ class AuroraFilterChip extends StatelessWidget {
   });
 
   @override
+  State<AuroraFilterChip> createState() => _AuroraFilterChipState();
+}
+
+class _AuroraFilterChipState extends State<AuroraFilterChip> {
+  bool _hovering = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          gradient: isSelected ? AuroraColors.accentGradient : null,
-          color: isSelected ? null : AuroraColors.surface,
-          borderRadius: BorderRadius.circular(100),
-          border: isSelected
-              ? null
-              : Border.all(color: Colors.white.withOpacity(0.08), width: 0.5),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : AuroraColors.textSecondary,
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: widget.isSelected ? AuroraColors.accentGradient : null,
+            color: widget.isSelected
+                ? null
+                : _hovering
+                    ? AuroraColors.surfaceElevated
+                    : AuroraColors.surface.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(100),
+            border: widget.isSelected
+                ? null
+                : Border.all(
+                    color: Colors.white.withOpacity(_hovering ? 0.15 : 0.06),
+                    width: 0.5,
+                  ),
+          ),
+          child: Text(
+            widget.label,
+            style: TextStyle(
+              color: widget.isSelected ? Colors.white : AuroraColors.textSecondary,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
           ),
         ),
       ),
