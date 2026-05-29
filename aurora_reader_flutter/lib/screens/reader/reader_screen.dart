@@ -53,13 +53,27 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   @override
   void dispose() {
     _stopwatch.stop();
-    // Save reading time
+    final elapsed = _stopwatch.elapsed.inSeconds;
     ref.read(bookRepositoryProvider.notifier).addReadingTime(
           widget.bookId,
-          _stopwatch.elapsed.inSeconds,
+          elapsed,
         );
-    // Save current progress
     _saveProgress();
+
+    final book = ref.read(bookByIdProvider(widget.bookId));
+    if (book != null && elapsed > 5) {
+      ref.read(readingSessionsProvider.notifier).addSession(
+            ReadingSessionModel(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              bookId: widget.bookId,
+              bookTitle: book.title,
+              startTime: DateTime.now().subtract(Duration(seconds: elapsed)),
+              durationSeconds: elapsed,
+              pagesRead: (_readingProgress * 10).round().clamp(1, 50),
+            ),
+          );
+    }
+
     _scrollController.removeListener(_updateProgress);
     _scrollController.dispose();
     super.dispose();

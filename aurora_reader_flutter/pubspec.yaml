@@ -51,6 +51,10 @@ dependencies:
   just_audio: ^0.9.36
   flutter_tts: ^4.0.2
 
+  # Persistence (IndexedDB on web, file-based on native)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
   # Web platform support
   web: ^1.0.0
 
