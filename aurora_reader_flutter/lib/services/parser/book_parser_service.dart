@@ -7,9 +7,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:html/parser.dart' as html_parser;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import 'package:drift/drift.dart' show Value;
-
-import '../../core/database/database.dart';
 
 // ─── SUPPORTED FORMATS ──────────────────────────────────────────────────────
 
@@ -210,39 +207,6 @@ class BookParserService {
   Future<List<ParsedChapter>> extractChapters(String filePath) async {
     final result = await parseBook(filePath);
     return result.chapters;
-  }
-
-  /// Persist a [ParsedBookResult] into the database, creating both the
-  /// [Book] row and its associated [BookChapter] rows.
-  Future<String> saveToDatabase(
-    AppDatabase db,
-    ParsedBookResult result,
-    String filePath,
-  ) async {
-    final bookId = _uuid.v4();
-
-    await db.insertBook(BooksCompanion.insert(
-      id: Value(bookId),
-      title: result.metadata.title,
-      author: result.metadata.author,
-      isbn: Value(result.metadata.isbn),
-      coverImageData: Value(result.metadata.coverImageData),
-      fileUrl: filePath,
-      format: result.metadata.format.name,
-      fileSize: Value(result.metadata.fileSize),
-    ));
-
-    for (final chapter in result.chapters) {
-      await db.into(db.bookChapters).insert(BookChaptersCompanion.insert(
-            id: Value(_uuid.v4()),
-            bookId: bookId,
-            title: chapter.title,
-            content: chapter.content,
-            chapterIndex: chapter.index,
-          ));
-    }
-
-    return bookId;
   }
 
   // ── EPUB (full implementation) ──────────────────────────────────────────

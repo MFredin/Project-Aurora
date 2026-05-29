@@ -1,144 +1,47 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 import '../../core/layout/responsive.dart';
-
-/// Mock book data for the library
-class _MockBook {
-  final String id;
-  final String title;
-  final String author;
-  final double progress;
-  final String status; // reading, finished, wantToRead
-  final String format;
-  final int totalPages;
-
-  const _MockBook({
-    required this.id,
-    required this.title,
-    required this.author,
-    required this.progress,
-    required this.status,
-    this.format = 'epub',
-    this.totalPages = 300,
-  });
-}
-
-const _mockBooks = <_MockBook>[
-  _MockBook(
-    id: '1',
-    title: 'Dune',
-    author: 'Frank Herbert',
-    progress: 0.72,
-    status: 'reading',
-    totalPages: 688,
-  ),
-  _MockBook(
-    id: '2',
-    title: 'Neuromancer',
-    author: 'William Gibson',
-    progress: 1.0,
-    status: 'finished',
-    totalPages: 271,
-  ),
-  _MockBook(
-    id: '3',
-    title: 'The Left Hand of Darkness',
-    author: 'Ursula K. Le Guin',
-    progress: 0.35,
-    status: 'reading',
-    totalPages: 304,
-  ),
-  _MockBook(
-    id: '4',
-    title: 'Foundation',
-    author: 'Isaac Asimov',
-    progress: 0.0,
-    status: 'wantToRead',
-    totalPages: 244,
-  ),
-  _MockBook(
-    id: '5',
-    title: 'Snow Crash',
-    author: 'Neal Stephenson',
-    progress: 0.91,
-    status: 'reading',
-    totalPages: 480,
-  ),
-  _MockBook(
-    id: '6',
-    title: 'Hyperion',
-    author: 'Dan Simmons',
-    progress: 1.0,
-    status: 'finished',
-    totalPages: 482,
-  ),
-  _MockBook(
-    id: '7',
-    title: 'The Dispossessed',
-    author: 'Ursula K. Le Guin',
-    progress: 0.0,
-    status: 'wantToRead',
-    totalPages: 387,
-  ),
-  _MockBook(
-    id: '8',
-    title: 'Kindred',
-    author: 'Octavia Butler',
-    progress: 0.48,
-    status: 'reading',
-    totalPages: 264,
-  ),
-  _MockBook(
-    id: '9',
-    title: 'Rendezvous with Rama',
-    author: 'Arthur C. Clarke',
-    progress: 1.0,
-    status: 'finished',
-    totalPages: 243,
-  ),
-  _MockBook(
-    id: '10',
-    title: 'Parable of the Sower',
-    author: 'Octavia Butler',
-    progress: 0.0,
-    status: 'wantToRead',
-    totalPages: 345,
-  ),
-];
+import '../../core/data/models.dart';
+import '../../core/data/book_repository.dart';
+import '../../services/parser/book_parser_service.dart';
 
 enum _SortOption { recent, title, author, progress }
 
-class LibraryScreen extends StatefulWidget {
+class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
 
   @override
-  State<LibraryScreen> createState() => _LibraryScreenState();
+  ConsumerState<LibraryScreen> createState() => _LibraryScreenState();
 }
 
-class _LibraryScreenState extends State<LibraryScreen> {
+class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   String _selectedFilter = 'All';
   _SortOption _sortOption = _SortOption.recent;
   final _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isGridView = true;
+  bool _isImporting = false;
 
   final _filters = ['All', 'Reading', 'Finished', 'Want to Read'];
 
-  List<_MockBook> get _filteredBooks {
-    var books = List<_MockBook>.from(_mockBooks);
+  List<BookModel> _filterAndSort(List<BookModel> allBooks) {
+    var books = List<BookModel>.from(allBooks);
 
     // Filter by status
     switch (_selectedFilter) {
       case 'Reading':
-        books = books.where((b) => b.status == 'reading').toList();
+        books = books.where((b) => b.statusLabel == 'reading').toList();
         break;
       case 'Finished':
-        books = books.where((b) => b.status == 'finished').toList();
+        books = books.where((b) => b.statusLabel == 'finished').toList();
         break;
       case 'Want to Read':
-        books = books.where((b) => b.status == 'wantToRead').toList();
+        books = books.where((b) => b.statusLabel == 'wantToRead').toList();
         break;
     }
 
@@ -160,13 +63,56 @@ class _LibraryScreenState extends State<LibraryScreen> {
         books.sort((a, b) => a.author.compareTo(b.author));
         break;
       case _SortOption.progress:
-        books.sort((a, b) => b.progress.compareTo(a.progress));
+        books.sort((a, b) => b.progressPercent.compareTo(a.progressPercent));
         break;
       case _SortOption.recent:
-        break; // Keep default order
+        // Sort by lastOpened (most recent first), then by dateAdded
+        books.sort((a, b) {
+          final aDate = a.lastOpened ?? a.dateAdded;
+          final bDate = b.lastOpened ?? b.dateAdded;
+          return bDate.compareTo(aDate);
+        });
+        break;
     }
 
     return books;
+  }
+
+  Future<void> _importBook() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['epub', 'txt', 'pdf', 'fb2', 'mobi', 'rtf', 'docx'],
+      withData: true,
+    );
+    if (result == null || result.files.single.bytes == null) return;
+
+    final file = result.files.single;
+    final parser = ref.read(bookParserServiceProvider);
+
+    setState(() => _isImporting = true);
+
+    try {
+      final parsed = await parser.parseBookFromBytes(
+        Uint8List.fromList(file.bytes!),
+        file.name,
+      );
+      ref.read(bookRepositoryProvider.notifier).addParsedBook(parsed);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Added "${parsed.metadata.title}"')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to import: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isImporting = false);
+      }
+    }
   }
 
   @override
@@ -177,130 +123,169 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final books = _filteredBooks;
+    final allBooks = ref.watch(bookRepositoryProvider);
+    final books = _filterAndSort(allBooks);
 
     return AuroraBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              // Header
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Row(
-                  children: [
-                    const Text(
-                      'Library',
-                      style: TextStyle(
-                        color: AuroraColors.textPrimary,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    // Grid/List toggle
-                    GestureDetector(
-                      onTap: () => setState(() => _isGridView = !_isGridView),
-                      child: Icon(
-                        _isGridView ? Icons.grid_view_rounded : Icons.view_list_rounded,
-                        color: AuroraColors.textSecondary,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Sort button
-                    PopupMenuButton<_SortOption>(
-                      icon: const Icon(
-                        Icons.sort_rounded,
-                        color: AuroraColors.textSecondary,
-                        size: 24,
-                      ),
-                      color: AuroraColors.surfaceElevated,
-                      onSelected: (option) =>
-                          setState(() => _sortOption = option),
-                      itemBuilder: (context) => [
-                        _buildSortItem(_SortOption.recent, 'Recent'),
-                        _buildSortItem(_SortOption.title, 'Title'),
-                        _buildSortItem(_SortOption.author, 'Author'),
-                        _buildSortItem(_SortOption.progress, 'Progress'),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Row(
+                      children: [
+                        const Text(
+                          'Library',
+                          style: TextStyle(
+                            color: AuroraColors.textPrimary,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        // Grid/List toggle
+                        GestureDetector(
+                          onTap: () =>
+                              setState(() => _isGridView = !_isGridView),
+                          child: Icon(
+                            _isGridView
+                                ? Icons.grid_view_rounded
+                                : Icons.view_list_rounded,
+                            color: AuroraColors.textSecondary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        // Sort button
+                        PopupMenuButton<_SortOption>(
+                          icon: const Icon(
+                            Icons.sort_rounded,
+                            color: AuroraColors.textSecondary,
+                            size: 24,
+                          ),
+                          color: AuroraColors.surfaceElevated,
+                          onSelected: (option) =>
+                              setState(() => _sortOption = option),
+                          itemBuilder: (context) => [
+                            _buildSortItem(_SortOption.recent, 'Recent'),
+                            _buildSortItem(_SortOption.title, 'Title'),
+                            _buildSortItem(_SortOption.author, 'Author'),
+                            _buildSortItem(_SortOption.progress, 'Progress'),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
 
-              // Search bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AuroraColors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.08),
-                      width: 0.5,
+                  // Search bar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AuroraColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.08),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (v) => setState(() => _searchQuery = v),
+                        style:
+                            const TextStyle(color: AuroraColors.textPrimary),
+                        decoration: const InputDecoration(
+                          hintText: 'Search books...',
+                          hintStyle:
+                              TextStyle(color: AuroraColors.textTertiary),
+                          prefixIcon: Icon(Icons.search_rounded,
+                              color: AuroraColors.textTertiary),
+                          border: InputBorder.none,
+                          contentPadding:
+                              EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
                     ),
                   ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (v) => setState(() => _searchQuery = v),
-                    style: const TextStyle(color: AuroraColors.textPrimary),
-                    decoration: const InputDecoration(
-                      hintText: 'Search books...',
-                      hintStyle: TextStyle(color: AuroraColors.textTertiary),
-                      prefixIcon: Icon(Icons.search_rounded,
-                          color: AuroraColors.textTertiary),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 14),
+                  const SizedBox(height: 16),
+
+                  // Filter chips
+                  SizedBox(
+                    height: 40,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: _filters.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final filter = _filters[index];
+                        return AuroraFilterChip(
+                          label: filter,
+                          isSelected: _selectedFilter == filter,
+                          onTap: () =>
+                              setState(() => _selectedFilter = filter),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Book count
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 4),
+                    child: Text(
+                      '${books.length} ${books.length == 1 ? 'book' : 'books'}',
+                      style: const TextStyle(
+                        color: AuroraColors.textTertiary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+
+                  // Book grid/list or empty state
+                  Expanded(
+                    child: books.isEmpty
+                        ? _buildEmptyState()
+                        : _isGridView
+                            ? _buildGridView(books)
+                            : _buildListView(books),
+                  ),
+                ],
+              ),
+              // Loading overlay while importing
+              if (_isImporting)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.4),
+                    child: const Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(
+                                AuroraColors.auroraTeal),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Importing book...',
+                            style: TextStyle(
+                              color: AuroraColors.textPrimary,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              // Filter chips
-              SizedBox(
-                height: 40,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: _filters.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final filter = _filters[index];
-                    return AuroraFilterChip(
-                      label: filter,
-                      isSelected: _selectedFilter == filter,
-                      onTap: () => setState(() => _selectedFilter = filter),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Book count
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                child: Text(
-                  '${books.length} ${books.length == 1 ? 'book' : 'books'}',
-                  style: const TextStyle(
-                    color: AuroraColors.textTertiary,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-
-              // Book grid/list or empty state
-              Expanded(
-                child: books.isEmpty
-                    ? _buildEmptyState()
-                    : _isGridView
-                        ? _buildGridView(books)
-                        : _buildListView(books),
-              ),
             ],
           ),
         ),
@@ -317,19 +302,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ],
           ),
           child: FloatingActionButton(
-            onPressed: () {
-              // Navigate to file picker / discover
-            },
+            onPressed: _isImporting ? null : _importBook,
             backgroundColor: Colors.transparent,
             elevation: 0,
-            child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+            child:
+                const Icon(Icons.add_rounded, color: Colors.white, size: 28),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildGridView(List<_MockBook> books) {
+  Widget _buildGridView(List<BookModel> books) {
     final columns = ResponsiveHelper.gridColumns(context);
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
@@ -340,16 +324,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
         childAspectRatio: 0.58,
       ),
       itemCount: books.length,
-      itemBuilder: (context, index) => _BookGridCard(book: books[index]),
+      itemBuilder: (context, index) => _BookGridCard(
+        book: books[index],
+        onTap: () => context.go('/reader/${books[index].id}'),
+      ),
     );
   }
 
-  Widget _buildListView(List<_MockBook> books) {
+  Widget _buildListView(List<BookModel> books) {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
       itemCount: books.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) => _BookListTile(book: books[index]),
+      itemBuilder: (context, index) => _BookListTile(
+        book: books[index],
+        onTap: () => context.go('/reader/${books[index].id}'),
+      ),
     );
   }
 
@@ -398,7 +388,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           AuroraButton(
             label: 'Add Your First Book',
             icon: Icons.add_rounded,
-            onPressed: () {},
+            onPressed: _importBook,
           ),
         ],
       ),
@@ -427,24 +417,27 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
 /// Grid card for a single book
 class _BookGridCard extends StatelessWidget {
-  final _MockBook book;
-  const _BookGridCard({required this.book});
+  final BookModel book;
+  final VoidCallback onTap;
+  const _BookGridCard({required this.book, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final progress = book.progressPercent;
+
     return GestureDetector(
-      onTap: () {
-        // Navigate to reader
-      },
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cover with gradient
+          // Cover with gradient or real image
           Expanded(
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: AuroraColors.coverGradient(book.title),
+                gradient: book.coverImageData == null
+                    ? AuroraColors.coverGradient(book.title)
+                    : null,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -454,49 +447,60 @@ class _BookGridCard extends StatelessWidget {
                   ),
                 ],
               ),
+              clipBehavior: Clip.antiAlias,
               child: Stack(
                 children: [
-                  // Book title on cover
-                  Positioned.fill(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            book.title,
-                            textAlign: TextAlign.center,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                Shadow(
-                                    blurRadius: 8, color: Colors.black54),
-                              ],
+                  // Cover image or fallback gradient text
+                  if (book.coverImageData != null)
+                    Positioned.fill(
+                      child: Image.memory(
+                        book.coverImageData!,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  else
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              book.title,
+                              textAlign: TextAlign.center,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                      blurRadius: 8,
+                                      color: Colors.black54),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            book.author,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 12,
-                              shadows: const [
-                                Shadow(
-                                    blurRadius: 8, color: Colors.black54),
-                              ],
+                            const SizedBox(height: 4),
+                            Text(
+                              book.author,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 12,
+                                shadows: const [
+                                  Shadow(
+                                      blurRadius: 8,
+                                      color: Colors.black54),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                   // Format badge
                   Positioned(
                     top: 8,
@@ -519,7 +523,7 @@ class _BookGridCard extends StatelessWidget {
                     ),
                   ),
                   // Status indicator
-                  if (book.status == 'finished')
+                  if (book.statusLabel == 'finished')
                     Positioned(
                       top: 8,
                       left: 8,
@@ -562,11 +566,11 @@ class _BookGridCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           // Progress bar
-          if (book.progress > 0 && book.progress < 1.0) ...[
+          if (progress > 0 && progress < 1.0) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: book.progress,
+                value: progress,
                 minHeight: 3,
                 backgroundColor: AuroraColors.surface,
                 valueColor:
@@ -575,13 +579,13 @@ class _BookGridCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              '${(book.progress * 100).toInt()}%',
+              '${(progress * 100).toInt()}%',
               style: const TextStyle(
                 color: AuroraColors.textTertiary,
                 fontSize: 11,
               ),
             ),
-          ] else if (book.progress >= 1.0)
+          ] else if (progress >= 1.0)
             const Text(
               'Finished',
               style: TextStyle(
@@ -598,15 +602,17 @@ class _BookGridCard extends StatelessWidget {
 
 /// List tile for a single book
 class _BookListTile extends StatelessWidget {
-  final _MockBook book;
-  const _BookListTile({required this.book});
+  final BookModel book;
+  final VoidCallback onTap;
+  const _BookListTile({required this.book, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final progress = book.progressPercent;
+    final estimatedPages = book.totalWords ~/ 250;
+
     return AuroraCard(
-      onTap: () {
-        // Navigate to reader
-      },
+      onTap: onTap,
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
@@ -615,16 +621,24 @@ class _BookListTile extends StatelessWidget {
             width: 48,
             height: 68,
             decoration: BoxDecoration(
-              gradient: AuroraColors.coverGradient(book.title),
+              gradient: book.coverImageData == null
+                  ? AuroraColors.coverGradient(book.title)
+                  : null,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Center(
-              child: Icon(
-                Icons.menu_book_rounded,
-                color: Colors.white.withOpacity(0.7),
-                size: 20,
-              ),
-            ),
+            clipBehavior: Clip.antiAlias,
+            child: book.coverImageData != null
+                ? Image.memory(
+                    book.coverImageData!,
+                    fit: BoxFit.cover,
+                  )
+                : Center(
+                    child: Icon(
+                      Icons.menu_book_rounded,
+                      color: Colors.white.withOpacity(0.7),
+                      size: 20,
+                    ),
+                  ),
           ),
           const SizedBox(width: 12),
           // Info
@@ -651,24 +665,24 @@ class _BookListTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                if (book.progress > 0) ...[
+                if (progress > 0) ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value: book.progress,
+                      value: progress,
                       minHeight: 3,
                       backgroundColor: AuroraColors.surface,
-                      valueColor:
-                          const AlwaysStoppedAnimation(AuroraColors.auroraTeal),
+                      valueColor: const AlwaysStoppedAnimation(
+                          AuroraColors.auroraTeal),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    book.progress >= 1.0
+                    progress >= 1.0
                         ? 'Finished'
-                        : '${(book.progress * 100).toInt()}% complete',
+                        : '${(progress * 100).toInt()}% complete',
                     style: TextStyle(
-                      color: book.progress >= 1.0
+                      color: progress >= 1.0
                           ? AuroraColors.auroraGreen
                           : AuroraColors.textTertiary,
                       fontSize: 11,
@@ -700,7 +714,9 @@ class _BookListTile extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${book.totalPages} pages',
+                estimatedPages > 0
+                    ? '$estimatedPages pages'
+                    : '${book.chapters.length} ch.',
                 style: const TextStyle(
                   color: AuroraColors.textTertiary,
                   fontSize: 11,

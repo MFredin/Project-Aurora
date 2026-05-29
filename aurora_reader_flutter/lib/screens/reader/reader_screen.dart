@@ -1,113 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/data/models.dart';
+import '../../core/data/book_repository.dart';
 import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
-/// Mock chapter content for demo reading experience
-const _mockChapters = <Map<String, String>>[
-  {
-    'title': 'Chapter 1: The Boy in the Desert',
-    'content': '''The boy lay quietly in the shade of the great rock, listening to the silence of the desert. Above him, the sky stretched in an endless dome of burning blue, unmarred by clouds. The sand, fine as powdered glass, shifted in lazy drifts around the base of the outcrop where he had taken shelter.
-
-He had been walking for three days now. Three days since the caravan had left without him, since he had woken to find the campsite empty, the fire cold, and the tracks already half-buried by the restless wind. At first he had run after them, stumbling through the dunes, calling out names that the desert swallowed whole. By the second day he had stopped running.
-
-Now he simply walked. North, he thought, though the stars had grown unreliable and the sun seemed to move in spirals. He carried a half-empty waterskin, a folding knife his grandfather had given him, and a book — a slim volume bound in cracked leather that he had never been able to read, because it was written in a language he did not know.
-
-The rock offered the first real shade he had found since morning. He pressed his back against the cool stone and closed his eyes, letting his breathing slow. Somewhere far away, he thought he heard music — a low, humming vibration that seemed to come from the ground itself, as if the earth were singing in its sleep.
-
-He opened the book to a random page. The characters were strange — looping, flowing things that looked more like drawings of wind than any alphabet he had studied. And yet, in the heat-shimmer of the desert afternoon, they seemed almost to move on the page, rearranging themselves into patterns that tugged at the edges of understanding.
-
-"You can almost read it, can't you?" said a voice.
-
-The boy looked up. A woman stood at the edge of the rock's shadow, dressed in white robes that should have been blinding in the sunlight but instead seemed to absorb it, glowing softly. Her eyes were the color of the desert at twilight — purple fading to deep blue.
-
-"Who are you?" he asked, his voice raw from disuse.
-
-"A traveler," she said, "like you." She sat down across from him without invitation, folding her legs beneath her with fluid grace. "That book you're holding — where did you find it?"
-
-"It was my mother's. She said it came from far away." He turned it over in his hands. "She never told me what it said."
-
-The woman reached out and touched the cover, and the boy felt a tremor run through the leather, as if the book had a heartbeat. "It says many things," she murmured. "But the most important thing it says is this: the desert is not empty. It is full of doors. You just have to learn to see them."
-
-As she spoke, the humming grew louder, and the air around the rock began to shimmer — not with heat, but with something else entirely, something that bent the light into colors the boy had no names for.
-
-"What's happening?" he whispered.
-
-"A door is opening," said the woman. She smiled. "The question is: will you walk through it?"''',
-  },
-  {
-    'title': 'Chapter 2: The City of Echoes',
-    'content': '''He walked through.
-
-There was no threshold, no frame — just a place where the air grew thick and then thin again, and suddenly the desert was gone. In its place stood a city.
-
-But not a city like any the boy had known. This city was built of sound. The walls of the buildings were layers of compressed whispers, translucent as amber, and he could see shapes moving within them — the ghosts of conversations had centuries ago. The streets were paved with silence, a silence so deep and perfect that his own footsteps seemed to echo backward in time.
-
-"Welcome to the City of Echoes," said the woman, who had appeared beside him without seeming to move. "Everything ever spoken here has been preserved. Every word, every song, every scream — they are all here, woven into the stones."
-
-The boy reached out and touched the nearest wall. Instantly, a voice flooded through him — an old man singing a lullaby in a language that had been dead for a thousand years. The melody was achingly beautiful, full of longing for something that could never be recovered.
-
-He pulled his hand away, trembling.
-
-"The city affects everyone differently," the woman observed. "Some people hear their own futures. Others hear the last words of the dead. What did you hear?"
-
-"A song," he said. "A very old song."
-
-She nodded, as if this were the most natural answer in the world. "The songs are the oldest echoes. They last longer than speech, longer than screams. Music is the hardest thing for silence to consume."
-
-They walked deeper into the city. The buildings grew taller, their walls denser with trapped sounds, until they became nearly opaque — dark as smoky quartz. Here and there, light leaked through in places where a particularly powerful echo had burned a hole in the silence, and through these gaps the boy caught glimpses of other places, other times.
-
-"Is this where my mother's book comes from?" he asked.
-
-"The book comes from many places," the woman said. "But yes — some of its pages were written here, in the time before the city fell silent."
-
-"What happened?"
-
-"Someone spoke the wrong word. A word so powerful it consumed every other echo, swallowed every sound, and left only itself behind, repeating endlessly in the empty streets." She paused at a crossroads where four silent avenues met. "That word is still here. Somewhere. Repeating in a whisper. If you listen very carefully, you can almost hear it."
-
-The boy listened. And in the space between one heartbeat and the next, he heard it — a single syllable, soft as a moth's wing, that made the foundations of the city tremble.''',
-  },
-  {
-    'title': 'Chapter 3: The Library at the World\'s Edge',
-    'content': '''Beyond the City of Echoes, the landscape changed.
-
-The ground rose in gentle waves, covered in grass so deeply green it was almost black in the shadows. Above, two moons hung in a sky the color of bruised plums — one silver, one faintly gold. Between them, a river of stars flowed like luminous milk, casting enough light to read by.
-
-The boy realized he was still carrying the book. He opened it again, and this time — perhaps because of what the City of Echoes had done to his perception — the characters on the page seemed clearer. Not legible, exactly, but closer to meaning, like a word you know but cannot quite remember.
-
-"We are going to the Library," the woman said. It was not a question.
-
-"What library?"
-
-"The Library at the World's Edge. It sits on the last cliff before the Nothing, and it contains every book that has ever been written — and every book that was ever meant to be written but wasn't. The unwritten books are the most interesting ones. They glow."
-
-They walked for what might have been hours or days. Time moved strangely here, pooling in valleys and rushing over hilltops like wind. Eventually the ground began to rise more steeply, and the boy could see the edge of the world ahead — a clean line where the land simply stopped, and beyond it, a vast and luminous void.
-
-The Library sat on the very lip of the cliff, a building that seemed to have grown rather than been built. Its walls were made of living wood, twisting and braiding into arches and columns. Its windows glowed with the warm light of a thousand reading lamps, and through the open doors he could see shelves stretching away into impossible distances.
-
-"Every book," the boy murmured.
-
-"Every book," the woman confirmed. "Including yours."
-
-He looked at the slim volume in his hands. "My mother's book is in there?"
-
-"Not your mother's book. Yours. The one you haven't written yet." She smiled, and in her smile he saw the desert and the city and the twin moons reflected like memories. "That's why the book brought you here. Not to read it — to finish it."
-
-The Library doors opened wider as they approached, as if the building were breathing them in.''',
-  },
-];
-
-class ReaderScreen extends StatefulWidget {
+class ReaderScreen extends ConsumerStatefulWidget {
   final String bookId;
 
   const ReaderScreen({super.key, required this.bookId});
 
   @override
-  State<ReaderScreen> createState() => _ReaderScreenState();
+  ConsumerState<ReaderScreen> createState() => _ReaderScreenState();
 }
 
-class _ReaderScreenState extends State<ReaderScreen> {
+class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   int _currentChapter = 0;
   double _fontSize = 18.0;
   double _brightness = 1.0;
@@ -116,6 +25,10 @@ class _ReaderScreenState extends State<ReaderScreen> {
   bool _showSettings = false;
   final ScrollController _scrollController = ScrollController();
   double _readingProgress = 0.0;
+  bool _restoredProgress = false;
+
+  // Reading time tracking
+  final Stopwatch _stopwatch = Stopwatch();
 
   // Selection / highlight state
   String? _selectedText;
@@ -130,20 +43,34 @@ class _ReaderScreenState extends State<ReaderScreen> {
     AuroraColors.auroraWarm,
   ];
 
-  String get _currentTitle => _mockChapters[_currentChapter]['title']!;
-  String get _currentContent => _mockChapters[_currentChapter]['content']!;
-
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_updateProgress);
+    _stopwatch.start();
   }
 
   @override
   void dispose() {
+    _stopwatch.stop();
+    // Save reading time
+    ref.read(bookRepositoryProvider.notifier).addReadingTime(
+          widget.bookId,
+          _stopwatch.elapsed.inSeconds,
+        );
+    // Save current progress
+    _saveProgress();
     _scrollController.removeListener(_updateProgress);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _saveProgress() {
+    ref.read(bookRepositoryProvider.notifier).updateProgress(
+          widget.bookId,
+          _currentChapter,
+          _readingProgress,
+        );
   }
 
   void _updateProgress() {
@@ -156,8 +83,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
   }
 
-  void _nextChapter() {
-    if (_currentChapter < _mockChapters.length - 1) {
+  void _nextChapter(BookModel book) {
+    if (_currentChapter < book.chapters.length - 1) {
+      _saveProgress();
       setState(() {
         _currentChapter++;
         _readingProgress = 0;
@@ -168,6 +96,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
 
   void _previousChapter() {
     if (_currentChapter > 0) {
+      _saveProgress();
       setState(() {
         _currentChapter--;
         _readingProgress = 0;
@@ -176,7 +105,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
   }
 
-  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+  KeyEventResult _handleKeyEvent(
+      FocusNode node, KeyEvent event, BookModel book) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     final key = event.logicalKey;
     if (key == LogicalKeyboardKey.arrowLeft ||
@@ -185,7 +115,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
       return KeyEventResult.handled;
     } else if (key == LogicalKeyboardKey.arrowRight ||
         key == LogicalKeyboardKey.pageDown) {
-      _nextChapter();
+      _nextChapter(book);
       return KeyEventResult.handled;
     } else if (key == LogicalKeyboardKey.escape) {
       Navigator.of(context).maybePop();
@@ -196,10 +126,68 @@ class _ReaderScreenState extends State<ReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final book = ref.watch(bookByIdProvider(widget.bookId));
+
+    // Handle null book (invalid bookId)
+    if (book == null) {
+      return Scaffold(
+        backgroundColor: AuroraColors.deepSpace,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AuroraColors.textTertiary,
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Book not found',
+                style: TextStyle(
+                  color: AuroraColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'The requested book could not be loaded.',
+                style: TextStyle(
+                  color: AuroraColors.textTertiary,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.of(context).maybePop(),
+                icon: const Icon(Icons.arrow_back_rounded),
+                label: const Text('Go Back'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AuroraColors.auroraTeal,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Restore reading position once
+    if (!_restoredProgress) {
+      _currentChapter =
+          book.progress.currentChapter.clamp(0, book.chapters.length - 1);
+      _restoredProgress = true;
+    }
+
+    final currentContent = book.chapters[_currentChapter].content;
+    final currentTitle = book.chapters[_currentChapter].title;
     final isMobile = ResponsiveHelper.isMobile(context);
+
     return Focus(
       autofocus: true,
-      onKeyEvent: _handleKeyEvent,
+      onKeyEvent: (node, event) => _handleKeyEvent(node, event, book),
       child: Scaffold(
         backgroundColor: AuroraColors.deepSpace.withOpacity(_brightness),
         body: SafeArea(
@@ -211,7 +199,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                 child: Column(
                   children: [
                     // Top progress bar
-                    _buildProgressBar(),
+                    _buildProgressBar(book),
 
                     // Content
                     Expanded(
@@ -224,7 +212,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                               maxWidth: isMobile ? double.infinity : 720,
                             ),
                             child: SelectableText(
-                              _currentContent,
+                              currentContent,
                               style: TextStyle(
                                 color: AuroraColors.textPrimary
                                     .withOpacity(0.9 * _brightness),
@@ -235,7 +223,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                               onSelectionChanged: (selection, cause) {
                                 if (selection.baseOffset !=
                                     selection.extentOffset) {
-                                  final text = _currentContent.substring(
+                                  final text = currentContent.substring(
                                     selection.baseOffset,
                                     selection.extentOffset,
                                   );
@@ -274,7 +262,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                   bottom: 80,
                   width: MediaQuery.of(context).size.width * 0.3,
                   child: GestureDetector(
-                    onTap: _nextChapter,
+                    onTap: () => _nextChapter(book),
                     behavior: HitTestBehavior.translucent,
                     child: Container(color: Colors.transparent),
                   ),
@@ -282,17 +270,17 @@ class _ReaderScreenState extends State<ReaderScreen> {
               ],
 
               // Top app bar
-              if (_showToolbar) _buildTopBar(),
+              if (_showToolbar) _buildTopBar(book, currentTitle),
 
               // Bottom toolbar
-              if (_showToolbar) _buildBottomToolbar(),
+              if (_showToolbar) _buildBottomToolbar(book),
 
               // Settings panel
               if (_showSettings) _buildSettingsPanel(),
 
               // Highlight toolbar (appears when text is selected)
               if (_selectedText != null && _selectedText!.isNotEmpty)
-                _buildHighlightToolbar(),
+                _buildHighlightToolbar(book),
             ],
           ),
         ),
@@ -300,9 +288,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
     );
   }
 
-  Widget _buildProgressBar() {
+  Widget _buildProgressBar(BookModel book) {
     final totalProgress =
-        (_currentChapter + _readingProgress) / _mockChapters.length;
+        (_currentChapter + _readingProgress) / book.chapters.length;
     return Container(
       height: 3,
       width: double.infinity,
@@ -319,7 +307,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(BookModel book, String currentTitle) {
     return Positioned(
       top: 0,
       left: 0,
@@ -349,7 +337,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _currentTitle,
+                    currentTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -359,7 +347,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
                     ),
                   ),
                   Text(
-                    'Chapter ${_currentChapter + 1} of ${_mockChapters.length}',
+                    '${book.title} • Chapter ${_currentChapter + 1} of ${book.chapters.length}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: AuroraColors.textTertiary,
                       fontSize: 12,
@@ -371,12 +361,30 @@ class _ReaderScreenState extends State<ReaderScreen> {
             IconButton(
               icon: const Icon(Icons.bookmark_border_rounded,
                   color: AuroraColors.auroraTeal),
-              onPressed: () {},
+              onPressed: () {
+                final content = book.chapters[_currentChapter].content;
+                ref.read(bookRepositoryProvider.notifier).addBookmark(
+                      widget.bookId,
+                      BookmarkModel(
+                        id: UniqueKey().toString(),
+                        bookId: widget.bookId,
+                        title: 'Chapter ${_currentChapter + 1}',
+                        chapter: _currentChapter,
+                        textSnippet: content.length > 100
+                            ? content.substring(0, 100)
+                            : content,
+                        dateCreated: DateTime.now(),
+                      ),
+                    );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Bookmark added')),
+                );
+              },
             ),
             IconButton(
               icon: const Icon(Icons.format_list_bulleted_rounded,
                   color: AuroraColors.textSecondary),
-              onPressed: () => _showChapterList(),
+              onPressed: () => _showChapterList(book),
             ),
           ],
         ),
@@ -384,7 +392,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     );
   }
 
-  Widget _buildBottomToolbar() {
+  Widget _buildBottomToolbar(BookModel book) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -438,8 +446,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
             _ToolbarButton(
               icon: Icons.chevron_right_rounded,
               label: 'Next',
-              onTap: _currentChapter < _mockChapters.length - 1
-                  ? _nextChapter
+              onTap: _currentChapter < book.chapters.length - 1
+                  ? () => _nextChapter(book)
                   : null,
             ),
           ],
@@ -557,7 +565,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     );
   }
 
-  Widget _buildHighlightToolbar() {
+  Widget _buildHighlightToolbar(BookModel book) {
     return Positioned(
       bottom: 70,
       left: 24,
@@ -598,7 +606,18 @@ class _ReaderScreenState extends State<ReaderScreen> {
               icon: const Icon(Icons.highlight_rounded,
                   color: AuroraColors.auroraTeal),
               onPressed: () {
-                // Create highlight
+                if (_selectedText != null) {
+                  ref.read(bookRepositoryProvider.notifier).addHighlight(
+                        widget.bookId,
+                        HighlightModel(
+                          id: UniqueKey().toString(),
+                          bookId: widget.bookId,
+                          highlightedText: _selectedText!,
+                          chapterIndex: _currentChapter,
+                          dateCreated: DateTime.now(),
+                        ),
+                      );
+                }
                 setState(() => _selectedText = null);
               },
               tooltip: 'Highlight',
@@ -618,6 +637,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
               icon: const Icon(Icons.copy_rounded,
                   color: AuroraColors.textSecondary),
               onPressed: () {
+                if (_selectedText != null) {
+                  Clipboard.setData(ClipboardData(text: _selectedText!));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Copied to clipboard')),
+                  );
+                }
                 setState(() => _selectedText = null);
               },
               tooltip: 'Copy',
@@ -628,7 +653,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     );
   }
 
-  void _showChapterList() {
+  void _showChapterList(BookModel book) {
     showModalBottomSheet(
       context: context,
       backgroundColor: AuroraColors.surfaceElevated,
@@ -667,7 +692,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              ...List.generate(_mockChapters.length, (index) {
+              ...List.generate(book.chapters.length, (index) {
                 final isActive = index == _currentChapter;
                 return ListTile(
                   leading: Icon(
@@ -680,7 +705,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                     size: 20,
                   ),
                   title: Text(
-                    _mockChapters[index]['title']!,
+                    book.chapters[index].title,
                     style: TextStyle(
                       color: isActive
                           ? AuroraColors.auroraTeal
@@ -690,6 +715,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                     ),
                   ),
                   onTap: () {
+                    _saveProgress();
                     setState(() {
                       _currentChapter = index;
                       _readingProgress = 0;

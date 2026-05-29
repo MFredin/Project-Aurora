@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
-import 'connection/connection.dart' as impl;
 
-part 'database.g.dart';
+// Generated code requires: dart run build_runner build
+// part 'database.g.dart';
 
 // ─── TABLE DEFINITIONS (Port of all 13 SwiftData @Model classes) ────────────
 
@@ -206,73 +206,8 @@ class UserPreferencesTable extends Table {
 
 // ─── DATABASE ───────────────────────────────────────────────────────────────
 
-@DriftDatabase(tables: [
-  Books,
-  ReadingProgresses,
-  BookChapters,
-  Bookmarks,
-  Highlights,
-  ReadingSessions,
-  ReadingStreaks,
-  Achievements,
-  FriendProfiles,
-  VocabularyEntries,
-  KnowledgeNodes,
-  BookClubs,
-  UserPreferencesTable,
-])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(impl.openConnection());
-
-  @override
-  int get schemaVersion => 1;
-
-  // ─── Book Queries ─────────────────────────────────────
-
-  Future<List<Book>> getAllBooks() => select(books).get();
-  Stream<List<Book>> watchAllBooks() => select(books).watch();
-  Future<Book?> getBookById(String id) =>
-      (select(books)..where((b) => b.id.equals(id))).getSingleOrNull();
-  Future<int> insertBook(BooksCompanion book) => into(books).insert(book);
-  Future<bool> updateBook(Book book) => update(books).replace(book);
-  Future<int> deleteBook(String id) =>
-      (delete(books)..where((b) => b.id.equals(id))).go();
-
-  // ─── Progress Queries ─────────────────────────────────
-
-  Future<ReadingProgress?> getProgressForBook(String bookId) =>
-      (select(readingProgresses)..where((p) => p.bookId.equals(bookId)))
-          .getSingleOrNull();
-  Stream<ReadingProgress?> watchProgressForBook(String bookId) =>
-      (select(readingProgresses)..where((p) => p.bookId.equals(bookId)))
-          .watchSingleOrNull();
-
-  // ─── Chapter Queries ──────────────────────────────────
-
-  Future<List<BookChapter>> getChaptersForBook(String bookId) =>
-      (select(bookChapters)
-            ..where((c) => c.bookId.equals(bookId))
-            ..orderBy([(c) => OrderingTerm.asc(c.chapterIndex)]))
-          .get();
-
-  // ─── Bookmark Queries ─────────────────────────────────
-
-  Stream<List<Bookmark>> watchBookmarksForBook(String bookId) =>
-      (select(bookmarks)..where((b) => b.bookId.equals(bookId))).watch();
-
-  // ─── Highlight Queries ────────────────────────────────
-
-  Stream<List<Highlight>> watchHighlightsForBook(String bookId) =>
-      (select(highlights)..where((h) => h.bookId.equals(bookId))).watch();
-  Stream<List<Highlight>> watchAllHighlights() => select(highlights).watch();
-
-  // ─── Session Queries ──────────────────────────────────
-
-  Stream<List<ReadingSession>> watchAllSessions() =>
-      select(readingSessions).watch();
-
-  // ─── Vocabulary Queries ───────────────────────────────
-
-  Stream<List<VocabularyEntry>> watchAllVocabulary() =>
-      select(vocabularyEntries).watch();
-}
+// AppDatabase requires codegen. Run: dart run build_runner build
+// The alpha uses BookRepository (lib/core/data/book_repository.dart) instead.
+//
+// @DriftDatabase(tables: [...])
+// class AppDatabase extends _$AppDatabase { ... }
