@@ -37,11 +37,7 @@ jobs:
 
       - name: Build for web
         working-directory: aurora_reader_flutter
-        run: |
-          flutter build web \
-            --release \
-            --base-href "/Project-Aurora/" \
-            --web-renderer canvaskit
+        run: flutter build web --release --base-href "/Project-Aurora/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
