@@ -240,14 +240,30 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                       child: Row(
                         children: [
-                          const Text(
-                            'Library',
-                            style: TextStyle(
-                              color: AuroraColors.textPrimary,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.5,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'EDDA',
+                                style: TextStyle(
+                                  color: AuroraColors.auroraTeal.withOpacity(0.6),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 4,
+                                  fontFamily: 'Georgia',
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Library',
+                                style: TextStyle(
+                                  color: AuroraColors.textPrimary,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                            ],
                           ),
                           const Spacer(),
                           _IconButton(
@@ -563,22 +579,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AuroraColors.auroraTeal.withOpacity(0.2),
-                    AuroraColors.auroraPurple.withOpacity(0.1),
-                  ],
-                ),
-              ),
-              child: const Icon(
-                Icons.auto_stories_rounded,
-                color: AuroraColors.textTertiary,
-                size: 44,
+            SizedBox(
+              width: 160,
+              height: 180,
+              child: CustomPaint(
+                painter: _StaveArchPainter(),
               ),
             ),
             const SizedBox(height: 28),
@@ -1258,4 +1263,78 @@ class _BookListTileState extends State<_BookListTile> {
       ),
     );
   }
+}
+
+class _StaveArchPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final ember = Paint()
+      ..color = AuroraColors.auroraTeal.withOpacity(0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round;
+
+    final page = Paint()
+      ..color = AuroraColors.textPrimary.withOpacity(0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+
+    final archPath = Path()
+      ..moveTo(cx, 0)
+      ..lineTo(size.width * 0.15, size.height * 0.35)
+      ..lineTo(size.width * 0.15, size.height * 0.85)
+      ..moveTo(cx, 0)
+      ..lineTo(size.width * 0.85, size.height * 0.35)
+      ..lineTo(size.width * 0.85, size.height * 0.85);
+    canvas.drawPath(archPath, ember);
+
+    final leftPage = Path()
+      ..moveTo(size.width * 0.28, size.height * 0.42)
+      ..lineTo(size.width * 0.28, size.height * 0.78)
+      ..quadraticBezierTo(cx, size.height * 0.72, cx, size.height * 0.80);
+    canvas.drawPath(leftPage, page);
+
+    final rightPage = Path()
+      ..moveTo(size.width * 0.72, size.height * 0.42)
+      ..lineTo(size.width * 0.72, size.height * 0.78)
+      ..quadraticBezierTo(cx, size.height * 0.72, cx, size.height * 0.80);
+    canvas.drawPath(rightPage, page);
+
+    final spine = Paint()
+      ..color = AuroraColors.textPrimary.withOpacity(0.08)
+      ..strokeWidth = 1.5;
+    canvas.drawLine(
+      Offset(cx, size.height * 0.40),
+      Offset(cx, size.height * 0.78),
+      spine,
+    );
+
+    final linePaint = Paint()
+      ..color = AuroraColors.manuscriptGold.withOpacity(0.12)
+      ..strokeWidth = 1.2;
+    for (var i = 0; i < 4; i++) {
+      final y = size.height * (0.50 + i * 0.06);
+      final vary = (i % 2 == 0) ? 0.0 : 4.0;
+      canvas.drawLine(Offset(size.width * 0.34, y), Offset(cx - 6 - vary, y), linePaint);
+      canvas.drawLine(Offset(cx + 6, y), Offset(size.width * 0.66 + vary, y), linePaint);
+    }
+
+    final spark = Paint()..color = AuroraColors.auroraTeal.withOpacity(0.35);
+    canvas.drawCircle(Offset(cx, -2), 3.5, spark);
+    canvas.drawCircle(Offset(cx - 6, 5), 1.8, spark..color = AuroraColors.auroraTeal.withOpacity(0.18));
+    canvas.drawCircle(Offset(cx + 7, 4), 2.0, spark..color = AuroraColors.auroraTeal.withOpacity(0.22));
+
+    final knot = Paint()
+      ..color = AuroraColors.auroraGreen.withOpacity(0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+    canvas.drawCircle(Offset(size.width * 0.15, size.height * 0.85), 4, knot);
+    canvas.drawCircle(Offset(size.width * 0.85, size.height * 0.85), 4, knot);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
