@@ -216,7 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Aurora Reader',
+                      'Edda',
                       style: TextStyle(
                         color: AuroraColors.textPrimary,
                         fontSize: 18,

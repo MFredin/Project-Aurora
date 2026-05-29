@@ -2,7 +2,7 @@
 class AppConstants {
   AppConstants._();
 
-  static const appName = 'Aurora Reader';
+  static const appName = 'Edda';
   static const appVersion = '4.0.0';
   static const appBuild = 1;
 

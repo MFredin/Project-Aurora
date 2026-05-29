@@ -68,7 +68,7 @@ class DataExportService {
   Future<String> exportHighlightsMarkdown() async {
     final highlights = await _db.watchAllHighlights().first;
     final buffer = StringBuffer();
-    buffer.writeln('# Aurora Reader - Highlights Export');
+    buffer.writeln('# Edda - Highlights Export');
     buffer.writeln('');
     buffer.writeln(
         '_Exported ${DateFormat.yMMMd().format(DateTime.now())}_');

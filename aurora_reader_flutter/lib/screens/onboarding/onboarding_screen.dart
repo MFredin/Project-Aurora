@@ -18,9 +18,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pages = const [
     _OnboardingPage(
       icon: Icons.auto_awesome_rounded,
-      title: 'Welcome to Aurora Reader',
+      title: 'Welcome to Edda',
       subtitle:
-          'Your cross-platform ebook companion with a stunning Northern Lights theme',
+          'Read in the shadows of the stave — your mystical ebook companion',
       gradient: AuroraColors.accentGradient,
     ),
     _OnboardingPage(

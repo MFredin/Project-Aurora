@@ -11,7 +11,7 @@ class AuroraReaderApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
-      title: 'Aurora Reader',
+      title: 'Edda',
       debugShowCheckedModeBanner: false,
       theme: AuroraTheme.darkTheme,
       darkTheme: AuroraTheme.darkTheme,

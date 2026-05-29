@@ -11,7 +11,7 @@ import 'package:uuid/uuid.dart';
 
 // ─── SUPPORTED FORMATS ──────────────────────────────────────────────────────
 
-/// All ebook formats Aurora Reader can handle.
+/// All ebook formats Edda can handle.
 enum BookFormat {
   epub,
   pdf,

@@ -1,11 +1,11 @@
 {
-  "name": "Aurora Reader",
-  "short_name": "Aurora",
+  "name": "Edda",
+  "short_name": "Edda",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0A0A1F",
-  "theme_color": "#26C7D1",
-  "description": "Cross-platform ebook reader with Northern Lights theme",
+  "background_color": "#0D1210",
+  "theme_color": "#B87944",
+  "description": "Mystical ebook reader — read in the shadows of the stave",
   "orientation": "any",
   "prefer_related_applications": false,
   "icons": [

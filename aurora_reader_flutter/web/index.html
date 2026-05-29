@@ -5,28 +5,28 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Cross-platform ebook reader with Northern Lights theme">
+  <meta name="description" content="Mystical ebook reader — read in the shadows of the stave">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Aurora Reader">
+  <meta name="apple-mobile-web-app-title" content="Edda">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png">
 
-  <title>Aurora Reader</title>
+  <title>Edda</title>
   <link rel="manifest" href="manifest.json">
 
-  <meta name="theme-color" content="#0A0A1F">
+  <meta name="theme-color" content="#0D1210">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <style>
     body {
       margin: 0;
       padding: 0;
-      background-color: #0A0A1F;
+      background-color: #0D1210;
       overflow: hidden;
     }
 
@@ -37,24 +37,25 @@
       justify-content: center;
       height: 100vh;
       width: 100vw;
-      background-color: #0A0A1F;
+      background-color: #0D1210;
     }
 
     #loading .spinner {
       width: 48px;
       height: 48px;
-      border: 4px solid rgba(38, 199, 209, 0.2);
-      border-top: 4px solid #26C7D1;
+      border: 4px solid rgba(184, 121, 68, 0.2);
+      border-top: 4px solid #B87944;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
 
     #loading p {
       margin-top: 16px;
-      color: #26C7D1;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 14px;
-      letter-spacing: 1px;
+      color: #B87944;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      letter-spacing: 6px;
+      font-weight: 700;
     }
 
     @keyframes spin {
@@ -66,7 +67,7 @@
 <body>
   <div id="loading">
     <div class="spinner"></div>
-    <p>Aurora Reader</p>
+    <p>EDDA</p>
   </div>
 
   <script src="flutter_bootstrap.js" async></script>
