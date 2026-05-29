@@ -494,26 +494,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             ],
           ),
         ),
-        floatingActionButton: Container(
-          decoration: BoxDecoration(
-            gradient: AuroraColors.accentGradient,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AuroraColors.auroraTeal.withOpacity(0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: FloatingActionButton(
-            onPressed: _isImporting ? null : _importBooks,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child:
-                const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-          ),
-        ),
       ),
     );
 
