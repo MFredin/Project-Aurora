@@ -3,6 +3,7 @@ import 'dart:io' if (dart.library.html) 'platform/web_stub_io.dart';
 import 'dart:typed_data';
 
 import 'package:epubx/epubx.dart';
+import 'package:image/image.dart' as img;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:html/parser.dart' as html_parser;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -249,7 +250,11 @@ class BookParserService {
     Uint8List? coverImage;
     final coverRef = epubBook.CoverImage;
     if (coverRef != null) {
-      coverImage = Uint8List.fromList(coverRef.Content!);
+      try {
+        coverImage = img.encodePng(coverRef);
+      } catch (_) {
+        // Skip cover if encoding fails
+      }
     }
 
     // Extract chapters from the reading order

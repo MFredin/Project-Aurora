@@ -108,7 +108,7 @@ class AuroraTheme {
           unselectedItemColor: AuroraColors.tabInactive,
           type: BottomNavigationBarType.fixed,
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: AuroraColors.surface.withOpacity(0.8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

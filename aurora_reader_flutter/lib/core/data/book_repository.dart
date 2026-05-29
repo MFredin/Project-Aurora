@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
@@ -10,23 +9,20 @@ const _uuid = Uuid();
 const _booksKey = 'books';
 const _sessionsKey = 'sessions';
 
-class BookRepository extends StateNotifier<List<BookModel>> {
-  final Box _box;
+class BookRepository extends Notifier<List<BookModel>> {
+  Box get _box => Hive.box('aurora_reader');
 
-  BookRepository(this._box) : super([]) {
-    _loadFromStorage();
-  }
-
-  void _loadFromStorage() {
+  @override
+  List<BookModel> build() {
     final raw = _box.get(_booksKey);
-    if (raw == null) return;
+    if (raw == null) return [];
     try {
       final List<dynamic> decoded = jsonDecode(raw as String);
-      state = decoded
+      return decoded
           .map((j) => BookModel.fromJson(j as Map<String, dynamic>))
           .toList();
     } catch (_) {
-      // Corrupted data — start fresh
+      return [];
     }
   }
 
@@ -146,9 +142,7 @@ class BookRepository extends StateNotifier<List<BookModel>> {
 }
 
 final bookRepositoryProvider =
-    StateNotifierProvider<BookRepository, List<BookModel>>((ref) {
-  return BookRepository(Hive.box('aurora_reader'));
-});
+    NotifierProvider<BookRepository, List<BookModel>>(BookRepository.new);
 
 final bookByIdProvider = Provider.family<BookModel?, String>((ref, id) {
   final books = ref.watch(bookRepositoryProvider);
@@ -158,22 +152,21 @@ final bookByIdProvider = Provider.family<BookModel?, String>((ref, id) {
   return null;
 });
 
-class ReadingSessionStore extends StateNotifier<List<ReadingSessionModel>> {
-  final Box _box;
+class ReadingSessionStore extends Notifier<List<ReadingSessionModel>> {
+  Box get _box => Hive.box('aurora_reader');
 
-  ReadingSessionStore(this._box) : super([]) {
-    _loadFromStorage();
-  }
-
-  void _loadFromStorage() {
+  @override
+  List<ReadingSessionModel> build() {
     final raw = _box.get(_sessionsKey);
-    if (raw == null) return;
+    if (raw == null) return [];
     try {
       final List<dynamic> decoded = jsonDecode(raw as String);
-      state = decoded
+      return decoded
           .map((j) => ReadingSessionModel.fromJson(j as Map<String, dynamic>))
           .toList();
-    } catch (_) {}
+    } catch (_) {
+      return [];
+    }
   }
 
   void _persist() {
@@ -188,7 +181,5 @@ class ReadingSessionStore extends StateNotifier<List<ReadingSessionModel>> {
 }
 
 final readingSessionsProvider =
-    StateNotifierProvider<ReadingSessionStore, List<ReadingSessionModel>>(
-        (ref) {
-  return ReadingSessionStore(Hive.box('aurora_reader'));
-});
+    NotifierProvider<ReadingSessionStore, List<ReadingSessionModel>>(
+        ReadingSessionStore.new);

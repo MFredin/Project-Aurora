@@ -23,6 +23,7 @@ dependencies:
 
   # EPUB Parsing
   epubx: ^4.0.0
+  image: ^4.0.1
   html: ^0.15.6
 
   # File Import

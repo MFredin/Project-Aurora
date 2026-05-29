@@ -32,7 +32,7 @@ class AuroraCard extends StatelessWidget {
 /// Aurora gradient button (capsule shape)
 class AuroraButton extends StatelessWidget {
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final LinearGradient gradient;
   final IconData? icon;
 
