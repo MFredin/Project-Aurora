@@ -208,19 +208,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AuroraCard(
                 child: Column(
                   children: [
-                    ShaderMask(
-                      shaderCallback: (bounds) =>
-                          AuroraColors.accentGradient.createShader(bounds),
-                      child: const Icon(Icons.auto_awesome_rounded,
-                          size: 40, color: Colors.white),
+                    SizedBox(
+                      width: 80,
+                      height: 90,
+                      child: CustomPaint(
+                        painter: _StaveArchLogoPainter(),
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Edda',
+                    const SizedBox(height: 12),
+                    Text(
+                      'EDDA',
                       style: TextStyle(
-                        color: AuroraColors.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        color: AuroraColors.auroraTeal,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 6,
+                        fontFamily: 'Georgia',
                       ),
                     ),
                     const Text(
@@ -387,4 +390,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+}
+
+class _StaveArchLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final ember = Paint()
+      ..color = AuroraColors.auroraTeal.withOpacity(0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round;
+
+    final page = Paint()
+      ..color = AuroraColors.textPrimary.withOpacity(0.35)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+
+    final archPath = Path()
+      ..moveTo(cx, 0)
+      ..lineTo(size.width * 0.1, size.height * 0.38)
+      ..lineTo(size.width * 0.1, size.height * 0.88)
+      ..moveTo(cx, 0)
+      ..lineTo(size.width * 0.9, size.height * 0.38)
+      ..lineTo(size.width * 0.9, size.height * 0.88);
+    canvas.drawPath(archPath, ember);
+
+    final leftPage = Path()
+      ..moveTo(size.width * 0.25, size.height * 0.45)
+      ..lineTo(size.width * 0.25, size.height * 0.80)
+      ..quadraticBezierTo(cx, size.height * 0.74, cx, size.height * 0.82);
+    canvas.drawPath(leftPage, page);
+
+    final rightPage = Path()
+      ..moveTo(size.width * 0.75, size.height * 0.45)
+      ..lineTo(size.width * 0.75, size.height * 0.80)
+      ..quadraticBezierTo(cx, size.height * 0.74, cx, size.height * 0.82);
+    canvas.drawPath(rightPage, page);
+
+    final spine = Paint()
+      ..color = AuroraColors.textPrimary.withOpacity(0.15)
+      ..strokeWidth = 1;
+    canvas.drawLine(
+      Offset(cx, size.height * 0.43),
+      Offset(cx, size.height * 0.80),
+      spine,
+    );
+
+    final linePaint = Paint()
+      ..color = AuroraColors.manuscriptGold.withOpacity(0.25)
+      ..strokeWidth = 1;
+    for (var i = 0; i < 3; i++) {
+      final y = size.height * (0.54 + i * 0.08);
+      final vary = (i % 2 == 0) ? 0.0 : 3.0;
+      canvas.drawLine(Offset(size.width * 0.32, y), Offset(cx - 4 - vary, y), linePaint);
+      canvas.drawLine(Offset(cx + 4, y), Offset(size.width * 0.68 + vary, y), linePaint);
+    }
+
+    final spark = Paint()..color = AuroraColors.auroraTeal.withOpacity(0.6);
+    canvas.drawCircle(Offset(cx, -1), 2.5, spark);
+
+    final knot = Paint()
+      ..color = AuroraColors.auroraGreen.withOpacity(0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    canvas.drawCircle(Offset(size.width * 0.1, size.height * 0.88), 3, knot);
+    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.88), 3, knot);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
