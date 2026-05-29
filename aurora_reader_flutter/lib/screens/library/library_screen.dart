@@ -252,13 +252,18 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                           ),
                           const Spacer(),
                           _IconButton(
+                            icon: Icons.add_rounded,
+                            onTap: _isImporting ? () {} : _importBooks,
+                          ),
+                          const SizedBox(width: 4),
+                          _IconButton(
                             icon: _isGridView
                                 ? Icons.grid_view_rounded
                                 : Icons.view_list_rounded,
                             onTap: () =>
                                 setState(() => _isGridView = !_isGridView),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 4),
                           PopupMenuButton<_SortOption>(
                             icon: const Icon(
                               Icons.tune_rounded,
@@ -696,13 +701,14 @@ class _BookDetailSheet extends StatelessWidget {
     final progress = book.progressPercent;
     final estimatedPages = book.totalWords ~/ 250;
     final readMinutes = book.progress.totalReadingSeconds ~/ 60;
+    final bottomPad = MediaQuery.of(context).padding.bottom + 80;
 
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+          padding: EdgeInsets.fromLTRB(20, 12, 20, bottomPad),
           decoration: BoxDecoration(
             color: AuroraColors.cosmos.withOpacity(0.92),
             borderRadius:
@@ -717,7 +723,6 @@ class _BookDetailSheet extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle
               Container(
                 width: 40,
                 height: 4,
@@ -726,16 +731,14 @@ class _BookDetailSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // Cover + info
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Cover
                   Container(
-                    width: 90,
-                    height: 130,
+                    width: 80,
+                    height: 116,
                     decoration: BoxDecoration(
                       gradient: book.coverImageData == null
                           ? AuroraColors.coverGradient(book.title)
@@ -770,7 +773,7 @@ class _BookDetailSheet extends StatelessWidget {
                             ),
                           ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -781,11 +784,11 @@ class _BookDetailSheet extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: AuroraColors.textPrimary,
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 3),
                         Text(
                           book.author,
                           style: const TextStyle(
@@ -793,11 +796,10 @@ class _BookDetailSheet extends StatelessWidget {
                             fontSize: 14,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        // Stats row
+                        const SizedBox(height: 10),
                         Wrap(
-                          spacing: 16,
-                          runSpacing: 8,
+                          spacing: 12,
+                          runSpacing: 6,
                           children: [
                             _StatChip(
                               label: book.format.toUpperCase(),
@@ -825,9 +827,8 @@ class _BookDetailSheet extends StatelessWidget {
                 ],
               ),
 
-              // Progress bar
               if (progress > 0) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -859,9 +860,7 @@ class _BookDetailSheet extends StatelessWidget {
                 ),
               ],
 
-              const SizedBox(height: 24),
-
-              // Action buttons
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
