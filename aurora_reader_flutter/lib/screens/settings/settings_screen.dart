@@ -350,7 +350,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Divider(
       height: 1,
       indent: 50,
-      color: const Color(0xFF3A3530).withOpacity(0.6),
+      color: const Color(0xFF252E27).withOpacity(0.6),
     );
   }
 

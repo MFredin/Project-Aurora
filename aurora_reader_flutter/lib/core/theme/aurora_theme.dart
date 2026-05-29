@@ -3,70 +3,73 @@ import 'package:flutter/material.dart';
 class AuroraColors {
   AuroraColors._();
 
-  // Runestone core palette — charcoal slate and weathered stone
-  static const deepSpace = Color(0xFF1A1A1E);
-  static const cosmos = Color(0xFF1F1E1B);
-  static const surface = Color(0xFF2A2722);
-  static const surfaceElevated = Color(0xFF33302A);
+  // Stave & Shadow — deep forest night
+  static const deepSpace = Color(0xFF0D1210);
+  static const cosmos = Color(0xFF141A16);
+  static const surface = Color(0xFF1A211C);
+  static const surfaceElevated = Color(0xFF222A24);
 
-  // Accent colors — aged metal and Nordic elements
-  static const auroraGreen = Color(0xFF7B9E6F);   // moss/sage
-  static const auroraTeal = Color(0xFFC4973B);     // aged gold (primary accent)
-  static const auroraBlue = Color(0xFF7BA4C7);     // frost steel
-  static const auroraPurple = Color(0xFF8B6B8F);   // heather plum
-  static const auroraPink = Color(0xFF9E5B6B);     // dark rose
-  static const auroraWarm = Color(0xFFB85C3A);     // burnt umber
+  // Accent colors — ember, patina, and manuscript
+  static const auroraGreen = Color(0xFF5A9E8F);   // lichen teal / copper patina
+  static const auroraTeal = Color(0xFFB87944);     // muted ember (primary accent)
+  static const auroraBlue = Color(0xFF5A9E8F);     // lichen teal (alias)
+  static const auroraPurple = Color(0xFF7A6B5A);   // driftwood
+  static const auroraPink = Color(0xFF8B5E4A);     // smoked clay
+  static const auroraWarm = Color(0xFFC25B3A);     // warning ember
 
-  // Text hierarchy — parchment tones
-  static const textPrimary = Color(0xFFE8E0D0);
-  static const textSecondary = Color(0xFF9E9688);
-  static const textTertiary = Color(0xFF5E5850);
+  // Manuscript highlight
+  static const manuscriptGold = Color(0xFFA89060);
+
+  // Text hierarchy — fog and moss
+  static const textPrimary = Color(0xFFD4D0C8);
+  static const textSecondary = Color(0xFF8A8680);
+  static const textTertiary = Color(0xFF6B7066);
 
   // Tab bar
-  static const tabBarBackground = Color(0xF21A1A1E);
+  static const tabBarBackground = Color(0xF20D1210);
   static const tabActive = auroraTeal;
   static const tabInactive = textTertiary;
 
-  // Gradients — hammered metal and ember
+  // Gradients — smoldering and mossy
   static const auroraGradient = LinearGradient(
     colors: [
-      Color(0x99C4973B),
-      Color(0x667BA4C7),
-      Color(0x807B9E6F),
-      Color(0x4D8B6B8F),
+      Color(0x99B87944),
+      Color(0x665A9E8F),
+      Color(0x80A89060),
+      Color(0x4D7A6B5A),
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const accentGradient = LinearGradient(
-    colors: [Color(0xFFC4973B), Color(0xFFA8802E)],
+    colors: [Color(0xFFB87944), Color(0xFF9A6338)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
 
   static const secondaryGradient = LinearGradient(
-    colors: [Color(0xFF7BA4C7), Color(0xFF5B7A9E)],
+    colors: [Color(0xFF5A9E8F), Color(0xFF3D7A6D)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
 
   static const warmGradient = LinearGradient(
-    colors: [Color(0xFFB85C3A), Color(0xFFC4973B)],
+    colors: [Color(0xFFC25B3A), Color(0xFFB87944)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
 
-  // Book cover palettes — old bindings and manuscripts
+  // Book cover palettes — forest floor and stave church
   static const coverPalettes = <List<Color>>[
-    [Color(0xFF6B3A3A), Color(0xFF8B5E3C)], // burgundy → leather
-    [Color(0xFF3A5C4A), Color(0xFF5B7A5E)], // forest → sage
-    [Color(0xFF5B7A9E), Color(0xFF3A4F6B)], // steel → deep blue
-    [Color(0xFF8B6B8F), Color(0xFF5B3A5E)], // heather → plum
-    [Color(0xFFB85C3A), Color(0xFF8B3A2E)], // ember → rust
-    [Color(0xFF7B9E6F), Color(0xFF4A6B3A)], // moss → pine
-    [Color(0xFFC4973B), Color(0xFF8B6B2E)], // gold → bronze
-    [Color(0xFF4A5E6B), Color(0xFF7BA4C7)], // slate → frost
+    [Color(0xFF4A3528), Color(0xFF6B4E38)], // dark bark → warm wood
+    [Color(0xFF2A4A3A), Color(0xFF3D6B52)], // deep pine → forest
+    [Color(0xFF3A4F5A), Color(0xFF5A7A8B)], // fjord slate → cold steel
+    [Color(0xFF5A4A3A), Color(0xFF7A6B5A)], // smoke → driftwood
+    [Color(0xFF6B3A28), Color(0xFF8B5A3A)], // ember → copper
+    [Color(0xFF2A3A2E), Color(0xFF4A5E48)], // shadow pine → moss
+    [Color(0xFF8B6B3A), Color(0xFFA89060)], // amber → manuscript gold
+    [Color(0xFF3A4A4E), Color(0xFF5A9E8F)], // deep water → lichen
   ];
 
   static LinearGradient coverGradient(String title) {
@@ -88,7 +91,7 @@ class AuroraTheme {
         fontFamily: 'sans-serif',
         colorScheme: const ColorScheme.dark(
           primary: AuroraColors.auroraTeal,
-          secondary: AuroraColors.auroraPurple,
+          secondary: AuroraColors.auroraGreen,
           surface: AuroraColors.surface,
           error: AuroraColors.auroraWarm,
           onPrimary: Colors.white,
@@ -112,7 +115,7 @@ class AuroraTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
-              color: Colors.white.withOpacity(0.04),
+              color: const Color(0xFF252E27).withOpacity(0.6),
               width: 0.5,
             ),
           ),
@@ -177,7 +180,7 @@ class AuroraTheme {
           hintStyle: const TextStyle(color: AuroraColors.textTertiary),
         ),
         dividerTheme: DividerThemeData(
-          color: Colors.white.withOpacity(0.04),
+          color: const Color(0xFF252E27).withOpacity(0.6),
         ),
         dialogTheme: DialogThemeData(
           backgroundColor: AuroraColors.surfaceElevated,

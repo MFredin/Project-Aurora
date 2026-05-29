@@ -296,7 +296,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                               color: AuroraColors.surface.withOpacity(0.6),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: const Color(0xFF3A3530),
+                                color: const Color(0xFF252E27),
                                 width: 0.5,
                               ),
                             ),
@@ -397,7 +397,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                               color: AuroraColors.surfaceElevated,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: const Color(0xFF3A3530),
+                                color: const Color(0xFF252E27),
                               ),
                               boxShadow: [
                                 BoxShadow(
@@ -704,7 +704,7 @@ class _BookDetailSheet extends StatelessWidget {
                 const BorderRadius.vertical(top: Radius.circular(20)),
             border: Border(
               top: BorderSide(
-                color: const Color(0xFF3A3530).withOpacity(0.8),
+                color: const Color(0xFF252E27).withOpacity(0.8),
                 width: 0.5,
               ),
             ),
@@ -1152,8 +1152,8 @@ class _BookListTileState extends State<_BookListTile> {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: _hovering
-                  ? const Color(0xFF4A4540)
-                  : const Color(0xFF3A3530),
+                  ? const Color(0xFF354038)
+                  : const Color(0xFF252E27),
               width: 0.5,
             ),
           ),

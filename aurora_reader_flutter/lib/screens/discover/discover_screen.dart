@@ -95,7 +95,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 color: AuroraColors.surface.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: const Color(0xFF3A3530),
+                  color: const Color(0xFF252E27),
                   width: 0.5,
                 ),
               ),

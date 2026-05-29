@@ -332,7 +332,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           color: AuroraColors.cosmos.withOpacity(0.95),
           border: Border(
             bottom: BorderSide(
-              color: const Color(0xFF3A3530).withOpacity(0.6),
+              color: const Color(0xFF252E27).withOpacity(0.6),
               width: 0.5,
             ),
           ),
@@ -417,7 +417,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           color: AuroraColors.cosmos.withOpacity(0.95),
           border: Border(
             top: BorderSide(
-              color: const Color(0xFF3A3530).withOpacity(0.6),
+              color: const Color(0xFF252E27).withOpacity(0.6),
               width: 0.5,
             ),
           ),
@@ -607,7 +607,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             Container(
               width: 1,
               height: 28,
-              color: const Color(0xFF3A3530),
+              color: const Color(0xFF252E27),
             ),
             const SizedBox(width: 8),
             // Highlight action

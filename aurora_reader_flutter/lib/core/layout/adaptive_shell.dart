@@ -47,7 +47,7 @@ class AdaptiveShell extends StatelessWidget {
           color: AuroraColors.cosmos.withOpacity(0.95),
           border: Border(
             top: BorderSide(
-              color: const Color(0xFF3A3530).withOpacity(0.6),
+              color: const Color(0xFF252E27).withOpacity(0.6),
               width: 0.5,
             ),
           ),
@@ -87,7 +87,7 @@ class AdaptiveShell extends StatelessWidget {
               color: AuroraColors.cosmos.withOpacity(0.95),
               border: Border(
                 right: BorderSide(
-                  color: const Color(0xFF3A3530).withOpacity(0.6),
+                  color: const Color(0xFF252E27).withOpacity(0.6),
                   width: 0.5,
                 ),
               ),

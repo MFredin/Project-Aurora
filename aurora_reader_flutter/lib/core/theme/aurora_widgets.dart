@@ -1,8 +1,6 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'aurora_theme.dart';
 
-/// Stone tablet card with subtle grain texture
 class AuroraCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -24,17 +22,17 @@ class AuroraCard extends StatelessWidget {
       child: Container(
         padding: padding ?? const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AuroraColors.surface.withOpacity(0.7),
+          color: AuroraColors.surface.withOpacity(0.75),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFF3A3530),
+            color: const Color(0xFF252E27),
             width: 0.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -44,7 +42,6 @@ class AuroraCard extends StatelessWidget {
   }
 }
 
-/// Hammered metal button with amber glow
 class AuroraButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -57,7 +54,7 @@ class AuroraButton extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.gradient = const LinearGradient(
-      colors: [Color(0xFFC4973B), Color(0xFFA8802E)],
+      colors: [Color(0xFFB87944), Color(0xFF9A6338)],
     ),
     this.icon,
     this.compact = false,
@@ -90,20 +87,20 @@ class _AuroraButtonState extends State<AuroraButton> {
             color: disabled ? AuroraColors.surface : null,
             borderRadius: BorderRadius.circular(8),
             border: disabled
-                ? Border.all(color: const Color(0xFF3A3530), width: 0.5)
+                ? Border.all(color: const Color(0xFF252E27), width: 0.5)
                 : null,
             boxShadow: _hovering && !disabled
                 ? [
                     BoxShadow(
-                      color: AuroraColors.auroraTeal.withOpacity(0.35),
-                      blurRadius: 14,
+                      color: AuroraColors.auroraTeal.withOpacity(0.4),
+                      blurRadius: 16,
                       spreadRadius: 1,
                     ),
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 4,
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 5,
                       offset: const Offset(0, 2),
                     ),
                   ],
@@ -119,7 +116,7 @@ class _AuroraButtonState extends State<AuroraButton> {
                 Icon(widget.icon,
                     color: disabled
                         ? AuroraColors.textTertiary
-                        : const Color(0xFFFFF5E0),
+                        : const Color(0xFFF0E8D8),
                     size: 18),
                 const SizedBox(width: 8),
               ],
@@ -128,7 +125,7 @@ class _AuroraButtonState extends State<AuroraButton> {
                 style: TextStyle(
                   color: disabled
                       ? AuroraColors.textTertiary
-                      : const Color(0xFFFFF5E0),
+                      : const Color(0xFFF0E8D8),
                   fontWeight: FontWeight.w600,
                   fontSize: widget.compact ? 13 : 15,
                 ),
@@ -141,7 +138,6 @@ class _AuroraButtonState extends State<AuroraButton> {
   }
 }
 
-/// Nordic night background with subtle warm undertones
 class AuroraBackground extends StatelessWidget {
   final Widget child;
 
@@ -157,20 +153,20 @@ class AuroraBackground extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF1E1C1A),
+                Color(0xFF111815),
                 AuroraColors.deepSpace,
-                Color(0xFF141210),
+                Color(0xFF0A0E0C),
               ],
             ),
           ),
         ),
-        // Warm firelight glow from below
+        // Ember glow from below-left
         Positioned(
-          left: -80,
-          bottom: -150,
+          left: -100,
+          bottom: -160,
           child: Container(
-            width: 300,
-            height: 300,
+            width: 320,
+            height: 320,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
@@ -182,19 +178,19 @@ class AuroraBackground extends StatelessWidget {
             ),
           ),
         ),
-        // Cold frost hint from top right
+        // Lichen teal mist from top-right
         Positioned(
-          right: -100,
-          top: -120,
+          right: -120,
+          top: -100,
           child: Container(
-            width: 280,
-            height: 280,
+            width: 300,
+            height: 300,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AuroraColors.auroraBlue.withOpacity(0.05),
-                  AuroraColors.auroraBlue.withOpacity(0.0),
+                  AuroraColors.auroraGreen.withOpacity(0.04),
+                  AuroraColors.auroraGreen.withOpacity(0.0),
                 ],
               ),
             ),
@@ -206,7 +202,6 @@ class AuroraBackground extends StatelessWidget {
   }
 }
 
-/// Runestone-style filter chip
 class AuroraFilterChip extends StatefulWidget {
   final String label;
   final bool isSelected;
@@ -249,8 +244,8 @@ class _AuroraFilterChipState extends State<AuroraFilterChip> {
                 ? null
                 : Border.all(
                     color: Color.lerp(
-                      const Color(0xFF3A3530),
-                      const Color(0xFF4A4540),
+                      const Color(0xFF252E27),
+                      const Color(0xFF354038),
                       _hovering ? 1.0 : 0.0,
                     )!,
                     width: 0.5,
@@ -260,7 +255,7 @@ class _AuroraFilterChipState extends State<AuroraFilterChip> {
             widget.label,
             style: TextStyle(
               color: widget.isSelected
-                  ? const Color(0xFFFFF5E0)
+                  ? const Color(0xFFF0E8D8)
                   : AuroraColors.textSecondary,
               fontWeight: FontWeight.w500,
               fontSize: 14,
