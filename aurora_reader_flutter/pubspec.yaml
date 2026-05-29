@@ -28,6 +28,7 @@ dependencies:
 
   # File Import
   file_picker: ^11.0.2
+  desktop_drop: ^0.5.0
 
   # Charts (Activity screen)
   fl_chart: ^1.2.0

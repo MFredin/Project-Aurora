@@ -1,7 +1,9 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
@@ -26,13 +28,18 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   String _searchQuery = '';
   bool _isGridView = true;
   bool _isImporting = false;
+  bool _isDragOver = false;
+  String _importStatus = '';
 
   final _filters = ['All', 'Reading', 'Finished', 'Want to Read'];
+
+  static const _supportedExtensions = [
+    'epub', 'txt', 'pdf', 'fb2', 'mobi', 'rtf', 'docx',
+  ];
 
   List<BookModel> _filterAndSort(List<BookModel> allBooks) {
     var books = List<BookModel>.from(allBooks);
 
-    // Filter by status
     switch (_selectedFilter) {
       case 'Reading':
         books = books.where((b) => b.statusLabel == 'reading').toList();
@@ -45,7 +52,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         break;
     }
 
-    // Filter by search
     if (_searchQuery.isNotEmpty) {
       books = books
           .where((b) =>
@@ -54,7 +60,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           .toList();
     }
 
-    // Sort
     switch (_sortOption) {
       case _SortOption.title:
         books.sort((a, b) => a.title.compareTo(b.title));
@@ -66,7 +71,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         books.sort((a, b) => b.progressPercent.compareTo(a.progressPercent));
         break;
       case _SortOption.recent:
-        // Sort by lastOpened (most recent first), then by dateAdded
         books.sort((a, b) {
           final aDate = a.lastOpened ?? a.dateAdded;
           final bDate = b.lastOpened ?? b.dateAdded;
@@ -78,41 +82,109 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     return books;
   }
 
-  Future<void> _importBook() async {
+  Future<void> _importBooks() async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['epub', 'txt', 'pdf', 'fb2', 'mobi', 'rtf', 'docx'],
+      allowedExtensions: _supportedExtensions,
+      allowMultiple: true,
       withData: true,
     );
-    if (result == null || result.files.single.bytes == null) return;
+    if (result == null || result.files.isEmpty) return;
 
-    final file = result.files.single;
+    await _processFiles(result.files);
+  }
+
+  Future<void> _processFiles(List<PlatformFile> files) async {
+    final validFiles = files.where((f) {
+      if (f.bytes == null) return false;
+      final ext = f.name.split('.').last.toLowerCase();
+      return _supportedExtensions.contains(ext);
+    }).toList();
+
+    if (validFiles.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No supported files found')),
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _isImporting = true;
+      _importStatus = 'Importing ${validFiles.length} ${validFiles.length == 1 ? 'book' : 'books'}...';
+    });
+
     final parser = ref.read(bookParserServiceProvider);
+    final repo = ref.read(bookRepositoryProvider.notifier);
+    int imported = 0;
+    int failed = 0;
 
-    setState(() => _isImporting = true);
+    for (final file in validFiles) {
+      if (mounted) {
+        setState(() {
+          _importStatus = 'Importing ${imported + 1} of ${validFiles.length}: ${file.name}';
+        });
+      }
 
-    try {
-      final parsed = await parser.parseBookFromBytes(
-        Uint8List.fromList(file.bytes!),
-        file.name,
-      );
-      ref.read(bookRepositoryProvider.notifier).addParsedBook(parsed);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Added "${parsed.metadata.title}"')),
+      try {
+        final parsed = await parser.parseBookFromBytes(
+          Uint8List.fromList(file.bytes!),
+          file.name,
         );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to import: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isImporting = false);
+        repo.addParsedBook(parsed);
+        imported++;
+      } catch (_) {
+        failed++;
       }
     }
+
+    if (mounted) {
+      setState(() {
+        _isImporting = false;
+        _importStatus = '';
+      });
+      final msg = failed > 0
+          ? 'Added $imported ${imported == 1 ? 'book' : 'books'}, $failed failed'
+          : 'Added $imported ${imported == 1 ? 'book' : 'books'}';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg)),
+      );
+    }
+  }
+
+  void _confirmDelete(BookModel book) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Book',
+            style: TextStyle(color: AuroraColors.textPrimary)),
+        content: Text(
+          'Remove "${book.title}" from your library? This cannot be undone.',
+          style: const TextStyle(color: AuroraColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel',
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(bookRepositoryProvider.notifier).deleteBook(book.id);
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Deleted "${book.title}"')),
+              );
+            },
+            child: const Text('Delete',
+                style: TextStyle(color: AuroraColors.auroraWarm)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -126,7 +198,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final allBooks = ref.watch(bookRepositoryProvider);
     final books = _filterAndSort(allBooks);
 
-    return AuroraBackground(
+    Widget body = AuroraBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
@@ -150,7 +222,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                           ),
                         ),
                         const Spacer(),
-                        // Grid/List toggle
                         GestureDetector(
                           onTap: () =>
                               setState(() => _isGridView = !_isGridView),
@@ -163,7 +234,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        // Sort button
                         PopupMenuButton<_SortOption>(
                           icon: const Icon(
                             Icons.sort_rounded,
@@ -260,28 +330,75 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   ),
                 ],
               ),
-              // Loading overlay while importing
+              // Loading overlay
               if (_isImporting)
                 Positioned.fill(
                   child: Container(
                     color: Colors.black.withOpacity(0.4),
-                    child: const Center(
+                    child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(
+                          const CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation(
                                 AuroraColors.auroraTeal),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(
-                            'Importing book...',
-                            style: TextStyle(
+                            _importStatus.isNotEmpty
+                                ? _importStatus
+                                : 'Importing...',
+                            style: const TextStyle(
                               color: AuroraColors.textPrimary,
                               fontSize: 16,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+                ),
+              // Drag-and-drop overlay
+              if (_isDragOver)
+                Positioned.fill(
+                  child: Container(
+                    color: AuroraColors.deepSpace.withOpacity(0.85),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(40),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AuroraColors.auroraTeal,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          color: AuroraColors.surface.withOpacity(0.5),
+                        ),
+                        child: const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.file_download_rounded,
+                                color: AuroraColors.auroraTeal, size: 48),
+                            SizedBox(height: 16),
+                            Text(
+                              'Drop books here',
+                              style: TextStyle(
+                                color: AuroraColors.textPrimary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'EPUB, TXT, PDF, and more',
+                              style: TextStyle(
+                                color: AuroraColors.textSecondary,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -302,7 +419,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             ],
           ),
           child: FloatingActionButton(
-            onPressed: _isImporting ? null : _importBook,
+            onPressed: _isImporting ? null : _importBooks,
             backgroundColor: Colors.transparent,
             elevation: 0,
             child:
@@ -311,6 +428,28 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         ),
       ),
     );
+
+    body = DropTarget(
+      onDragEntered: (_) => setState(() => _isDragOver = true),
+      onDragExited: (_) => setState(() => _isDragOver = false),
+      onDragDone: (details) async {
+        setState(() => _isDragOver = false);
+        if (_isImporting) return;
+        final files = <PlatformFile>[];
+        for (final xFile in details.files) {
+          final bytes = await xFile.readAsBytes();
+          files.add(PlatformFile(
+            name: xFile.name,
+            size: bytes.length,
+            bytes: bytes,
+          ));
+        }
+        if (files.isNotEmpty) _processFiles(files);
+      },
+      child: body,
+    );
+
+    return body;
   }
 
   Widget _buildGridView(List<BookModel> books) {
@@ -327,6 +466,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       itemBuilder: (context, index) => _BookGridCard(
         book: books[index],
         onTap: () => context.go('/reader/${books[index].id}'),
+        onLongPress: () => _confirmDelete(books[index]),
       ),
     );
   }
@@ -336,9 +476,28 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
       itemCount: books.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) => _BookListTile(
-        book: books[index],
-        onTap: () => context.go('/reader/${books[index].id}'),
+      itemBuilder: (context, index) => Dismissible(
+        key: ValueKey(books[index].id),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          decoration: BoxDecoration(
+            color: AuroraColors.auroraWarm.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Icon(Icons.delete_rounded,
+              color: AuroraColors.auroraWarm, size: 28),
+        ),
+        confirmDismiss: (_) async {
+          _confirmDelete(books[index]);
+          return false;
+        },
+        child: _BookListTile(
+          book: books[index],
+          onTap: () => context.go('/reader/${books[index].id}'),
+          onLongPress: () => _confirmDelete(books[index]),
+        ),
       ),
     );
   }
@@ -376,10 +535,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Tap + to add books from your device\nor browse the Discover tab',
+          Text(
+            kIsWeb
+                ? 'Drag & drop ebook files here\nor tap + to browse'
+                : 'Tap + to add books from your device',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: AuroraColors.textSecondary,
               fontSize: 14,
             ),
@@ -388,7 +549,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           AuroraButton(
             label: 'Add Your First Book',
             icon: Icons.add_rounded,
-            onPressed: _importBook,
+            onPressed: _importBooks,
           ),
         ],
       ),
@@ -419,7 +580,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 class _BookGridCard extends StatelessWidget {
   final BookModel book;
   final VoidCallback onTap;
-  const _BookGridCard({required this.book, required this.onTap});
+  final VoidCallback onLongPress;
+  const _BookGridCard({
+    required this.book,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -427,6 +593,7 @@ class _BookGridCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -450,7 +617,6 @@ class _BookGridCard extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: Stack(
                 children: [
-                  // Cover image or fallback gradient text
                   if (book.coverImageData != null)
                     Positioned.fill(
                       child: Image.memory(
@@ -522,7 +688,6 @@ class _BookGridCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Status indicator
                   if (book.statusLabel == 'finished')
                     Positioned(
                       top: 8,
@@ -542,7 +707,6 @@ class _BookGridCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          // Title
           Text(
             book.title,
             maxLines: 1,
@@ -554,7 +718,6 @@ class _BookGridCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          // Author
           Text(
             book.author,
             maxLines: 1,
@@ -565,7 +728,6 @@ class _BookGridCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          // Progress bar
           if (progress > 0 && progress < 1.0) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
@@ -604,7 +766,12 @@ class _BookGridCard extends StatelessWidget {
 class _BookListTile extends StatelessWidget {
   final BookModel book;
   final VoidCallback onTap;
-  const _BookListTile({required this.book, required this.onTap});
+  final VoidCallback onLongPress;
+  const _BookListTile({
+    required this.book,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -614,117 +781,117 @@ class _BookListTile extends StatelessWidget {
     return AuroraCard(
       onTap: onTap,
       padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          // Mini cover
-          Container(
-            width: 48,
-            height: 68,
-            decoration: BoxDecoration(
-              gradient: book.coverImageData == null
-                  ? AuroraColors.coverGradient(book.title)
-                  : null,
-              borderRadius: BorderRadius.circular(6),
+      child: GestureDetector(
+        onLongPress: onLongPress,
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 68,
+              decoration: BoxDecoration(
+                gradient: book.coverImageData == null
+                    ? AuroraColors.coverGradient(book.title)
+                    : null,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: book.coverImageData != null
+                  ? Image.memory(
+                      book.coverImageData!,
+                      fit: BoxFit.cover,
+                    )
+                  : Center(
+                      child: Icon(
+                        Icons.menu_book_rounded,
+                        color: Colors.white.withOpacity(0.7),
+                        size: 20,
+                      ),
+                    ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: book.coverImageData != null
-                ? Image.memory(
-                    book.coverImageData!,
-                    fit: BoxFit.cover,
-                  )
-                : Center(
-                    child: Icon(
-                      Icons.menu_book_rounded,
-                      color: Colors.white.withOpacity(0.7),
-                      size: 20,
-                    ),
-                  ),
-          ),
-          const SizedBox(width: 12),
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  book.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AuroraColors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  book.author,
-                  style: const TextStyle(
-                    color: AuroraColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                if (progress > 0) ...[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 3,
-                      backgroundColor: AuroraColors.surface,
-                      valueColor: const AlwaysStoppedAnimation(
-                          AuroraColors.auroraTeal),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    progress >= 1.0
-                        ? 'Finished'
-                        : '${(progress * 100).toInt()}% complete',
-                    style: TextStyle(
-                      color: progress >= 1.0
-                          ? AuroraColors.auroraGreen
-                          : AuroraColors.textTertiary,
-                      fontSize: 11,
+                    book.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AuroraColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    book.author,
+                    style: const TextStyle(
+                      color: AuroraColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (progress > 0) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 3,
+                        backgroundColor: AuroraColors.surface,
+                        valueColor: const AlwaysStoppedAnimation(
+                            AuroraColors.auroraTeal),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      progress >= 1.0
+                          ? 'Finished'
+                          : '${(progress * 100).toInt()}% complete',
+                      style: TextStyle(
+                        color: progress >= 1.0
+                            ? AuroraColors.auroraGreen
+                            : AuroraColors.textTertiary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          // Format + pages
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AuroraColors.surfaceElevated,
-                  borderRadius: BorderRadius.circular(4),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AuroraColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    book.format.toUpperCase(),
+                    style: const TextStyle(
+                      color: AuroraColors.textTertiary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-                child: Text(
-                  book.format.toUpperCase(),
+                const SizedBox(height: 4),
+                Text(
+                  estimatedPages > 0
+                      ? '$estimatedPages pages'
+                      : '${book.chapters.length} ch.',
                   style: const TextStyle(
                     color: AuroraColors.textTertiary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
                   ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                estimatedPages > 0
-                    ? '$estimatedPages pages'
-                    : '${book.chapters.length} ch.',
-                style: const TextStyle(
-                  color: AuroraColors.textTertiary,
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
