@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -328,86 +327,81 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       top: 0,
       left: 0,
       right: 0,
-      child: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AuroraColors.deepSpace.withOpacity(0.85),
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.white.withOpacity(0.06),
-                  width: 0.5,
-                ),
-              ),
-            ),
-            padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded,
-                      color: AuroraColors.textPrimary, size: 22),
-                  onPressed: () => Navigator.of(context).maybePop(),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        book.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AuroraColors.textPrimary,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        'Chapter ${_currentChapter + 1} of ${book.chapters.length}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AuroraColors.textTertiary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.bookmark_border_rounded,
-                      color: AuroraColors.auroraTeal, size: 22),
-                  onPressed: () {
-                    final content = book.chapters[_currentChapter].content;
-                    ref.read(bookRepositoryProvider.notifier).addBookmark(
-                          widget.bookId,
-                          BookmarkModel(
-                            id: UniqueKey().toString(),
-                            bookId: widget.bookId,
-                            title: 'Chapter ${_currentChapter + 1}',
-                            chapter: _currentChapter,
-                            textSnippet: content.length > 100
-                                ? content.substring(0, 100)
-                                : content,
-                            dateCreated: DateTime.now(),
-                          ),
-                        );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Bookmark added')),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.format_list_bulleted_rounded,
-                      color: AuroraColors.textSecondary, size: 22),
-                  onPressed: () => _showChapterList(book),
-                ),
-              ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: AuroraColors.cosmos.withOpacity(0.95),
+          border: Border(
+            bottom: BorderSide(
+              color: const Color(0xFF3A3530).withOpacity(0.6),
+              width: 0.5,
             ),
           ),
+        ),
+        padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_rounded,
+                  color: AuroraColors.textPrimary, size: 22),
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    book.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AuroraColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    'Chapter ${_currentChapter + 1} of ${book.chapters.length}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AuroraColors.textTertiary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.bookmark_border_rounded,
+                  color: AuroraColors.auroraTeal, size: 22),
+              onPressed: () {
+                final content = book.chapters[_currentChapter].content;
+                ref.read(bookRepositoryProvider.notifier).addBookmark(
+                      widget.bookId,
+                      BookmarkModel(
+                        id: UniqueKey().toString(),
+                        bookId: widget.bookId,
+                        title: 'Chapter ${_currentChapter + 1}',
+                        chapter: _currentChapter,
+                        textSnippet: content.length > 100
+                            ? content.substring(0, 100)
+                            : content,
+                        dateCreated: DateTime.now(),
+                      ),
+                    );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Bookmark added')),
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.format_list_bulleted_rounded,
+                  color: AuroraColors.textSecondary, size: 22),
+              onPressed: () => _showChapterList(book),
+            ),
+          ],
         ),
       ),
     );
@@ -418,36 +412,30 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AuroraColors.deepSpace.withOpacity(0.85),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.white.withOpacity(0.06),
-                  width: 0.5,
-                ),
-              ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AuroraColors.cosmos.withOpacity(0.95),
+          border: Border(
+            top: BorderSide(
+              color: const Color(0xFF3A3530).withOpacity(0.6),
+              width: 0.5,
             ),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: Row(
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Previous chapter
             _ToolbarButton(
               icon: Icons.chevron_left_rounded,
               label: 'Prev',
               onTap: _currentChapter > 0 ? _previousChapter : null,
             ),
-            // Font size
             _ToolbarButton(
               icon: Icons.text_fields_rounded,
               label: 'Font',
               onTap: () => setState(() => _showSettings = !_showSettings),
             ),
-            // Brightness
             _ToolbarButton(
               icon: Icons.brightness_6_rounded,
               label: 'Light',
@@ -457,7 +445,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                 });
               },
             ),
-            // Scroll/Page mode
             _ToolbarButton(
               icon: _isScrollMode
                   ? Icons.swap_horiz_rounded
@@ -465,7 +452,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               label: _isScrollMode ? 'Scroll' : 'Page',
               onTap: () => setState(() => _isScrollMode = !_isScrollMode),
             ),
-            // Next chapter
             _ToolbarButton(
               icon: Icons.chevron_right_rounded,
               label: 'Next',
@@ -474,8 +460,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   : null,
             ),
           ],
-        ),
-      ),
         ),
       ),
     );
@@ -623,7 +607,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             Container(
               width: 1,
               height: 28,
-              color: Colors.white.withOpacity(0.1),
+              color: const Color(0xFF3A3530),
             ),
             const SizedBox(width: 8),
             // Highlight action

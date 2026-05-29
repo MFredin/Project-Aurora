@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/aurora_theme.dart';
@@ -10,7 +9,7 @@ class AdaptiveShell extends StatelessWidget {
   const AdaptiveShell({super.key, required this.child});
 
   static const _destinations = [
-    (icon: Icons.library_books_rounded, activeIcon: Icons.library_books, label: 'Library', path: '/library'),
+    (icon: Icons.library_books_outlined, activeIcon: Icons.library_books, label: 'Library', path: '/library'),
     (icon: Icons.insights_outlined, activeIcon: Icons.insights, label: 'Activity', path: '/activity'),
     (icon: Icons.hub_outlined, activeIcon: Icons.hub, label: 'Knowledge', path: '/knowledge'),
     (icon: Icons.cloud_outlined, activeIcon: Icons.cloud, label: 'Cloud', path: '/cloud'),
@@ -43,37 +42,32 @@ class AdaptiveShell extends StatelessWidget {
     return Scaffold(
       body: child,
       extendBody: true,
-      bottomNavigationBar: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AuroraColors.deepSpace.withOpacity(0.8),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.white.withOpacity(0.06),
-                  width: 0.5,
-                ),
-              ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AuroraColors.cosmos.withOpacity(0.95),
+          border: Border(
+            top: BorderSide(
+              color: const Color(0xFF3A3530).withOpacity(0.6),
+              width: 0.5,
             ),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(_destinations.length, (i) {
-                    final dest = _destinations[i];
-                    final isActive = selectedIndex == i;
-                    return _NavItem(
-                      icon: isActive ? dest.activeIcon : dest.icon,
-                      label: dest.label,
-                      isActive: isActive,
-                      onTap: () => _onDestinationSelected(context, i),
-                    );
-                  }),
-                ),
-              ),
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(_destinations.length, (i) {
+                final dest = _destinations[i];
+                final isActive = selectedIndex == i;
+                return _NavItem(
+                  icon: isActive ? dest.activeIcon : dest.icon,
+                  label: dest.label,
+                  isActive: isActive,
+                  onTap: () => _onDestinationSelected(context, i),
+                );
+              }),
             ),
           ),
         ),
@@ -90,10 +84,10 @@ class AdaptiveShell extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: AuroraColors.cosmos.withOpacity(0.9),
+              color: AuroraColors.cosmos.withOpacity(0.95),
               border: Border(
                 right: BorderSide(
-                  color: Colors.white.withOpacity(0.06),
+                  color: const Color(0xFF3A3530).withOpacity(0.6),
                   width: 0.5,
                 ),
               ),
@@ -115,7 +109,7 @@ class AdaptiveShell extends StatelessWidget {
               unselectedLabelTextStyle: const TextStyle(
                 color: AuroraColors.textTertiary,
               ),
-              indicatorColor: AuroraColors.auroraTeal.withOpacity(0.12),
+              indicatorColor: AuroraColors.auroraTeal.withOpacity(0.1),
               onDestinationSelected: (index) =>
                   _onDestinationSelected(context, index),
               destinations: [
@@ -173,11 +167,11 @@ class _NavItemState extends State<_NavItem> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                   color: widget.isActive
-                      ? AuroraColors.auroraTeal.withOpacity(0.15)
+                      ? AuroraColors.auroraTeal.withOpacity(0.12)
                       : _hovering
-                          ? Colors.white.withOpacity(0.05)
+                          ? Colors.white.withOpacity(0.04)
                           : Colors.transparent,
                 ),
                 child: Icon(

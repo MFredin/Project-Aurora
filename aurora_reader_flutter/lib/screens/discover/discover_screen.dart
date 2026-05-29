@@ -92,10 +92,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 // Search bar
                 Container(
               decoration: BoxDecoration(
-                color: AuroraColors.surface,
-                borderRadius: BorderRadius.circular(12),
+                color: AuroraColors.surface.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: const Color(0xFF3A3530),
                   width: 0.5,
                 ),
               ),

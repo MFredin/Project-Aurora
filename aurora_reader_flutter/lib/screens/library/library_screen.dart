@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -292,16 +291,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
+                      child: Container(
                             decoration: BoxDecoration(
-                              color: AuroraColors.surface.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(14),
+                              color: AuroraColors.surface.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.08),
+                                color: const Color(0xFF3A3530),
                                 width: 0.5,
                               ),
                             ),
@@ -334,8 +329,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                               ),
                             ),
                           ),
-                        ),
-                      ),
                     ),
                   ),
 
@@ -397,19 +390,21 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   child: Container(
                     color: Colors.black.withOpacity(0.5),
                     child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
+                      child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 40, vertical: 32),
                             decoration: BoxDecoration(
-                              color: AuroraColors.surface.withOpacity(0.7),
-                              borderRadius: BorderRadius.circular(20),
+                              color: AuroraColors.surfaceElevated,
+                              borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.1),
+                                color: const Color(0xFF3A3530),
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 16,
+                                ),
+                              ],
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -436,8 +431,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                                 ),
                               ],
                             ),
-                          ),
-                        ),
                       ),
                     ),
                   ),
@@ -703,19 +696,15 @@ class _BookDetailSheet extends StatelessWidget {
     final readMinutes = book.progress.totalReadingSeconds ~/ 60;
     final bottomPad = MediaQuery.of(context).padding.bottom + 80;
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
+    return Container(
           padding: EdgeInsets.fromLTRB(20, 12, 20, bottomPad),
           decoration: BoxDecoration(
-            color: AuroraColors.cosmos.withOpacity(0.92),
+            color: AuroraColors.cosmos,
             borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(24)),
+                const BorderRadius.vertical(top: Radius.circular(20)),
             border: Border(
               top: BorderSide(
-                color: Colors.white.withOpacity(0.1),
+                color: const Color(0xFF3A3530).withOpacity(0.8),
                 width: 0.5,
               ),
             ),
@@ -894,8 +883,6 @@ class _BookDetailSheet extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
     );
   }
 }
@@ -1037,17 +1024,12 @@ class _BookGridCardState extends State<_BookGridCard> {
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: BackdropFilter(
-                            filter:
-                                ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                            child: Container(
+                        child: Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 7, vertical: 3),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(6),
+                                color: Colors.black.withOpacity(0.4),
+                                borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 widget.book.format.toUpperCase(),
@@ -1058,8 +1040,6 @@ class _BookGridCardState extends State<_BookGridCard> {
                                   letterSpacing: 0.5,
                                 ),
                               ),
-                            ),
-                          ),
                         ),
                       ),
                       if (widget.book.statusLabel == 'finished')
@@ -1172,8 +1152,8 @@ class _BookListTileState extends State<_BookListTile> {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: _hovering
-                  ? Colors.white.withOpacity(0.12)
-                  : Colors.white.withOpacity(0.06),
+                  ? const Color(0xFF4A4540)
+                  : const Color(0xFF3A3530),
               width: 0.5,
             ),
           ),

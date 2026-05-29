@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'aurora_theme.dart';
 
-/// Frosted glass card with blur effect
+/// Stone tablet card with subtle grain texture
 class AuroraCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -14,36 +14,37 @@ class AuroraCard extends StatelessWidget {
     required this.child,
     this.padding,
     this.onTap,
-    this.blurAmount = 12,
+    this.blurAmount = 8,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blurAmount, sigmaY: blurAmount),
-          child: Container(
-            padding: padding ?? const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AuroraColors.surface.withOpacity(0.55),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.1),
-                width: 0.5,
-              ),
-            ),
-            child: child,
+      child: Container(
+        padding: padding ?? const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AuroraColors.surface.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFF3A3530),
+            width: 0.5,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
+        child: child,
       ),
     );
   }
 }
 
-/// Aurora gradient button with glow
+/// Hammered metal button with amber glow
 class AuroraButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -56,7 +57,7 @@ class AuroraButton extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.gradient = const LinearGradient(
-      colors: [AuroraColors.auroraTeal, AuroraColors.auroraGreen],
+      colors: [Color(0xFFC4973B), Color(0xFFA8802E)],
     ),
     this.icon,
     this.compact = false,
@@ -87,31 +88,39 @@ class _AuroraButtonState extends State<AuroraButton> {
           decoration: BoxDecoration(
             gradient: disabled ? null : widget.gradient,
             color: disabled ? AuroraColors.surface : null,
-            borderRadius: BorderRadius.circular(100),
+            borderRadius: BorderRadius.circular(8),
+            border: disabled
+                ? Border.all(color: const Color(0xFF3A3530), width: 0.5)
+                : null,
             boxShadow: _hovering && !disabled
                 ? [
                     BoxShadow(
-                      color: AuroraColors.auroraTeal.withOpacity(0.5),
-                      blurRadius: 16,
+                      color: AuroraColors.auroraTeal.withOpacity(0.35),
+                      blurRadius: 14,
                       spreadRadius: 1,
                     ),
                   ]
                 : [
                     BoxShadow(
-                      color: AuroraColors.auroraTeal.withOpacity(0.2),
-                      blurRadius: 8,
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
                   ],
           ),
           transform: _hovering && !disabled
-              ? (Matrix4.identity()..scale(1.03))
+              ? (Matrix4.identity()..scale(1.02))
               : Matrix4.identity(),
           transformAlignment: Alignment.center,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (widget.icon != null) ...[
-                Icon(widget.icon, color: Colors.white, size: 18),
+                Icon(widget.icon,
+                    color: disabled
+                        ? AuroraColors.textTertiary
+                        : const Color(0xFFFFF5E0),
+                    size: 18),
                 const SizedBox(width: 8),
               ],
               Text(
@@ -119,7 +128,7 @@ class _AuroraButtonState extends State<AuroraButton> {
                 style: TextStyle(
                   color: disabled
                       ? AuroraColors.textTertiary
-                      : Colors.white,
+                      : const Color(0xFFFFF5E0),
                   fontWeight: FontWeight.w600,
                   fontSize: widget.compact ? 13 : 15,
                 ),
@@ -132,7 +141,7 @@ class _AuroraButtonState extends State<AuroraButton> {
   }
 }
 
-/// Animated aurora background with layered glows
+/// Nordic night background with subtle warm undertones
 class AuroraBackground extends StatelessWidget {
   final Widget child;
 
@@ -148,33 +157,17 @@ class AuroraBackground extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF0D0D28),
+                Color(0xFF1E1C1A),
                 AuroraColors.deepSpace,
-                Color(0xFF080818),
+                Color(0xFF141210),
               ],
             ),
           ),
         ),
+        // Warm firelight glow from below
         Positioned(
-          left: -120,
-          top: -180,
-          child: Container(
-            width: 350,
-            height: 350,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AuroraColors.auroraGreen.withOpacity(0.15),
-                  AuroraColors.auroraGreen.withOpacity(0.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          right: -60,
-          top: -80,
+          left: -80,
+          bottom: -150,
           child: Container(
             width: 300,
             height: 300,
@@ -182,42 +175,26 @@ class AuroraBackground extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AuroraColors.auroraBlue.withOpacity(0.12),
-                  AuroraColors.auroraBlue.withOpacity(0.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          right: -80,
-          bottom: -120,
-          child: Container(
-            width: 400,
-            height: 400,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AuroraColors.auroraPurple.withOpacity(0.12),
-                  AuroraColors.auroraPurple.withOpacity(0.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          left: -40,
-          bottom: -60,
-          child: Container(
-            width: 250,
-            height: 250,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AuroraColors.auroraTeal.withOpacity(0.08),
+                  AuroraColors.auroraTeal.withOpacity(0.06),
                   AuroraColors.auroraTeal.withOpacity(0.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Cold frost hint from top right
+        Positioned(
+          right: -100,
+          top: -120,
+          child: Container(
+            width: 280,
+            height: 280,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  AuroraColors.auroraBlue.withOpacity(0.05),
+                  AuroraColors.auroraBlue.withOpacity(0.0),
                 ],
               ),
             ),
@@ -229,7 +206,7 @@ class AuroraBackground extends StatelessWidget {
   }
 }
 
-/// Filter chip styled for Aurora theme
+/// Runestone-style filter chip
 class AuroraFilterChip extends StatefulWidget {
   final String label;
   final bool isSelected;
@@ -266,19 +243,25 @@ class _AuroraFilterChipState extends State<AuroraFilterChip> {
                 ? null
                 : _hovering
                     ? AuroraColors.surfaceElevated
-                    : AuroraColors.surface.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(100),
+                    : AuroraColors.surface.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(8),
             border: widget.isSelected
                 ? null
                 : Border.all(
-                    color: Colors.white.withOpacity(_hovering ? 0.15 : 0.06),
+                    color: Color.lerp(
+                      const Color(0xFF3A3530),
+                      const Color(0xFF4A4540),
+                      _hovering ? 1.0 : 0.0,
+                    )!,
                     width: 0.5,
                   ),
           ),
           child: Text(
             widget.label,
             style: TextStyle(
-              color: widget.isSelected ? Colors.white : AuroraColors.textSecondary,
+              color: widget.isSelected
+                  ? const Color(0xFFFFF5E0)
+                  : AuroraColors.textSecondary,
               fontWeight: FontWeight.w500,
               fontSize: 14,
             ),
