@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Aurora Reader</title>
+  <script>
+    // Redirect all paths to index.html with hash routing.
+    // GitHub Pages serves this file for any unknown path.
+    var path = window.location.pathname;
+    var base = '/Project-Aurora/';
+    if (path.startsWith(base)) {
+      path = path.substring(base.length);
+    }
+    if (path && path !== '/' && path !== 'index.html') {
+      window.location.replace(base + '#/' + path + window.location.search);
+    } else {
+      window.location.replace(base);
+    }
+  </script>
+</head>
+<body>
+  <p style="color:#26C7D1;font-family:sans-serif;text-align:center;margin-top:40vh">
+    Redirecting to Aurora Reader...
+  </p>
+</body>
+</html>
