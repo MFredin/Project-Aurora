@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edda — Product Roadmap & Competitive Analysis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --deep-space: #0D1210;
+    --cosmos: #141A16;
+    --surface: #1A211C;
+    --teal: #B87944;
+    --green: #5A9E8F;
+    --gold: #A89060;
+    --text-primary: #D4D0C8;
+    --text-secondary: #8A8680;
+    --text-tertiary: #6B7066;
+    --warm: #C25B3A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--deep-space);
+    color: var(--text-primary);
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  @media print {
+    body { background: white; color: #1a1a1a; font-size: 11pt; }
+    .cover { page-break-after: always; background: var(--deep-space) !important; color: var(--text-primary) !important; }
+    .section { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; }
+    table { font-size: 9pt; }
+    .no-print { display: none; }
+  }
+
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+    background: linear-gradient(160deg, var(--deep-space) 0%, var(--cosmos) 50%, var(--surface) 100%);
+  }
+
+  .cover h1 {
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+
+  .cover .subtitle {
+    font-size: 20px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+
+  .cover .tagline {
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 22px;
+    color: var(--text-primary);
+    max-width: 700px;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .cover .date {
+    margin-top: 60px;
+    font-size: 14px;
+    color: var(--text-tertiary);
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  h2 {
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--teal);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(184,121,68,0.3);
+    letter-spacing: -0.5px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--green);
+    margin: 32px 0 12px;
+  }
+
+  h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gold);
+    margin: 20px 0 8px;
+  }
+
+  p { margin-bottom: 16px; color: var(--text-secondary); }
+
+  .section { margin-bottom: 56px; }
+
+  .highlight-box {
+    background: rgba(184,121,68,0.08);
+    border-left: 3px solid var(--teal);
+    padding: 20px 24px;
+    border-radius: 0 8px 8px 0;
+    margin: 24px 0;
+  }
+
+  .highlight-box p { margin-bottom: 0; color: var(--text-primary); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--surface);
+    color: var(--teal);
+    font-weight: 600;
+    border-bottom: 2px solid rgba(184,121,68,0.3);
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(107,112,102,0.2);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+
+  tr:hover td { background: rgba(90,158,143,0.05); }
+
+  .check { color: var(--green); font-weight: bold; }
+  .cross { color: var(--text-tertiary); }
+  .star { color: var(--gold); }
+
+  ul, ol {
+    margin: 12px 0 20px 24px;
+    color: var(--text-secondary);
+  }
+
+  li { margin-bottom: 6px; }
+  li strong { color: var(--text-primary); }
+
+  .tier-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .tier-1 { background: rgba(184,121,68,0.2); color: var(--teal); }
+  .tier-2 { background: rgba(90,158,143,0.2); color: var(--green); }
+  .tier-3 { background: rgba(168,144,96,0.2); color: var(--gold); }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid rgba(107,112,102,0.2);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .feature-card h4 { margin-top: 0; }
+
+  .pipeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+    align-items: center;
+  }
+
+  .pipeline-step {
+    background: var(--surface);
+    border: 1px solid rgba(107,112,102,0.3);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .pipeline-arrow {
+    color: var(--text-tertiary);
+    font-size: 18px;
+  }
+
+  .roadmap-phase {
+    display: flex;
+    align-items: flex-start;
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--surface);
+    border-radius: 10px;
+    border-left: 3px solid var(--teal);
+  }
+
+  .phase-number {
+    min-width: 36px;
+    height: 36px;
+    background: rgba(184,121,68,0.2);
+    color: var(--teal);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+
+  .phase-content h4 { margin-top: 0; color: var(--text-primary); }
+  .phase-content p { font-size: 13px; margin-bottom: 0; }
+
+  .download-btn {
+    display: inline-block;
+    background: var(--teal);
+    color: white;
+    padding: 12px 32px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 15px;
+    margin: 20px 0;
+  }
+
+  .download-btn:hover { opacity: 0.9; }
+
+  @media (max-width: 600px) {
+    .container { padding: 32px 20px; }
+    .cover h1 { font-size: 48px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    table { font-size: 11px; }
+    th, td { padding: 6px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cover Page -->
+<div class="cover">
+  <h1>Edda</h1>
+  <div class="subtitle">Product Roadmap</div>
+  <div class="tagline">
+    "The single app where you discover, read, track, journal, discuss, and own your entire reading life —
+    with an AI companion, ambient soundscapes, and zero lock-in."
+  </div>
+  <div class="date">Competitive Analysis & Feature Roadmap — May 2026</div>
+  <div class="no-print" style="margin-top:40px">
+    <button class="download-btn" onclick="window.print()">Download as PDF</button>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- The Problem -->
+<div class="section">
+  <h2>The Problem We're Solving</h2>
+  <p>Modern readers use <strong>3-5+ apps</strong> to manage their reading lives. No single app covers more than 2-3 stages of the reading lifecycle well.</p>
+
+  <div class="pipeline">
+    <span class="pipeline-step">Discover</span>
+    <span class="pipeline-arrow">&rarr;</span>
+    <span class="pipeline-step">Acquire</span>
+    <span class="pipeline-arrow">&rarr;</span>
+    <span class="pipeline-step">Read</span>
+    <span class="pipeline-arrow">&rarr;</span>
+    <span class="pipeline-step">Track</span>
+    <span class="pipeline-arrow">&rarr;</span>
+    <span class="pipeline-step">Journal</span>
+    <span class="pipeline-arrow">&rarr;</span>
+    <span class="pipeline-step">Review</span>
+    <span class="pipeline-arrow">&rarr;</span>
+    <span class="pipeline-step">Discuss</span>
+    <span class="pipeline-arrow">&rarr;</span>
+    <span class="pipeline-step">Export</span>
+  </div>
+
+  <table>
+    <tr><th>Stage</th><th>Typical Tools</th><th>Pain</th></tr>
+    <tr><td>Discover</td><td>BookTok, Goodreads, StoryGraph, Reddit</td><td>Scattered recommendations, no unified wishlist</td></tr>
+    <tr><td>Acquire</td><td>Kindle, Libby, Kobo, bookstores</td><td>Format lock-in, DRM silos</td></tr>
+    <tr><td>Read</td><td>Kindle, Apple Books, Kobo, physical</td><td>Highlights trapped in ecosystems</td></tr>
+    <tr><td>Track</td><td>StoryGraph, Goodreads, spreadsheets</td><td>Double-entry across platforms</td></tr>
+    <tr><td>Journal</td><td>Notion, physical journals</td><td>No integration with reading data</td></tr>
+    <tr><td>Review</td><td>Goodreads + StoryGraph</td><td>Duplicated effort</td></tr>
+    <tr><td>Discuss</td><td>Discord, group chats, Fable</td><td>No spoiler gating, logistics scattered</td></tr>
+    <tr><td>Export</td><td>Readwise ($8-12/mo)</td><td>Paying to access your own highlights</td></tr>
+  </table>
+</div>
+
+<!-- Current Features -->
+<div class="section">
+  <h2>What Edda Has Today</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h4>Reading Engine</h4>
+      <ul>
+        <li>EPUB, PDF, TXT, MOBI, AZW, FB2 formats</li>
+        <li>Continuous scrolling &amp; page mode</li>
+        <li>Customizable font size &amp; brightness</li>
+        <li>Dark / Light mode (Hive-persisted)</li>
+      </ul>
+    </div>
+    <div class="feature-card">
+      <h4>AI & Audio</h4>
+      <ul>
+        <li>AI reading companion (LLM-powered)</li>
+        <li>Ambient soundscapes</li>
+        <li>Text-to-speech</li>
+        <li>Dictionary lookup</li>
+      </ul>
+    </div>
+    <div class="feature-card">
+      <h4>Organization</h4>
+      <ul>
+        <li>Highlights &amp; bookmarks</li>
+        <li>Reading statistics &amp; session tracking</li>
+        <li>Book discovery (Open Library / Google Books)</li>
+        <li>Google Drive import</li>
+      </ul>
+    </div>
+    <div class="feature-card">
+      <h4>Platform</h4>
+      <ul>
+        <li>Cross-device sync</li>
+        <li>Data export</li>
+        <li>Drag-and-drop book import</li>
+        <li>Cross-platform (Flutter)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Competitive Landscape -->
+<div class="section">
+  <h2>Competitive Landscape</h2>
+
+  <table>
+    <tr><th>Competitor</th><th>Strength</th><th>Key Weakness</th></tr>
+    <tr><td><strong>Goodreads</strong></td><td>150M users, largest database</td><td>Outdated UI, no dark mode, no half-stars, review bombing</td></tr>
+    <tr><td><strong>StoryGraph</strong></td><td>Mood/pace tags, quarter-stars, deep stats</td><td>Weak social features, smaller database</td></tr>
+    <tr><td><strong>Fable</strong></td><td>Book clubs, social reading, celebrity curation</td><td>Low engagement, $70/yr, performance issues</td></tr>
+    <tr><td><strong>Kindle</strong></td><td>Best sync, X-Ray, Word Wise, massive catalog</td><td>DRM lock-in, highlight caps (1-15%), poor library org</td></tr>
+    <tr><td><strong>Google Books</strong></td><td>Free upload, Gemini AI, DRM-free option</td><td>No shelves, highlight bugs, smaller catalog</td></tr>
+    <tr><td><strong>Audible</strong></td><td>Largest audiobook catalog, ownership model</td><td>DRM, no note export, storefront-heavy UX</td></tr>
+    <tr><td><strong>Bookly</strong></td><td>Timer + ambient sounds, streaks, infographics</td><td>10-book free limit, expensive</td></tr>
+    <tr><td><strong>Readwise</strong></td><td>Highlight aggregation, PKM sync, spaced repetition</td><td>$120/yr just to access your own highlights</td></tr>
+    <tr><td><strong>Notion</strong></td><td>Infinite customization for journals</td><td>Manual entry, no scanning, offline-limited</td></tr>
+  </table>
+</div>
+
+<!-- Feature Comparison Matrix -->
+<div class="section">
+  <h2>Feature Comparison Matrix</h2>
+  <table>
+    <tr>
+      <th>Feature</th><th>Goodreads</th><th>StoryGraph</th><th>Fable</th><th>Kindle</th><th>Readwise</th><th>Edda Now</th><th>Edda Goal</th>
+    </tr>
+    <tr><td>Read ebooks</td><td class="cross">-</td><td class="cross">-</td><td>Partial</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+    <tr><td>Multi-format (6+)</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td>Limited</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+    <tr><td>AI companion</td><td class="cross">-</td><td class="cross">-</td><td>Scout</td><td>Ask Book</td><td>Ghost</td><td class="check">&#10003;</td><td class="star">&#9733;</td></tr>
+    <tr><td>Ambient sounds</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+    <tr><td>TTS</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+    <tr><td>Deep stats</td><td class="cross">-</td><td class="check">&#10003;</td><td>Good</td><td>Basic</td><td class="cross">-</td><td>Basic</td><td class="star">&#9733;</td></tr>
+    <tr><td>Book tracking</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td>Basic</td><td class="cross">-</td><td class="cross">-</td><td class="star">&#9733;</td></tr>
+    <tr><td>Reading journal</td><td class="cross">-</td><td>Partial</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="star">&#9733;</td></tr>
+    <tr><td>Social features</td><td class="check">&#10003;</td><td>Minimal</td><td class="check">&#10003;</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="star">&#9733;</td></tr>
+    <tr><td>Book clubs</td><td>Groups</td><td>Buddy</td><td class="check">&#10003;</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="star">&#9733;</td></tr>
+    <tr><td>Goals &amp; gamification</td><td>Basic</td><td>Basic</td><td>Streaks</td><td>Insights</td><td class="cross">-</td><td class="cross">-</td><td class="star">&#9733;</td></tr>
+    <tr><td>Mood/pace tags</td><td class="cross">-</td><td class="check">&#10003;</td><td>Via AI</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="star">&#9733;</td></tr>
+    <tr><td>Content warnings</td><td class="cross">-</td><td class="check">&#10003;</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="star">&#9733;</td></tr>
+    <tr><td>PKM export</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td>Capped</td><td class="check">&#10003;</td><td>Basic</td><td class="star">&#9733;</td></tr>
+    <tr><td>Quarter-star ratings</td><td class="cross">-</td><td class="check">&#10003;</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td><td class="star">&#9733;</td></tr>
+    <tr><td>Dark mode</td><td class="cross">No</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+    <tr><td>Data ownership</td><td>Limited</td><td class="check">&#10003;</td><td class="cross">-</td><td>DRM</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="star">&#9733;</td></tr>
+  </table>
+  <p style="font-size:12px; color: var(--text-tertiary); margin-top:8px;">
+    <span class="check">&#10003;</span> = Has feature &nbsp;&nbsp;
+    <span class="cross">-</span> = Missing &nbsp;&nbsp;
+    <span class="star">&#9733;</span> = Planned enhancement
+  </p>
+</div>
+
+<!-- Roadmap -->
+<div class="section">
+  <h2>Implementation Roadmap</h2>
+
+  <h3><span class="tier-badge tier-1">Tier 1</span> High Impact — Build First</h3>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">1</div>
+    <div class="phase-content">
+      <h4>Track — Shelves, Status & Ratings</h4>
+      <p>Smart shelves (Want to Read, Reading, Read, DNF), quarter-star ratings, reading status management, format tracking, Goodreads CSV import. Foundation for everything else.</p>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">2</div>
+    <div class="phase-content">
+      <h4>Journal — Mood, Notes & Reviews</h4>
+      <p>Mood/pace tags per book, progress-based notes, quote collection, post-read reviews with privacy toggle, custom tags, re-read support. Eliminates Notion dependency.</p>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">3</div>
+    <div class="phase-content">
+      <h4>Goals — Challenges, Streaks & Wrap</h4>
+      <p>Annual reading challenge with ahead/behind pace, reading streaks, achievement badges, daily goals, shareable Year-in-Review (Spotify Wrapped-style). Drives daily engagement.</p>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">4</div>
+    <div class="phase-content">
+      <h4>Export — PKM Sync & Highlight Review</h4>
+      <p>Markdown/JSON/CSV export with full metadata, Obsidian vault sync, Notion API sync, daily spaced-repetition highlight review. Replaces Readwise ($120/yr value).</p>
+    </div>
+  </div>
+
+  <h3><span class="tier-badge tier-2">Tier 2</span> Strong Differentiators — Build Next</h3>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">5</div>
+    <div class="phase-content">
+      <h4>Social — Activity Feed & Friends</h4>
+      <p>Follow readers, activity feed, buddy reads, friend recommendations, per-book privacy controls, community content warnings.</p>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">6</div>
+    <div class="phase-content">
+      <h4>Clubs — Book Club Hub</h4>
+      <p>Create/join clubs, ranked-choice voting, reading schedules, chapter-gated spoiler-free discussions, AI discussion questions, shared progress dashboard.</p>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">7</div>
+    <div class="phase-content">
+      <h4>Discovery — AI-Powered Recommendations</h4>
+      <p>Mood-based search, "Because you liked X" recs, friend-powered suggestions, AI reading advisor, trending by genre.</p>
+    </div>
+  </div>
+
+  <h3><span class="tier-badge tier-3">Tier 3</span> Edda's Moat — Unique Differentiators</h3>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">8</div>
+    <div class="phase-content">
+      <h4>Enhanced AI Companion</h4>
+      <p>"Story So Far" recaps for any book, AI character tracker, vocabulary builder with flashcards, comprehension Q&A, AI content warnings.</p>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">9</div>
+    <div class="phase-content">
+      <h4>Audiobook Integration</h4>
+      <p>Manual audiobook tracking, timestamp-to-text mapping, unified progress across reading &amp; listening.</p>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-number">10</div>
+    <div class="phase-content">
+      <h4>Anti-Lock-In Platform</h4>
+      <p>Import from Goodreads/StoryGraph/Kindle, open API for third-party integrations, full data portability.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Key Insights -->
+<div class="section">
+  <h2>Key Research Insights</h2>
+
+  <div class="highlight-box">
+    <p><strong>2026 State of Reading Report:</strong> "People I know personally" is now the #1 source of book discovery, surpassing algorithms. Readers want "AI that feels additive rather than intrusive."</p>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Amazon Lock-In Trend:</strong> September 2025 lockdowns restricted My Notebook copying and introduced stronger Kindle encryption. Amazon is actively reducing user access to their own reading data.</p>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Readwise Opportunity:</strong> Readwise exists because reading apps lock highlights and export in incompatible formats. An app that reads + exports natively eliminates the $120/year intermediary.</p>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Format Convergence:</strong> 57% of readers now consume both audiobooks and ebooks. Smartphones are the #1 reading device. Seamless format switching is the top reader wish.</p>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Gamification Works:</strong> Fable reports 300% YoY growth in reading streak engagement (average 29-day streaks). StoryGraph's quarter-star ratings and mood tags are the most cited reasons users switch from Goodreads.</p>
+  </div>
+</div>
+
+<!-- Sources -->
+<div class="section">
+  <h2>Research Sources</h2>
+  <ul style="font-size: 13px; color: var(--text-tertiary);">
+    <li>2026 State of Reading Report (Everand/Fable)</li>
+    <li>Reedsy: Goodreads vs StoryGraph (2024)</li>
+    <li>BookWise: StoryGraph Features Analysis (2026)</li>
+    <li>TextMuncher: Kindle DRM/Export Analysis (2025)</li>
+    <li>Readwise User Research &amp; Documentation</li>
+    <li>Bookclubs.com Feature Analysis</li>
+    <li>StoryGraph Public Roadmap</li>
+    <li>Pratt IXD: Goodreads UX Critique (2024)</li>
+    <li>ARC Library Feature Documentation</li>
+    <li>Kobo Annotation Export Analysis (2025)</li>
+    <li>Book Riot: Fable Review, StoryGraph Review</li>
+    <li>Trustpilot: Audible Reviews</li>
+    <li>Zotero + Obsidian Academic Workflow Research</li>
+    <li>MarginNote Feature Analysis</li>
+    <li>Multiple Reddit communities (r/books, r/ebooks, r/booksuggestions)</li>
+  </ul>
+</div>
+
+<div style="text-align:center; padding: 40px 0; border-top: 1px solid rgba(107,112,102,0.2); color: var(--text-tertiary); font-size: 13px;">
+  Edda &mdash; Project Aurora &mdash; May 2026
+</div>
+
+</div>
+</body>
+</html>
