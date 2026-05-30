@@ -1,8 +1,11 @@
 import 'dart:math';
+import 'package:html/parser.dart' as html_parser;
+import 'package:html/dom.dart' as dom;
 
 class TextProcessor {
   TextProcessor._();
 
+  /// For raw text formats (TXT, MOBI) that may have broken formatting.
   static String normalize(String raw) {
     if (raw.trim().isEmpty) return raw;
 
@@ -22,6 +25,69 @@ class TextProcessor {
     text = _fixQuotes(text);
 
     return text.trim();
+  }
+
+  /// For EPUB/FB2 HTML content — extracts text preserving paragraph structure.
+  static String extractFromHtml(String html) {
+    final document = html_parser.parse(html);
+    final body = document.body;
+    if (body == null) return html.trim();
+
+    final paragraphs = <String>[];
+    _walkNodes(body, paragraphs);
+
+    final result = paragraphs
+        .map((p) => p.trim())
+        .where((p) => p.isNotEmpty)
+        .join('\n\n');
+
+    return _decodeEntities(result).trim();
+  }
+
+  static void _walkNodes(dom.Node node, List<String> paragraphs) {
+    if (node is dom.Text) {
+      final text = node.text.replaceAll(RegExp(r'\s+'), ' ');
+      if (text.trim().isNotEmpty) {
+        if (paragraphs.isEmpty) {
+          paragraphs.add(text);
+        } else {
+          paragraphs.last += text;
+        }
+      }
+      return;
+    }
+
+    if (node is! dom.Element) return;
+
+    final tag = node.localName?.toLowerCase() ?? '';
+
+    // Skip non-content elements
+    if (const {'script', 'style', 'head'}.contains(tag)) return;
+
+    final isBlock = const {
+      'p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'blockquote', 'li', 'tr', 'section', 'article',
+      'header', 'footer', 'figcaption', 'dt', 'dd',
+    }.contains(tag);
+
+    final isBreak = tag == 'br';
+
+    if (isBreak) {
+      paragraphs.add('');
+      return;
+    }
+
+    if (isBlock) {
+      paragraphs.add('');
+    }
+
+    for (final child in node.nodes) {
+      _walkNodes(child, paragraphs);
+    }
+
+    if (isBlock && paragraphs.isNotEmpty) {
+      paragraphs.add('');
+    }
   }
 
   static String _normalizeLineEndings(String text) {

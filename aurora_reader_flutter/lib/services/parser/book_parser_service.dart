@@ -221,13 +221,12 @@ class BookParserService {
         final heading = document.querySelector('h1, h2, h3, h4');
         final chapterTitle = heading?.text.trim() ?? 'Chapter ${index + 1}';
 
-        final plainText = document.body?.text ?? htmlContent;
-        final normalized = TextProcessor.normalize(plainText);
+        final content = TextProcessor.extractFromHtml(htmlContent);
 
-        if (normalized.isNotEmpty) {
+        if (content.isNotEmpty) {
           chapters.add(ParsedChapter(
             title: chapterTitle,
-            content: normalized,
+            content: content,
             index: index,
           ));
           index++;

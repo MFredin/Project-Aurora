@@ -233,28 +233,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                             constraints: BoxConstraints(
                               maxWidth: isMobile ? double.infinity : 720,
                             ),
-                            child: SelectableText(
-                              currentContent,
-                              style: TextStyle(
-                                color: AuroraColors.textPrimary
-                                    .withOpacity(0.9 * _brightness),
-                                fontSize: _fontSize,
-                                height: 1.75,
-                                fontFamily: 'Georgia',
-                              ),
-                              onSelectionChanged: (selection, cause) {
-                                if (selection.baseOffset !=
-                                    selection.extentOffset) {
-                                  final text = currentContent.substring(
-                                    selection.baseOffset,
-                                    selection.extentOffset,
-                                  );
-                                  setState(() => _selectedText = text);
-                                } else {
-                                  setState(() => _selectedText = null);
-                                }
-                              },
-                            ),
+                            child: _buildChapterContent(
+                              currentTitle, currentContent),
                           ),
                         ),
                       ),
@@ -307,6 +287,71 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildChapterContent(String title, String content) {
+    final textColor = AuroraColors.textPrimary.withOpacity(0.9 * _brightness);
+    final paragraphs = content.split('\n\n');
+
+    final spans = <InlineSpan>[];
+    final plainBuffer = StringBuffer();
+
+    final isStructuralTitle = RegExp(
+      r'^(prologue|epilogue|chapter\s|part\s|act\s|book\s|acknowledgements|afterword|foreword|preface|introduction)',
+      caseSensitive: false,
+    ).hasMatch(title);
+
+    if (isStructuralTitle) {
+      final headerText = '$title\n\n';
+      spans.add(TextSpan(
+        text: headerText,
+        style: TextStyle(
+          color: AuroraColors.auroraTeal.withOpacity(_brightness),
+          fontSize: _fontSize + 8,
+          fontWeight: FontWeight.w700,
+          fontFamily: 'Georgia',
+          height: 2.0,
+        ),
+      ));
+      plainBuffer.write(headerText);
+    }
+
+    var first = true;
+    for (final para in paragraphs) {
+      final trimmed = para.trim();
+      if (trimmed.isEmpty) continue;
+
+      if (!first || isStructuralTitle) {
+        spans.add(const TextSpan(text: '\n\n'));
+        plainBuffer.write('\n\n');
+      }
+      spans.add(TextSpan(text: trimmed));
+      plainBuffer.write(trimmed);
+      first = false;
+    }
+
+    final plainText = plainBuffer.toString();
+
+    return SelectableText.rich(
+      TextSpan(
+        style: TextStyle(
+          color: textColor,
+          fontSize: _fontSize,
+          height: 1.75,
+          fontFamily: 'Georgia',
+        ),
+        children: spans,
+      ),
+      onSelectionChanged: (selection, cause) {
+        if (selection.baseOffset != selection.extentOffset) {
+          final start = selection.baseOffset.clamp(0, plainText.length);
+          final end = selection.extentOffset.clamp(0, plainText.length);
+          setState(() => _selectedText = plainText.substring(start, end));
+        } else {
+          setState(() => _selectedText = null);
+        }
+      },
     );
   }
 
