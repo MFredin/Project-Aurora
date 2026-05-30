@@ -130,7 +130,7 @@ class GoogleDriveService {
     }
   }
 
-  Future<DriveListResult> listFiles({String? folderId, String? pageToken, bool _retry = true}) async {
+  Future<DriveListResult> listFiles({String? folderId, String? pageToken, bool retryOnAuth = true}) async {
     await _ensureToken();
 
     final queryParts = <String>[
@@ -186,17 +186,17 @@ class GoogleDriveService {
         nextPageToken: data['nextPageToken'] as String?,
       );
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401 && _retry) {
+      if (e.response?.statusCode == 401 && retryOnAuth) {
         _accessToken = null;
         await _ensureToken();
-        return listFiles(folderId: folderId, pageToken: pageToken, _retry: false);
+        return listFiles(folderId: folderId, pageToken: pageToken, retryOnAuth: false);
       }
       ErrorLogger.instance.capture(e, source: 'GoogleDrive.listFiles');
       throw DriveException('Failed to list files: ${e.message}');
     }
   }
 
-  Future<List<DriveFile>> searchEbooks(String query, {bool _retry = true}) async {
+  Future<List<DriveFile>> searchEbooks(String query, {bool retryOnAuth = true}) async {
     await _ensureToken();
 
     final q = "name contains '${query.replaceAll("'", "\\'")}'"
@@ -233,17 +233,17 @@ class GoogleDriveService {
         );
       }).toList();
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401 && _retry) {
+      if (e.response?.statusCode == 401 && retryOnAuth) {
         _accessToken = null;
         await _ensureToken();
-        return searchEbooks(query, _retry: false);
+        return searchEbooks(query, retryOnAuth: false);
       }
       ErrorLogger.instance.capture(e, source: 'GoogleDrive.search');
       throw DriveException('Search failed: ${e.message}');
     }
   }
 
-  Future<Uint8List> downloadFile(String fileId, {bool _retry = true}) async {
+  Future<Uint8List> downloadFile(String fileId, {bool retryOnAuth = true}) async {
     await _ensureToken();
 
     try {
@@ -258,10 +258,10 @@ class GoogleDriveService {
 
       return Uint8List.fromList(response.data!);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401 && _retry) {
+      if (e.response?.statusCode == 401 && retryOnAuth) {
         _accessToken = null;
         await _ensureToken();
-        return downloadFile(fileId, _retry: false);
+        return downloadFile(fileId, retryOnAuth: false);
       }
       ErrorLogger.instance.capture(e, source: 'GoogleDrive.download');
       throw DriveException('Download failed: ${e.message}');
