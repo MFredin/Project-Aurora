@@ -5,6 +5,7 @@ import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth/auth_service.dart';
+import '../../services/logging/error_logger.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -65,8 +66,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       );
       if (mounted) context.go('/library');
     } on AuthException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'SignupScreen.signUp');
       if (mounted) setState(() => _error = e.message);
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'SignupScreen.signUp');
       if (mounted) setState(() => _error = 'Something went wrong.');
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -271,8 +274,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       await auth.signInWithGoogle();
       if (mounted) context.go('/library');
     } on AuthException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'SignupScreen.googleSignIn');
       if (mounted) setState(() => _error = e.message);
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'SignupScreen.googleSignIn');
       if (mounted) setState(() => _error = 'Google sign-in failed: $e');
     } finally {
       if (mounted) setState(() => _googleLoading = false);

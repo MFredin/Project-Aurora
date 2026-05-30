@@ -47,6 +47,7 @@ class FirebaseAuthService implements AuthService {
       if (user == null) throw const AuthException('Account creation failed.');
       return _mapUser(user);
     } on fb.FirebaseAuthException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'FirebaseAuth.signUp');
       throw AuthException(_mapFirebaseError(e.code));
     }
   }
@@ -62,6 +63,7 @@ class FirebaseAuthService implements AuthService {
       if (user == null) throw const AuthException('Sign in failed.');
       return _mapUser(user);
     } on fb.FirebaseAuthException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'FirebaseAuth.signIn');
       throw AuthException(_mapFirebaseError(e.code));
     }
   }
@@ -80,6 +82,7 @@ class FirebaseAuthService implements AuthService {
       if (user == null) throw const AuthException('Google sign-in failed.');
       return _mapUser(user);
     } on fb.FirebaseAuthException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'FirebaseAuth.googleSignIn');
       throw AuthException(_mapFirebaseError(e.code));
     }
   }
@@ -104,6 +107,7 @@ class FirebaseAuthService implements AuthService {
     try {
       await user.delete();
     } on fb.FirebaseAuthException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'FirebaseAuth.deleteAccount');
       if (e.code == 'requires-recent-login') {
         throw const AuthException(
           'Please sign out and sign back in before deleting your account.',

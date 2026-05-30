@@ -31,14 +31,15 @@ class _CloudScreenState extends ConsumerState<CloudScreen> {
       await drive.connect();
       if (mounted) setState(() => _driveConnecting = false);
     } on DriveException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'CloudScreen.connectDrive');
       if (mounted) {
         setState(() {
           _driveConnecting = false;
           _error = e.message;
         });
       }
-    } catch (e) {
-      ErrorLogger.instance.capture(e, source: 'CloudScreen.connectDrive');
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'CloudScreen.connectDrive');
       if (mounted) {
         setState(() {
           _driveConnecting = false;

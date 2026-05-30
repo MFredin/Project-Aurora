@@ -63,9 +63,10 @@ class _DriveFilePickerState extends ConsumerState<DriveFilePicker> {
         });
       }
     } on DriveException catch (e) {
-      if (mounted) setState(() => _error = e.message);
-    } catch (e) {
       ErrorLogger.instance.capture(e, source: 'DriveFilePicker.load');
+      if (mounted) setState(() => _error = e.message);
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'DriveFilePicker.load');
       if (mounted) setState(() => _error = 'Failed to load files.');
     } finally {
       if (mounted && _loading) setState(() => _loading = false);
@@ -95,9 +96,10 @@ class _DriveFilePickerState extends ConsumerState<DriveFilePicker> {
         });
       }
     } on DriveException catch (e) {
-      if (mounted) setState(() => _error = e.message);
-    } catch (e) {
       ErrorLogger.instance.capture(e, source: 'DriveFilePicker.search');
+      if (mounted) setState(() => _error = e.message);
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'DriveFilePicker.search');
       if (mounted) setState(() => _error = 'Search failed.');
     } finally {
       if (mounted && _loading) setState(() => _loading = false);
@@ -156,6 +158,7 @@ class _DriveFilePickerState extends ConsumerState<DriveFilePicker> {
         );
       }
     } on DriveException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'DriveFilePicker.import');
       if (mounted) {
         setState(() => _downloading = null);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -166,8 +169,8 @@ class _DriveFilePickerState extends ConsumerState<DriveFilePicker> {
           ),
         );
       }
-    } catch (e) {
-      ErrorLogger.instance.capture(e, source: 'DriveFilePicker.import');
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'DriveFilePicker.import');
       if (mounted) {
         setState(() => _downloading = null);
         ScaffoldMessenger.of(context).showSnackBar(

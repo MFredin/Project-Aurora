@@ -84,6 +84,7 @@ class GoogleDriveService {
       _connected = true;
       _box.put(_hiveKey, true);
     } on fb.FirebaseAuthException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'GoogleDrive.connect');
       throw DriveException('Drive authorization failed: ${e.message}');
     }
   }
@@ -124,6 +125,7 @@ class GoogleDriveService {
         throw const DriveException('Could not refresh Drive access token.');
       }
     } on fb.FirebaseAuthException catch (e) {
+      ErrorLogger.instance.capture(e, source: 'GoogleDrive.ensureToken');
       _connected = false;
       _box.put(_hiveKey, false);
       throw DriveException('Drive re-authorization failed: ${e.message}');
