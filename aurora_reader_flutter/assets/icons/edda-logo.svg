@@ -8,54 +8,42 @@
       <stop offset="0%" style="stop-color:#5A9E8F"/>
       <stop offset="60%" style="stop-color:#3D7A6D"/>
     </linearGradient>
-    <linearGradient id="page" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#D4D0C8"/>
-      <stop offset="100%" style="stop-color:#A89060"/>
-    </linearGradient>
   </defs>
 
-  <!-- Background circle — deep forest -->
+  <!-- Background circle -->
   <circle cx="256" cy="256" r="248" fill="#0D1210"/>
   <circle cx="256" cy="256" r="248" fill="none" stroke="#252E27" stroke-width="2"/>
 
-  <!-- Stave church arch / pointed doorway frame -->
-  <path d="M256 80 L170 200 L170 380 L200 380 L200 220 L256 130 L312 220 L312 380 L342 380 L342 200 Z"
-        fill="none" stroke="url(#ember)" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Runic Knot "E" — interlaced Norse knotwork -->
+  <!-- Vertical spine -->
+  <path d="M160 90 L160 422" fill="none" stroke="url(#ember)" stroke-width="12" stroke-linecap="round"/>
 
-  <!-- Open book pages inside the arch -->
-  <!-- Left page -->
-  <path d="M210 240 L210 360 Q240 345 256 350"
-        fill="none" stroke="url(#page)" stroke-width="3.5" stroke-linecap="round"/>
-  <!-- Right page -->
-  <path d="M302 240 L302 360 Q272 345 256 350"
-        fill="none" stroke="url(#page)" stroke-width="3.5" stroke-linecap="round"/>
-  <!-- Book spine -->
-  <line x1="256" y1="230" x2="256" y2="350" stroke="url(#page)" stroke-width="2" opacity="0.5"/>
+  <!-- Top arm with curve -->
+  <path d="M160 90 C220 90, 290 80, 350 100 C380 110, 370 145, 340 138"
+        fill="none" stroke="url(#ember)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- Text lines on left page -->
-  <line x1="220" y1="265" x2="248" y2="265" stroke="#A89060" stroke-width="1.5" opacity="0.5"/>
-  <line x1="220" y1="278" x2="244" y2="278" stroke="#A89060" stroke-width="1.5" opacity="0.4"/>
-  <line x1="220" y1="291" x2="250" y2="291" stroke="#A89060" stroke-width="1.5" opacity="0.5"/>
-  <line x1="220" y1="304" x2="240" y2="304" stroke="#A89060" stroke-width="1.5" opacity="0.3"/>
+  <!-- Middle arm -->
+  <path d="M160 250 C230 250, 270 235, 320 242 C348 246, 342 272, 310 266"
+        fill="none" stroke="url(#ember)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- Text lines on right page -->
-  <line x1="264" y1="265" x2="292" y2="265" stroke="#A89060" stroke-width="1.5" opacity="0.5"/>
-  <line x1="264" y1="278" x2="288" y2="278" stroke="#A89060" stroke-width="1.5" opacity="0.4"/>
-  <line x1="264" y1="291" x2="294" y2="291" stroke="#A89060" stroke-width="1.5" opacity="0.5"/>
-  <line x1="264" y1="304" x2="284" y2="304" stroke="#A89060" stroke-width="1.5" opacity="0.3"/>
+  <!-- Bottom arm -->
+  <path d="M160 422 C220 422, 290 432, 350 412 C380 402, 370 367, 340 374"
+        fill="none" stroke="url(#ember)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- Ember spark above the arch peak -->
-  <circle cx="256" cy="72" r="4" fill="#B87944" opacity="0.8"/>
-  <circle cx="248" cy="80" r="2" fill="#B87944" opacity="0.4"/>
-  <circle cx="264" cy="78" r="2.5" fill="#B87944" opacity="0.5"/>
+  <!-- Interlace loops at arm terminals (lichen teal) -->
+  <!-- Top loop -->
+  <path d="M340 138 C310 132, 300 155, 318 168 C336 180, 358 162, 340 138"
+        fill="none" stroke="url(#lichen)" stroke-width="10" stroke-linecap="round"/>
 
-  <!-- Knotwork accents at arch base -->
-  <circle cx="170" cy="380" r="6" fill="none" stroke="url(#lichen)" stroke-width="1.5"/>
-  <circle cx="342" cy="380" r="6" fill="none" stroke="url(#lichen)" stroke-width="1.5"/>
+  <!-- Middle loop -->
+  <path d="M310 266 C280 260, 268 282, 286 296 C304 310, 326 292, 310 266"
+        fill="none" stroke="url(#lichen)" stroke-width="10" stroke-linecap="round"/>
 
-  <!-- EDDA wordmark -->
-  <text x="256" y="430" text-anchor="middle"
-        font-family="Georgia, 'Times New Roman', serif"
-        font-size="56" font-weight="700" letter-spacing="12"
-        fill="url(#page)">EDDA</text>
+  <!-- Bottom loop -->
+  <path d="M340 374 C310 380, 300 357, 318 344 C336 332, 358 350, 340 374"
+        fill="none" stroke="url(#lichen)" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Spine terminal dots -->
+  <circle cx="160" cy="80" r="10" fill="#B87944"/>
+  <circle cx="160" cy="432" r="10" fill="#B87944"/>
 </svg>

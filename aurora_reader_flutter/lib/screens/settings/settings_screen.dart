@@ -209,10 +209,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   children: [
                     SizedBox(
-                      width: 80,
-                      height: 90,
+                      width: 48,
+                      height: 52,
                       child: CustomPaint(
-                        painter: _StaveArchLogoPainter(),
+                        painter: _RunicKnotPainter(),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -220,7 +220,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       'EDDA',
                       style: TextStyle(
                         color: AuroraColors.auroraTeal,
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 6,
                         fontFamily: 'Georgia',
@@ -392,72 +392,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-class _StaveArchLogoPainter extends CustomPainter {
+class _RunicKnotPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
+    final w = size.width;
+    final h = size.height;
+
     final ember = Paint()
-      ..color = AuroraColors.auroraTeal.withOpacity(0.7)
+      ..color = AuroraColors.auroraTeal
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    final page = Paint()
-      ..color = AuroraColors.textPrimary.withOpacity(0.35)
+    final lichen = Paint()
+      ..color = AuroraColors.auroraGreen.withOpacity(0.5)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    final archPath = Path()
-      ..moveTo(cx, 0)
-      ..lineTo(size.width * 0.1, size.height * 0.38)
-      ..lineTo(size.width * 0.1, size.height * 0.88)
-      ..moveTo(cx, 0)
-      ..lineTo(size.width * 0.9, size.height * 0.38)
-      ..lineTo(size.width * 0.9, size.height * 0.88);
-    canvas.drawPath(archPath, ember);
+    // The "E" is built from interlaced strokes:
+    // A vertical spine with three horizontal arms that weave over/under
 
-    final leftPage = Path()
-      ..moveTo(size.width * 0.25, size.height * 0.45)
-      ..lineTo(size.width * 0.25, size.height * 0.80)
-      ..quadraticBezierTo(cx, size.height * 0.74, cx, size.height * 0.82);
-    canvas.drawPath(leftPage, page);
+    // Vertical spine of E
+    final spine = Path()
+      ..moveTo(w * 0.2, h * 0.05)
+      ..lineTo(w * 0.2, h * 0.95);
+    canvas.drawPath(spine, ember);
 
-    final rightPage = Path()
-      ..moveTo(size.width * 0.75, size.height * 0.45)
-      ..lineTo(size.width * 0.75, size.height * 0.80)
-      ..quadraticBezierTo(cx, size.height * 0.74, cx, size.height * 0.82);
-    canvas.drawPath(rightPage, page);
+    // Top arm — curves slightly upward at the end
+    final topArm = Path()
+      ..moveTo(w * 0.2, h * 0.05)
+      ..cubicTo(w * 0.5, h * 0.05, w * 0.65, h * 0.0, w * 0.85, h * 0.08)
+      ..cubicTo(w * 0.92, h * 0.11, w * 0.88, h * 0.20, w * 0.78, h * 0.18);
+    canvas.drawPath(topArm, ember);
 
-    final spine = Paint()
-      ..color = AuroraColors.textPrimary.withOpacity(0.15)
-      ..strokeWidth = 1;
-    canvas.drawLine(
-      Offset(cx, size.height * 0.43),
-      Offset(cx, size.height * 0.80),
-      spine,
-    );
+    // Middle arm — the interlace crossover
+    final midArm = Path()
+      ..moveTo(w * 0.2, h * 0.48)
+      ..cubicTo(w * 0.45, h * 0.48, w * 0.55, h * 0.42, w * 0.72, h * 0.45)
+      ..cubicTo(w * 0.82, h * 0.47, w * 0.80, h * 0.55, w * 0.68, h * 0.53);
+    canvas.drawPath(midArm, ember);
 
-    final linePaint = Paint()
-      ..color = AuroraColors.manuscriptGold.withOpacity(0.25)
-      ..strokeWidth = 1;
-    for (var i = 0; i < 3; i++) {
-      final y = size.height * (0.54 + i * 0.08);
-      final vary = (i % 2 == 0) ? 0.0 : 3.0;
-      canvas.drawLine(Offset(size.width * 0.32, y), Offset(cx - 4 - vary, y), linePaint);
-      canvas.drawLine(Offset(cx + 4, y), Offset(size.width * 0.68 + vary, y), linePaint);
-    }
+    // Bottom arm
+    final botArm = Path()
+      ..moveTo(w * 0.2, h * 0.95)
+      ..cubicTo(w * 0.5, h * 0.95, w * 0.65, h * 1.0, w * 0.85, h * 0.92)
+      ..cubicTo(w * 0.92, h * 0.89, w * 0.88, h * 0.80, w * 0.78, h * 0.82);
+    canvas.drawPath(botArm, ember);
 
-    final spark = Paint()..color = AuroraColors.auroraTeal.withOpacity(0.6);
-    canvas.drawCircle(Offset(cx, -1), 2.5, spark);
+    // Interlace weave loops — small loops at the arm terminals
+    // Top loop
+    final topLoop = Path()
+      ..moveTo(w * 0.78, h * 0.18)
+      ..cubicTo(w * 0.68, h * 0.16, w * 0.65, h * 0.22, w * 0.72, h * 0.25)
+      ..cubicTo(w * 0.80, h * 0.28, w * 0.85, h * 0.22, w * 0.78, h * 0.18);
+    canvas.drawPath(topLoop, lichen);
 
-    final knot = Paint()
-      ..color = AuroraColors.auroraGreen.withOpacity(0.4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    canvas.drawCircle(Offset(size.width * 0.1, size.height * 0.88), 3, knot);
-    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.88), 3, knot);
+    // Middle loop
+    final midLoop = Path()
+      ..moveTo(w * 0.68, h * 0.53)
+      ..cubicTo(w * 0.58, h * 0.51, w * 0.55, h * 0.57, w * 0.62, h * 0.60)
+      ..cubicTo(w * 0.70, h * 0.63, w * 0.75, h * 0.57, w * 0.68, h * 0.53);
+    canvas.drawPath(midLoop, lichen);
+
+    // Bottom loop
+    final botLoop = Path()
+      ..moveTo(w * 0.78, h * 0.82)
+      ..cubicTo(w * 0.68, h * 0.84, w * 0.65, h * 0.78, w * 0.72, h * 0.75)
+      ..cubicTo(w * 0.80, h * 0.72, w * 0.85, h * 0.78, w * 0.78, h * 0.82);
+    canvas.drawPath(botLoop, lichen);
+
+    // Knot terminals — small dots at spine endpoints
+    final dot = Paint()..color = AuroraColors.auroraTeal;
+    canvas.drawCircle(Offset(w * 0.2, h * 0.03), 2.5, dot);
+    canvas.drawCircle(Offset(w * 0.2, h * 0.97), 2.5, dot);
   }
 
   @override

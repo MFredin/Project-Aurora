@@ -580,10 +580,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              width: 160,
-              height: 180,
+              width: 72,
+              height: 80,
               child: CustomPaint(
-                painter: _StaveArchPainter(),
+                painter: _RunicKnotPainter(),
               ),
             ),
             const SizedBox(height: 28),
@@ -1265,74 +1265,70 @@ class _BookListTileState extends State<_BookListTile> {
   }
 }
 
-class _StaveArchPainter extends CustomPainter {
+class _RunicKnotPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
+    final w = size.width;
+    final h = size.height;
+
     final ember = Paint()
-      ..color = AuroraColors.auroraTeal.withOpacity(0.25)
+      ..color = AuroraColors.auroraTeal.withOpacity(0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    final page = Paint()
-      ..color = AuroraColors.textPrimary.withOpacity(0.15)
+    final lichen = Paint()
+      ..color = AuroraColors.auroraGreen.withOpacity(0.25)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    final archPath = Path()
-      ..moveTo(cx, 0)
-      ..lineTo(size.width * 0.15, size.height * 0.35)
-      ..lineTo(size.width * 0.15, size.height * 0.85)
-      ..moveTo(cx, 0)
-      ..lineTo(size.width * 0.85, size.height * 0.35)
-      ..lineTo(size.width * 0.85, size.height * 0.85);
-    canvas.drawPath(archPath, ember);
+    final spine = Path()
+      ..moveTo(w * 0.2, h * 0.05)
+      ..lineTo(w * 0.2, h * 0.95);
+    canvas.drawPath(spine, ember);
 
-    final leftPage = Path()
-      ..moveTo(size.width * 0.28, size.height * 0.42)
-      ..lineTo(size.width * 0.28, size.height * 0.78)
-      ..quadraticBezierTo(cx, size.height * 0.72, cx, size.height * 0.80);
-    canvas.drawPath(leftPage, page);
+    final topArm = Path()
+      ..moveTo(w * 0.2, h * 0.05)
+      ..cubicTo(w * 0.5, h * 0.05, w * 0.65, h * 0.0, w * 0.85, h * 0.08)
+      ..cubicTo(w * 0.92, h * 0.11, w * 0.88, h * 0.20, w * 0.78, h * 0.18);
+    canvas.drawPath(topArm, ember);
 
-    final rightPage = Path()
-      ..moveTo(size.width * 0.72, size.height * 0.42)
-      ..lineTo(size.width * 0.72, size.height * 0.78)
-      ..quadraticBezierTo(cx, size.height * 0.72, cx, size.height * 0.80);
-    canvas.drawPath(rightPage, page);
+    final midArm = Path()
+      ..moveTo(w * 0.2, h * 0.48)
+      ..cubicTo(w * 0.45, h * 0.48, w * 0.55, h * 0.42, w * 0.72, h * 0.45)
+      ..cubicTo(w * 0.82, h * 0.47, w * 0.80, h * 0.55, w * 0.68, h * 0.53);
+    canvas.drawPath(midArm, ember);
 
-    final spine = Paint()
-      ..color = AuroraColors.textPrimary.withOpacity(0.08)
-      ..strokeWidth = 1.5;
-    canvas.drawLine(
-      Offset(cx, size.height * 0.40),
-      Offset(cx, size.height * 0.78),
-      spine,
-    );
+    final botArm = Path()
+      ..moveTo(w * 0.2, h * 0.95)
+      ..cubicTo(w * 0.5, h * 0.95, w * 0.65, h * 1.0, w * 0.85, h * 0.92)
+      ..cubicTo(w * 0.92, h * 0.89, w * 0.88, h * 0.80, w * 0.78, h * 0.82);
+    canvas.drawPath(botArm, ember);
 
-    final linePaint = Paint()
-      ..color = AuroraColors.manuscriptGold.withOpacity(0.12)
-      ..strokeWidth = 1.2;
-    for (var i = 0; i < 4; i++) {
-      final y = size.height * (0.50 + i * 0.06);
-      final vary = (i % 2 == 0) ? 0.0 : 4.0;
-      canvas.drawLine(Offset(size.width * 0.34, y), Offset(cx - 6 - vary, y), linePaint);
-      canvas.drawLine(Offset(cx + 6, y), Offset(size.width * 0.66 + vary, y), linePaint);
-    }
+    final topLoop = Path()
+      ..moveTo(w * 0.78, h * 0.18)
+      ..cubicTo(w * 0.68, h * 0.16, w * 0.65, h * 0.22, w * 0.72, h * 0.25)
+      ..cubicTo(w * 0.80, h * 0.28, w * 0.85, h * 0.22, w * 0.78, h * 0.18);
+    canvas.drawPath(topLoop, lichen);
 
-    final spark = Paint()..color = AuroraColors.auroraTeal.withOpacity(0.35);
-    canvas.drawCircle(Offset(cx, -2), 3.5, spark);
-    canvas.drawCircle(Offset(cx - 6, 5), 1.8, spark..color = AuroraColors.auroraTeal.withOpacity(0.18));
-    canvas.drawCircle(Offset(cx + 7, 4), 2.0, spark..color = AuroraColors.auroraTeal.withOpacity(0.22));
+    final midLoop = Path()
+      ..moveTo(w * 0.68, h * 0.53)
+      ..cubicTo(w * 0.58, h * 0.51, w * 0.55, h * 0.57, w * 0.62, h * 0.60)
+      ..cubicTo(w * 0.70, h * 0.63, w * 0.75, h * 0.57, w * 0.68, h * 0.53);
+    canvas.drawPath(midLoop, lichen);
 
-    final knot = Paint()
-      ..color = AuroraColors.auroraGreen.withOpacity(0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-    canvas.drawCircle(Offset(size.width * 0.15, size.height * 0.85), 4, knot);
-    canvas.drawCircle(Offset(size.width * 0.85, size.height * 0.85), 4, knot);
+    final botLoop = Path()
+      ..moveTo(w * 0.78, h * 0.82)
+      ..cubicTo(w * 0.68, h * 0.84, w * 0.65, h * 0.78, w * 0.72, h * 0.75)
+      ..cubicTo(w * 0.80, h * 0.72, w * 0.85, h * 0.78, w * 0.78, h * 0.82);
+    canvas.drawPath(botLoop, lichen);
+
+    final dot = Paint()..color = AuroraColors.auroraTeal.withOpacity(0.5);
+    canvas.drawCircle(Offset(w * 0.2, h * 0.03), 2.5, dot);
+    canvas.drawCircle(Offset(w * 0.2, h * 0.97), 2.5, dot);
   }
 
   @override
