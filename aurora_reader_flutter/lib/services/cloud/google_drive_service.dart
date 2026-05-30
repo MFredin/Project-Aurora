@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 import '../logging/error_logger.dart';
@@ -73,12 +72,7 @@ class GoogleDriveService {
       final provider = fb.GoogleAuthProvider();
       provider.addScope(_scope);
 
-      fb.UserCredential credential;
-      if (kIsWeb) {
-        credential = await fb.FirebaseAuth.instance.signInWithPopup(provider);
-      } else {
-        credential = await user.reauthenticateWithProvider(provider);
-      }
+      final credential = await user.reauthenticateWithProvider(provider);
 
       final oAuth = credential.credential;
       if (oAuth == null || oAuth is! fb.OAuthCredential || oAuth.accessToken == null) {
@@ -110,12 +104,7 @@ class GoogleDriveService {
       final provider = fb.GoogleAuthProvider();
       provider.addScope(_scope);
 
-      fb.UserCredential credential;
-      if (kIsWeb) {
-        credential = await fb.FirebaseAuth.instance.signInWithPopup(provider);
-      } else {
-        credential = await user.reauthenticateWithProvider(provider);
-      }
+      final credential = await user.reauthenticateWithProvider(provider);
 
       final oAuth = credential.credential;
       if (oAuth is fb.OAuthCredential && oAuth.accessToken != null) {
