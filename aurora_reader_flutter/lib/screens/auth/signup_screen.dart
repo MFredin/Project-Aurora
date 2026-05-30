@@ -19,6 +19,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   bool _loading = false;
+  bool _googleLoading = false;
   String? _error;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
@@ -195,6 +196,24 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               onPressed: _signUp,
                             ),
                     ),
+                    const SizedBox(height: 20),
+                    _buildDividerWithText('or'),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: _googleLoading
+                          ? const Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AuroraColors.textSecondary,
+                                ),
+                              ),
+                            )
+                          : _buildGoogleButton(),
+                    ),
                     const SizedBox(height: 24),
 
                     Row(
@@ -226,6 +245,92 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _googleLoading = true;
+      _error = null;
+    });
+
+    try {
+      final auth = ref.read(authServiceProvider);
+      await auth.signInWithGoogle();
+      if (mounted) context.go('/library');
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } catch (e) {
+      if (mounted) setState(() => _error = 'Google sign-in failed.');
+    } finally {
+      if (mounted) setState(() => _googleLoading = false);
+    }
+  }
+
+  Widget _buildDividerWithText(String text) {
+    return Row(
+      children: [
+        Expanded(
+          child: Divider(
+            color: const Color(0xFF252E27).withOpacity(0.6),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: AuroraColors.textTertiary,
+              fontSize: 13,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Divider(
+            color: const Color(0xFF252E27).withOpacity(0.6),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGoogleButton() {
+    return GestureDetector(
+      onTap: _signInWithGoogle,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: AuroraColors.surface.withOpacity(0.75),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFF252E27),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'G',
+              style: TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Georgia',
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'Continue with Google',
+              style: TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );

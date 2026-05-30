@@ -137,6 +137,13 @@ class LocalAuthService implements AuthService {
   }
 
   @override
+  Future<AuthUser> signInWithGoogle() async {
+    throw const AuthException(
+      'Google Sign-In requires Firebase to be configured.',
+    );
+  }
+
+  @override
   Future<void> signOut() async {
     _currentUser = null;
     await _box.delete(_sessionKey);

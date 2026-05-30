@@ -66,6 +66,19 @@ class FirebaseAuthService implements AuthService {
   }
 
   @override
+  Future<AuthUser> signInWithGoogle() async {
+    try {
+      final provider = fb.GoogleAuthProvider();
+      final credential = await _auth.signInWithProvider(provider);
+      final user = credential.user;
+      if (user == null) throw const AuthException('Google sign-in failed.');
+      return _mapUser(user);
+    } on fb.FirebaseAuthException catch (e) {
+      throw AuthException(_mapFirebaseError(e.code));
+    }
+  }
+
+  @override
   Future<void> signOut() async {
     await _auth.signOut();
   }

@@ -40,6 +40,7 @@ abstract class AuthService {
   AuthUser? get currentUser;
   Future<AuthUser> signUp(String email, String password, {String? displayName});
   Future<AuthUser> signIn(String email, String password);
+  Future<AuthUser> signInWithGoogle();
   Future<void> signOut();
   Future<void> updateDisplayName(String name);
   Future<void> deleteAccount();
