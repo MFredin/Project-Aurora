@@ -240,30 +240,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                       child: Row(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'EDDA',
-                                style: TextStyle(
-                                  color: AuroraColors.auroraTeal.withOpacity(0.6),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 4,
-                                  fontFamily: 'Georgia',
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              const Text(
-                                'Library',
-                                style: TextStyle(
-                                  color: AuroraColors.textPrimary,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ],
+                          const Text(
+                            'Library',
+                            style: TextStyle(
+                              color: AuroraColors.textPrimary,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.5,
+                            ),
                           ),
                           const Spacer(),
                           _IconButton(
