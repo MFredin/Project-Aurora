@@ -263,7 +263,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } catch (e) {
-      if (mounted) setState(() => _error = 'Google sign-in failed.');
+      if (mounted) setState(() => _error = 'Google sign-in failed: $e');
     } finally {
       if (mounted) setState(() => _googleLoading = false);
     }
