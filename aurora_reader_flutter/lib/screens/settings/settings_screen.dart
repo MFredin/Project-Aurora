@@ -18,7 +18,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool _darkMode = true;
   bool _notifications = true;
   bool _haptics = true;
   bool _autoSync = true;
@@ -131,8 +130,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _buildToggleRow(
                       icon: Icons.dark_mode_rounded,
                       label: 'Dark Mode',
-                      value: _darkMode,
-                      onChanged: (v) => setState(() => _darkMode = v),
+                      value: ref.watch(darkModeProvider),
+                      onChanged: (v) => ref.read(darkModeProvider.notifier).set(v),
                     ),
                     _divider(),
                     _buildToggleRow(

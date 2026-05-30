@@ -6,6 +6,7 @@ import '../../core/data/book_repository.dart';
 import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
+import '../../providers/service_providers.dart';
 import 'pdf_view_stub.dart'
     if (dart.library.html) 'pdf_view_web.dart';
 
@@ -29,16 +30,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   double _readingProgress = 0.0;
   bool _restoredProgress = false;
 
-  // Reading theme
-  int _themeIndex = 0;
-  static const _themes = [
-    _ReadingTheme('Dark', Color(0xFF0D1210), Color(0xFFD4D0C8), Color(0xFF141A16)),
-    _ReadingTheme('Sepia', Color(0xFF3B2F1E), Color(0xFFE8D5B5), Color(0xFF2E2416)),
-    _ReadingTheme('Light', Color(0xFFF5F5F0), Color(0xFF2A2A2A), Color(0xFFE8E8E0)),
-    _ReadingTheme('Green', Color(0xFF0D2818), Color(0xFFA8E6C3), Color(0xFF0A1F13)),
-  ];
-
-  _ReadingTheme get _theme => _themes[_themeIndex];
+  // Derived reader colors from app dark mode
+  _ReadingTheme get _theme {
+    final isDark = ref.watch(darkModeProvider);
+    return isDark
+        ? const _ReadingTheme(Color(0xFF0D1210), Color(0xFFD4D0C8), Color(0xFF141A16))
+        : const _ReadingTheme(Color(0xFFF5F2EB), Color(0xFF2A2A2A), Color(0xFFEDE9E0));
+  }
 
   // Reading time tracking
   final Stopwatch _stopwatch = Stopwatch();
@@ -623,28 +621,18 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               onTap: _currentChapter > 0 ? _previousChapter : null,
             ),
             _ToolbarButton(
-              icon: Icons.text_fields_rounded,
-              label: 'Font',
+              icon: ref.watch(darkModeProvider)
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
+              label: ref.watch(darkModeProvider) ? 'Light' : 'Dark',
+              color: _theme.fg,
+              onTap: () => ref.read(darkModeProvider.notifier).toggle(),
+            ),
+            _ToolbarButton(
+              icon: Icons.tune_rounded,
+              label: 'Settings',
               color: _theme.fg,
               onTap: () => setState(() => _showSettings = !_showSettings),
-            ),
-            _ToolbarButton(
-              icon: Icons.brightness_6_rounded,
-              label: 'Light',
-              color: _theme.fg,
-              onTap: () {
-                setState(() {
-                  _brightness = _brightness == 1.0 ? 0.7 : 1.0;
-                });
-              },
-            ),
-            _ToolbarButton(
-              icon: _isScrollMode
-                  ? Icons.swap_horiz_rounded
-                  : Icons.swap_vert_rounded,
-              label: _isScrollMode ? 'Scroll' : 'Page',
-              color: _theme.fg,
-              onTap: () => setState(() => _isScrollMode = !_isScrollMode),
             ),
             _ToolbarButton(
               icon: Icons.chevron_right_rounded,
@@ -727,27 +715,23 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     divisions: 14,
                     onChanged: (v) => setState(() => _brightness = v),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
 
-                  // Theme presets
-                  const Text('Reading Theme',
-                      style: TextStyle(
-                          color: AuroraColors.textPrimary,
-                          fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
+                  // Continuous scrolling
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      for (var i = 0; i < _themes.length; i++)
-                        GestureDetector(
-                          onTap: () => setState(() => _themeIndex = i),
-                          child: _ThemePreset(
-                            label: _themes[i].label,
-                            bg: _themes[i].bg,
-                            fg: _themes[i].fg,
-                            isSelected: _themeIndex == i,
-                          ),
-                        ),
+                      const Icon(Icons.swap_vert_rounded,
+                          color: AuroraColors.auroraTeal, size: 20),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text('Continuous Scroll',
+                            style: TextStyle(color: AuroraColors.textPrimary)),
+                      ),
+                      Switch(
+                        value: _isScrollMode,
+                        onChanged: (v) => setState(() => _isScrollMode = v),
+                        activeColor: AuroraColors.auroraTeal,
+                      ),
                     ],
                   ),
                 ],
@@ -965,57 +949,10 @@ class _ToolbarButton extends StatelessWidget {
   }
 }
 
-class _ThemePreset extends StatelessWidget {
-  final String label;
-  final Color bg;
-  final Color fg;
-  final bool isSelected;
-
-  const _ThemePreset({
-    required this.label,
-    required this.bg,
-    required this.fg,
-    required this.isSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? AuroraColors.auroraTeal : Colors.white12,
-              width: isSelected ? 2 : 0.5,
-            ),
-          ),
-          child: Center(
-            child: Text('Aa', style: TextStyle(color: fg, fontSize: 18)),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color:
-                isSelected ? AuroraColors.auroraTeal : AuroraColors.textTertiary,
-            fontSize: 11,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _ReadingTheme {
-  final String label;
   final Color bg;
   final Color fg;
   final Color chrome;
 
-  const _ReadingTheme(this.label, this.bg, this.fg, this.chrome);
+  const _ReadingTheme(this.bg, this.fg, this.chrome);
 }

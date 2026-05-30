@@ -85,6 +85,116 @@ class AuroraColors {
 class AuroraTheme {
   AuroraTheme._();
 
+  static ThemeData get lightTheme => ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF5F2EB),
+        fontFamily: 'sans-serif',
+        colorScheme: const ColorScheme.light(
+          primary: AuroraColors.auroraTeal,
+          secondary: AuroraColors.auroraGreen,
+          surface: Color(0xFFEDE9E0),
+          error: AuroraColors.auroraWarm,
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: Color(0xFF2A2A2A),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          foregroundColor: Color(0xFF2A2A2A),
+          elevation: 0,
+          centerTitle: true,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.transparent,
+          selectedItemColor: AuroraColors.auroraTeal,
+          unselectedItemColor: Color(0xFF8A8680),
+          type: BottomNavigationBarType.fixed,
+        ),
+        cardTheme: CardThemeData(
+          color: const Color(0xFFEDE9E0).withOpacity(0.8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: const Color(0xFFD4D0C8).withOpacity(0.5),
+              width: 0.5,
+            ),
+          ),
+          elevation: 0,
+        ),
+        listTileTheme: const ListTileThemeData(
+          textColor: Color(0xFF2A2A2A),
+          iconColor: AuroraColors.auroraTeal,
+        ),
+        textTheme: const TextTheme(
+          headlineLarge: TextStyle(
+              color: Color(0xFF2A2A2A),
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5),
+          headlineMedium: TextStyle(
+              color: Color(0xFF2A2A2A),
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5),
+          headlineSmall: TextStyle(
+              color: Color(0xFF2A2A2A), fontWeight: FontWeight.w600),
+          titleLarge: TextStyle(
+              color: Color(0xFF2A2A2A), fontWeight: FontWeight.w600),
+          titleMedium: TextStyle(color: Color(0xFF2A2A2A)),
+          titleSmall: TextStyle(color: Color(0xFF5A5550)),
+          bodyLarge: TextStyle(color: Color(0xFF2A2A2A)),
+          bodyMedium: TextStyle(color: Color(0xFF5A5550)),
+          bodySmall: TextStyle(color: Color(0xFF8A8680)),
+          labelLarge: TextStyle(
+              color: Color(0xFF2A2A2A), fontWeight: FontWeight.w600),
+          labelMedium: TextStyle(color: Color(0xFF5A5550)),
+          labelSmall: TextStyle(color: Color(0xFF8A8680)),
+        ),
+        sliderTheme: const SliderThemeData(
+          activeTrackColor: AuroraColors.auroraTeal,
+          thumbColor: AuroraColors.auroraTeal,
+          inactiveTrackColor: Color(0xFFD4D0C8),
+        ),
+        switchTheme: SwitchThemeData(
+          thumbColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AuroraColors.auroraTeal;
+            }
+            return const Color(0xFF8A8680);
+          }),
+          trackColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AuroraColors.auroraTeal.withOpacity(0.3);
+            }
+            return const Color(0xFFD4D0C8);
+          }),
+        ),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: AuroraColors.auroraTeal,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFEDE9E0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+          hintStyle: const TextStyle(color: Color(0xFF8A8680)),
+        ),
+        dividerTheme: DividerThemeData(
+          color: const Color(0xFFD4D0C8).withOpacity(0.6),
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: const Color(0xFFF5F2EB),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        snackBarTheme: const SnackBarThemeData(
+          backgroundColor: Color(0xFF2A2A2A),
+          contentTextStyle: TextStyle(color: Color(0xFFD4D0C8)),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
   static ThemeData get darkTheme => ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: AuroraColors.deepSpace,

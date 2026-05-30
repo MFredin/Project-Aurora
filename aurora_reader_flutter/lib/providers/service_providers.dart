@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import '../core/database/database.dart';
 import '../services/parser/book_parser_service.dart';
 import '../services/cloud/cloud_storage_service.dart';
@@ -18,6 +20,31 @@ import 'database_provider.dart';
 /// Re-exported here for convenience.
 export '../services/parser/book_parser_service.dart'
     show bookParserServiceProvider;
+
+/// Dark mode state (persisted in Hive).
+final darkModeProvider = NotifierProvider<DarkModeNotifier, bool>(
+  DarkModeNotifier.new,
+);
+
+class DarkModeNotifier extends Notifier<bool> {
+  static const _key = 'dark_mode';
+  Box get _box => Hive.box('aurora_reader');
+
+  @override
+  bool build() {
+    return _box.get(_key, defaultValue: true) as bool;
+  }
+
+  void toggle() {
+    state = !state;
+    _box.put(_key, state);
+  }
+
+  void set(bool value) {
+    state = value;
+    _box.put(_key, value);
+  }
+}
 
 /// Cloud storage service.
 final cloudStorageProvider = Provider<CloudStorageService>((ref) {
