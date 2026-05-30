@@ -1,21 +1,105 @@
 import 'package:flutter/material.dart';
-import '../../core/layout/responsive.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
+import '../../services/cloud/google_drive_service.dart';
+import '../../services/logging/error_logger.dart';
+import 'drive_file_picker.dart';
 
-/// Cloud storage and sync management screen.
-class CloudScreen extends StatefulWidget {
+class CloudScreen extends ConsumerStatefulWidget {
   const CloudScreen({super.key});
 
   @override
-  State<CloudScreen> createState() => _CloudScreenState();
+  ConsumerState<CloudScreen> createState() => _CloudScreenState();
 }
 
-class _CloudScreenState extends State<CloudScreen> {
-  bool _googleDriveConnected = false;
-  bool _dropboxConnected = false;
-  bool _iCloudSyncEnabled = true;
-  bool _isSyncing = false;
+class _CloudScreenState extends ConsumerState<CloudScreen> {
+  bool _driveConnecting = false;
+  String? _error;
+
+  bool get _driveConnected =>
+      ref.read(googleDriveServiceProvider).isConnected;
+
+  Future<void> _connectGoogleDrive() async {
+    setState(() {
+      _driveConnecting = true;
+      _error = null;
+    });
+
+    try {
+      final drive = ref.read(googleDriveServiceProvider);
+      await drive.connect();
+      if (mounted) setState(() => _driveConnecting = false);
+    } on DriveException catch (e) {
+      if (mounted) {
+        setState(() {
+          _driveConnecting = false;
+          _error = e.message;
+        });
+      }
+    } catch (e) {
+      ErrorLogger.instance.capture(e, source: 'CloudScreen.connectDrive');
+      if (mounted) {
+        setState(() {
+          _driveConnecting = false;
+          _error = 'Failed to connect Google Drive.';
+        });
+      }
+    }
+  }
+
+  Future<void> _disconnectGoogleDrive() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        title: const Text(
+          'Disconnect Google Drive?',
+          style: TextStyle(color: AuroraColors.textPrimary, fontSize: 16),
+        ),
+        content: const Text(
+          'Your imported books will remain in your library.',
+          style: TextStyle(color: AuroraColors.textSecondary, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel',
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Disconnect',
+                style: TextStyle(color: AuroraColors.auroraWarm)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final drive = ref.read(googleDriveServiceProvider);
+      await drive.disconnect();
+      if (mounted) setState(() {});
+    }
+  }
+
+  void _openDriveFilePicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const DriveFilePicker(),
+    );
+  }
+
+  void _onGoogleDriveTap() {
+    if (_driveConnecting) return;
+    if (_driveConnected) {
+      _openDriveFilePicker();
+    } else {
+      _connectGoogleDrive();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,232 +112,306 @@ class _CloudScreenState extends State<CloudScreen> {
               constraints: const BoxConstraints(maxWidth: 700),
               child: ListView(
                 padding: const EdgeInsets.all(20),
-            children: [
-              const Text(
-                'Cloud',
-                style: TextStyle(
-                  color: AuroraColors.textPrimary,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Sync your library across devices',
-                style: TextStyle(
-                  color: AuroraColors.textSecondary,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 24),
+                children: [
+                  const Text(
+                    'Cloud',
+                    style: TextStyle(
+                      color: AuroraColors.textPrimary,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Import books from cloud storage',
+                    style: TextStyle(
+                      color: AuroraColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
-              // Sync status card
-              AuroraCard(
-                child: Column(
-                  children: [
-                    ShaderMask(
-                      shaderCallback: (bounds) =>
-                          AuroraColors.accentGradient.createShader(bounds),
-                      child: const Icon(Icons.cloud_done_rounded,
-                          size: 40, color: Colors.white),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'All synced',
-                      style: TextStyle(
-                        color: AuroraColors.auroraGreen,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Last synced: 5 minutes ago',
-                      style: TextStyle(
-                        color: AuroraColors.textTertiary,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    AuroraButton(
-                      label: _isSyncing ? 'Syncing...' : 'Sync Now',
-                      icon: Icons.sync_rounded,
-                      onPressed: _isSyncing
-                          ? null
-                          : () {
-                              setState(() => _isSyncing = true);
-                              Future.delayed(const Duration(seconds: 2), () {
-                                if (mounted) setState(() => _isSyncing = false);
-                              });
-                            },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // iCloud Sync
-              const Text(
-                'DEVICE SYNC',
-                style: TextStyle(
-                  color: AuroraColors.textTertiary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              AuroraCard(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
+                  if (_error != null) ...[
                     Container(
-                      width: 44,
-                      height: 44,
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AuroraColors.auroraBlue.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(10),
+                        color: AuroraColors.auroraWarm.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AuroraColors.auroraWarm.withOpacity(0.3),
+                        ),
                       ),
-                      child: const Icon(Icons.cloud_sync_rounded,
-                          color: AuroraColors.auroraBlue, size: 24),
-                    ),
-                    const SizedBox(width: 14),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(
-                            'Cross-Device Sync',
-                            style: TextStyle(
-                              color: AuroraColors.textPrimary,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
+                          const Icon(Icons.warning_amber_rounded,
+                              color: AuroraColors.auroraWarm, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _error!,
+                              style: const TextStyle(
+                                color: AuroraColors.auroraWarm,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
-                          Text(
-                            'Reading progress, bookmarks, highlights',
-                            style: TextStyle(
-                              color: AuroraColors.textTertiary,
-                              fontSize: 12,
-                            ),
+                          GestureDetector(
+                            onTap: () => setState(() => _error = null),
+                            child: const Icon(Icons.close_rounded,
+                                color: AuroraColors.auroraWarm, size: 16),
                           ),
                         ],
                       ),
                     ),
-                    Switch(
-                      value: _iCloudSyncEnabled,
-                      onChanged: (v) => setState(() => _iCloudSyncEnabled = v),
-                      activeColor: AuroraColors.auroraTeal,
-                    ),
+                    const SizedBox(height: 16),
                   ],
-                ),
-              ),
-              const SizedBox(height: 24),
 
-              // Cloud Storage
-              const Text(
-                'CLOUD STORAGE',
-                style: TextStyle(
-                  color: AuroraColors.textTertiary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Google Drive
-              _buildCloudProvider(
-                icon: Icons.cloud_outlined,
-                name: 'Google Drive',
-                description: 'Import books from Google Drive',
-                color: AuroraColors.auroraBlue,
-                connected: _googleDriveConnected,
-                onToggle: () => setState(
-                    () => _googleDriveConnected = !_googleDriveConnected),
-              ),
-              const SizedBox(height: 8),
-
-              // Dropbox
-              _buildCloudProvider(
-                icon: Icons.cloud_circle_outlined,
-                name: 'Dropbox',
-                description: 'Import books from Dropbox',
-                color: AuroraColors.auroraTeal,
-                connected: _dropboxConnected,
-                onToggle: () =>
-                    setState(() => _dropboxConnected = !_dropboxConnected),
-              ),
-              const SizedBox(height: 24),
-
-              // Storage usage
-              const Text(
-                'STORAGE',
-                style: TextStyle(
-                  color: AuroraColors.textTertiary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              AuroraCard(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Local Storage',
-                          style: TextStyle(
-                            color: AuroraColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          '247 MB used',
-                          style: TextStyle(
-                            color: AuroraColors.textSecondary,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+                  const Text(
+                    'CLOUD STORAGE',
+                    style: TextStyle(
+                      color: AuroraColors.textTertiary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.2,
                     ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: 0.12,
-                        minHeight: 6,
-                        backgroundColor: AuroraColors.surface,
-                        valueColor: const AlwaysStoppedAnimation(
-                            AuroraColors.auroraTeal),
+                  ),
+                  const SizedBox(height: 8),
+
+                  _buildGoogleDriveCard(),
+                  const SizedBox(height: 8),
+
+                  _buildCloudProvider(
+                    icon: Icons.cloud_circle_outlined,
+                    name: 'Dropbox',
+                    description: 'Coming soon',
+                    color: AuroraColors.auroraBlue,
+                    connected: false,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Dropbox integration coming in a future update.',
+                            style: TextStyle(color: AuroraColors.textPrimary),
+                          ),
+                          backgroundColor: AuroraColors.surfaceElevated,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  if (_driveConnected) ...[
+                    const Text(
+                      'IMPORT',
+                      style: TextStyle(
+                        color: AuroraColors.textTertiary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Row(
+                    AuroraCard(
+                      padding: const EdgeInsets.all(16),
+                      onTap: _openDriveFilePicker,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: AuroraColors.auroraTeal.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.file_download_rounded,
+                                color: AuroraColors.auroraTeal, size: 24),
+                          ),
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Browse Google Drive',
+                                  style: TextStyle(
+                                    color: AuroraColors.textPrimary,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  'Find and import EPUB, PDF, or TXT files',
+                                  style: TextStyle(
+                                    color: AuroraColors.textTertiary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right_rounded,
+                              color: AuroraColors.textTertiary, size: 20),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  const Text(
+                    'ABOUT',
+                    style: TextStyle(
+                      color: AuroraColors.textTertiary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  AuroraCard(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _StorageLegend(
-                            color: AuroraColors.auroraTeal, label: 'Books'),
-                        SizedBox(width: 16),
-                        _StorageLegend(
-                            color: AuroraColors.auroraPurple, label: 'Cache'),
-                        SizedBox(width: 16),
-                        _StorageLegend(
-                            color: AuroraColors.auroraWarm, label: 'Data'),
+                        Row(
+                          children: [
+                            Icon(Icons.info_outline_rounded,
+                                color: AuroraColors.textTertiary, size: 18),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'How it works',
+                              style: TextStyle(
+                                color: AuroraColors.textPrimary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Connect your Google Drive to browse and import ebooks directly into your Edda library. '
+                          'Files are downloaded and stored locally on your device. '
+                          'Edda only requests read-only access to your Drive.',
+                          style: TextStyle(
+                            color: AuroraColors.textTertiary,
+                            fontSize: 13,
+                            height: 1.5,
+                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 100),
-            ],
+                  ),
+                  const SizedBox(height: 100),
+                ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGoogleDriveCard() {
+    return AuroraCard(
+      padding: const EdgeInsets.all(16),
+      onTap: _onGoogleDriveTap,
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AuroraColors.auroraGreen.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.cloud_outlined,
+                color: AuroraColors.auroraGreen, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Google Drive',
+                  style: TextStyle(
+                    color: AuroraColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  _driveConnected
+                      ? 'Tap to browse and import ebooks'
+                      : 'Import books from Google Drive',
+                  style: const TextStyle(
+                    color: AuroraColors.textTertiary,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_driveConnecting)
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AuroraColors.auroraTeal,
+              ),
+            )
+          else if (_driveConnected)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AuroraColors.auroraGreen.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text(
+                    'Connected',
+                    style: TextStyle(
+                      color: AuroraColors.auroraGreen,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: _disconnectGoogleDrive,
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.link_off_rounded,
+                        color: AuroraColors.textTertiary, size: 16),
+                  ),
+                ),
+              ],
+            )
+          else
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AuroraColors.surface,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Text(
+                'Connect',
+                style: TextStyle(
+                  color: AuroraColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -264,11 +422,11 @@ class _CloudScreenState extends State<CloudScreen> {
     required String description,
     required Color color,
     required bool connected,
-    required VoidCallback onToggle,
+    required VoidCallback onTap,
   }) {
     return AuroraCard(
       padding: const EdgeInsets.all(16),
-      onTap: onToggle,
+      onTap: onTap,
       child: Row(
         children: [
           Container(
@@ -306,9 +464,7 @@ class _CloudScreenState extends State<CloudScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: connected
-                  ? AuroraColors.auroraGreen.withOpacity(0.15)
-                  : AuroraColors.surface,
+              color: AuroraColors.surface,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
@@ -316,7 +472,7 @@ class _CloudScreenState extends State<CloudScreen> {
               style: TextStyle(
                 color: connected
                     ? AuroraColors.auroraGreen
-                    : AuroraColors.textSecondary,
+                    : AuroraColors.textTertiary,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -328,30 +484,3 @@ class _CloudScreenState extends State<CloudScreen> {
   }
 }
 
-class _StorageLegend extends StatelessWidget {
-  final Color color;
-  final String label;
-
-  const _StorageLegend({required this.color, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: AuroraColors.textTertiary,
-            fontSize: 11,
-          ),
-        ),
-      ],
-    );
-  }
-}
