@@ -8,25 +8,28 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:html/parser.dart' as html_parser;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import 'package:xml/xml.dart' as xml;
 import '../logging/error_logger.dart';
+import 'text_processor.dart';
+import 'mobi_parser.dart';
 
 // ─── SUPPORTED FORMATS ──────────────────────────────────────────────────────
 
-/// All ebook formats Edda can handle.
 enum BookFormat {
   epub,
   pdf,
   txt,
   fb2,
   mobi,
+  azw,
+  azw3,
+  kfx,
   cbz,
   cbr,
   rtf,
   djvu,
-  azw3,
   docx;
 
-  /// Resolve format from a file extension string (e.g. ".epub").
   static BookFormat? fromExtension(String ext) {
     final normalized = ext.toLowerCase().replaceAll('.', '');
     return BookFormat.values.cast<BookFormat?>().firstWhere(
@@ -35,13 +38,11 @@ enum BookFormat {
         );
   }
 
-  /// Friendly display label.
   String get label => name.toUpperCase();
 }
 
 // ─── PARSED RESULT MODELS ───────────────────────────────────────────────────
 
-/// Metadata extracted from a parsed book file.
 class ParsedBookMetadata {
   final String title;
   final String author;
@@ -66,7 +67,6 @@ class ParsedBookMetadata {
   });
 }
 
-/// A single chapter extracted from a book file.
 class ParsedChapter {
   final String title;
   final String content;
@@ -79,7 +79,6 @@ class ParsedChapter {
   });
 }
 
-/// Complete result from parsing a book file.
 class ParsedBookResult {
   final ParsedBookMetadata metadata;
   final List<ParsedChapter> chapters;
@@ -92,23 +91,14 @@ class ParsedBookResult {
 
 // ─── SERVICE ────────────────────────────────────────────────────────────────
 
-/// Parses ebook files into structured metadata and chapters.
-///
-/// Provides full EPUB parsing via the `epubx` package and stub
-/// implementations for all other supported formats (PDF, TXT, FB2, MOBI,
-/// CBZ, CBR, RTF, DJVU, AZW3, DOCX). The stubs extract what they can
-/// (file name, size) and return placeholder chapter content so the app
-/// remains functional while full parsers are developed.
 class BookParserService {
   BookParserService();
 
   static const _uuid = Uuid();
 
-  /// Set of file extensions this service can attempt to parse.
   static final Set<String> supportedExtensions =
       BookFormat.values.map((f) => '.${f.name}').toSet();
 
-  /// Returns `true` when the file at [path] has a supported extension.
   bool isSupportedFile(String path) {
     final ext = path.split('.').last.toLowerCase();
     return BookFormat.fromExtension(ext) != null;
@@ -116,12 +106,6 @@ class BookParserService {
 
   // ── Public API ──────────────────────────────────────────────────────────
 
-  /// Parse a book file at [filePath] and return structured data.
-  ///
-  /// On web this throws [UnsupportedError]; use [parseBookFromBytes] instead.
-  ///
-  /// Throws [FormatException] for unsupported file types and
-  /// [FileSystemException] when the file cannot be read.
   Future<ParsedBookResult> parseBook(String filePath) async {
     if (kIsWeb) {
       throw UnsupportedError('Use parseBookFromBytes on web');
@@ -132,65 +116,43 @@ class BookParserService {
       throw FileSystemException('File not found', filePath);
     }
 
-    final format = BookFormat.fromExtension(
-      filePath.split('.').last,
-    );
+    final format = BookFormat.fromExtension(filePath.split('.').last);
     if (format == null) {
       throw FormatException('Unsupported ebook format: $filePath');
     }
 
     final bytes = Uint8List.fromList(await file.readAsBytes());
     final fileName = file.uri.pathSegments.last;
-
-    switch (format) {
-      case BookFormat.epub:
-        return _parseEpubFromBytes(bytes, fileName);
-      case BookFormat.pdf:
-        return _parsePdf(bytes, fileName);
-      case BookFormat.txt:
-        return _parseTxtFromBytes(bytes, fileName);
-      case BookFormat.fb2:
-        return _parseFb2(bytes, fileName);
-      case BookFormat.mobi:
-        return _parseMobi(bytes, fileName);
-      case BookFormat.cbz:
-      case BookFormat.cbr:
-        return _parseComicArchive(bytes, fileName, format);
-      case BookFormat.rtf:
-        return _parseRtf(bytes, fileName);
-      case BookFormat.djvu:
-        return _parseDjvu(bytes, fileName);
-      case BookFormat.azw3:
-        return _parseAzw3(bytes, fileName);
-      case BookFormat.docx:
-        return _parseDocx(bytes, fileName);
-    }
+    return _parseByFormat(bytes, fileName, format);
   }
 
-  /// Parse a book from raw bytes. Works on all platforms including web.
-  ///
-  /// [filename] is used to determine the format from its extension and as
-  /// a fallback title.
   Future<ParsedBookResult> parseBookFromBytes(
       Uint8List bytes, String filename) async {
-    final format = BookFormat.fromExtension(
-      filename.split('.').last,
-    );
+    final format = BookFormat.fromExtension(filename.split('.').last);
     if (format == null) {
       throw FormatException('Unsupported ebook format: $filename');
     }
+    return _parseByFormat(bytes, filename, format);
+  }
 
+  Future<ParsedBookResult> _parseByFormat(
+      Uint8List bytes, String filename, BookFormat format) {
     switch (format) {
       case BookFormat.epub:
         return _parseEpubFromBytes(bytes, filename);
-      case BookFormat.txt:
-        return _parseTxtFromBytes(bytes, filename);
       case BookFormat.pdf:
         return _parsePdf(bytes, filename);
+      case BookFormat.txt:
+        return _parseTxtFromBytes(bytes, filename);
       case BookFormat.fb2:
         return _parseFb2(bytes, filename);
       case BookFormat.mobi:
-        return _parseMobi(bytes, filename);
+      case BookFormat.azw:
+        return _parseMobi(bytes, filename, format);
+      case BookFormat.azw3:
+        return _parseAzw3(bytes, filename);
+      case BookFormat.kfx:
+        return _parseKfx(bytes, filename);
       case BookFormat.cbz:
       case BookFormat.cbr:
         return _parseComicArchive(bytes, filename, format);
@@ -198,37 +160,25 @@ class BookParserService {
         return _parseRtf(bytes, filename);
       case BookFormat.djvu:
         return _parseDjvu(bytes, filename);
-      case BookFormat.azw3:
-        return _parseAzw3(bytes, filename);
       case BookFormat.docx:
         return _parseDocx(bytes, filename);
     }
   }
 
-  /// Extract only the chapter list from [filePath] without full metadata.
   Future<List<ParsedChapter>> extractChapters(String filePath) async {
     final result = await parseBook(filePath);
     return result.chapters;
   }
 
-  // ── EPUB (full implementation) ──────────────────────────────────────────
-
-  Future<ParsedBookResult> _parseEpub(File file) async {
-    final bytes = Uint8List.fromList(await file.readAsBytes());
-    final fileName = file.uri.pathSegments.last;
-    return _parseEpubFromBytes(bytes, fileName);
-  }
+  // ── EPUB ───────────────────────────────────────────────────────────────
 
   Future<ParsedBookResult> _parseEpubFromBytes(
       Uint8List bytes, String filename) async {
     final epubBook = await EpubReader.readBook(bytes);
 
-    // Extract metadata
-    final title =
-        epubBook.Title ?? _fileNameWithoutExtension(filename);
+    final title = epubBook.Title ?? _fileNameWithoutExtension(filename);
     final author = epubBook.Author ?? 'Unknown Author';
 
-    // Attempt to pull ISBN from Dublin Core identifiers
     String? isbn;
     final identifiers = epubBook.Schema?.Package?.Metadata?.Identifiers;
     if (identifiers != null) {
@@ -247,18 +197,17 @@ class BookParserService {
     final language =
         epubBook.Schema?.Package?.Metadata?.Languages?.firstOrNull;
 
-    // Extract cover image
     Uint8List? coverImage;
     final coverRef = epubBook.CoverImage;
     if (coverRef != null) {
       try {
         coverImage = Uint8List.fromList(img.encodePng(coverRef));
       } catch (e, stack) {
-        ErrorLogger.instance.capture(e, stackTrace: stack, source: 'BookParser.coverEncode');
+        ErrorLogger.instance
+            .capture(e, stackTrace: stack, source: 'BookParser.coverEncode');
       }
     }
 
-    // Extract chapters from the reading order
     final chapters = <ParsedChapter>[];
     final htmlContentMap = epubBook.Content?.Html;
     if (htmlContentMap != null) {
@@ -267,19 +216,16 @@ class BookParserService {
         final htmlContent = entry.value.Content ?? '';
         final document = html_parser.parse(htmlContent);
 
-        // Derive a chapter title from the first heading, or fall back to
-        // the file name within the EPUB archive.
         final heading = document.querySelector('h1, h2, h3, h4');
-        final chapterTitle =
-            heading?.text.trim() ?? 'Chapter ${index + 1}';
+        final chapterTitle = heading?.text.trim() ?? 'Chapter ${index + 1}';
 
-        // Strip HTML tags to get plain reading text.
         final plainText = document.body?.text ?? htmlContent;
+        final normalized = TextProcessor.normalize(plainText);
 
-        if (plainText.trim().isNotEmpty) {
+        if (normalized.isNotEmpty) {
           chapters.add(ParsedChapter(
             title: chapterTitle,
-            content: plainText.trim(),
+            content: normalized,
             index: index,
           ));
           index++;
@@ -287,7 +233,6 @@ class BookParserService {
       }
     }
 
-    // Guarantee at least one chapter so the reader view has content.
     if (chapters.isEmpty) {
       chapters.add(const ParsedChapter(
         title: 'Content',
@@ -312,15 +257,10 @@ class BookParserService {
     );
   }
 
-  // ── PDF (metadata extraction) ───────────────────────────────────────────
+  // ── PDF ────────────────────────────────────────────────────────────────
 
   Future<ParsedBookResult> _parsePdf(Uint8List bytes, String filename) async {
     final fileName = _fileNameWithoutExtension(filename);
-
-    // PDF metadata extraction would require a native PDF library.
-    // For now we extract what we can from the file itself and provide
-    // a single stub chapter. The reader screen uses `pdfrx` directly
-    // for rendering so full text extraction is not required here.
     return ParsedBookResult(
       metadata: ParsedBookMetadata(
         title: fileName,
@@ -338,22 +278,15 @@ class BookParserService {
     );
   }
 
-  // ── Plain text ──────────────────────────────────────────────────────────
-
-  Future<ParsedBookResult> _parseTxt(File file) async {
-    final bytes = Uint8List.fromList(await file.readAsBytes());
-    final fileName = file.uri.pathSegments.last;
-    return _parseTxtFromBytes(bytes, fileName);
-  }
+  // ── Plain text ─────────────────────────────────────────────────────────
 
   Future<ParsedBookResult> _parseTxtFromBytes(
       Uint8List bytes, String filename) async {
-    final content = utf8.decode(bytes);
+    final content = utf8.decode(bytes, allowMalformed: true);
     final fileName = _fileNameWithoutExtension(filename);
+    final normalized = TextProcessor.normalize(content);
 
-    // Split into chapters by common delimiters (double newline sections,
-    // or "Chapter X" headings). Fall back to a single chapter.
-    final chapters = _splitTextIntoChapters(content);
+    final chapters = _splitTextIntoChapters(normalized);
 
     return ParsedBookResult(
       metadata: ParsedBookMetadata(
@@ -367,67 +300,249 @@ class BookParserService {
           : [
               ParsedChapter(
                 title: fileName,
-                content: content,
+                content: normalized,
                 index: 0,
               ),
             ],
     );
   }
 
-  // ── FB2 (stub) ──────────────────────────────────────────────────────────
+  // ── FB2 ────────────────────────────────────────────────────────────────
 
   Future<ParsedBookResult> _parseFb2(Uint8List bytes, String filename) async {
-    return _stubResult(bytes.length, filename, BookFormat.fb2,
-        note: 'FB2 parsing will use XML extraction in a future release.');
+    final xmlString = utf8.decode(bytes, allowMalformed: true);
+    final document = xml.XmlDocument.parse(xmlString);
+
+    final titleInfo = document.findAllElements('title-info').firstOrNull;
+
+    final bookTitle =
+        titleInfo?.findElements('book-title').firstOrNull?.innerText.trim() ??
+            _fileNameWithoutExtension(filename);
+
+    var author = 'Unknown Author';
+    final authorEl = titleInfo?.findElements('author').firstOrNull;
+    if (authorEl != null) {
+      final first =
+          authorEl.findElements('first-name').firstOrNull?.innerText.trim() ??
+              '';
+      final last =
+          authorEl.findElements('last-name').firstOrNull?.innerText.trim() ??
+              '';
+      final combined = '$first $last'.trim();
+      if (combined.isNotEmpty) author = combined;
+    }
+
+    final lang =
+        titleInfo?.findElements('lang').firstOrNull?.innerText.trim();
+
+    final annotation =
+        titleInfo?.findElements('annotation').firstOrNull?.innerText.trim();
+
+    Uint8List? coverImage;
+    final coverPage = titleInfo?.findElements('coverpage').firstOrNull;
+    if (coverPage != null) {
+      final imageEl = coverPage.findElements('image').firstOrNull;
+      final href = imageEl?.getAttribute('l:href') ??
+          imageEl?.getAttribute('xlink:href') ??
+          imageEl?.getAttribute('href');
+      if (href != null) {
+        final id = href.replaceFirst('#', '');
+        final binary = document
+            .findAllElements('binary')
+            .where((b) => b.getAttribute('id') == id)
+            .firstOrNull;
+        if (binary != null) {
+          try {
+            coverImage = base64Decode(
+                binary.innerText.replaceAll(RegExp(r'\s'), ''));
+          } catch (e) {
+            ErrorLogger.instance.capture(e, source: 'BookParser.fb2Cover');
+          }
+        }
+      }
+    }
+
+    final chapters = <ParsedChapter>[];
+    final body = document.findAllElements('body').firstOrNull;
+    if (body != null) {
+      var index = 0;
+      for (final section in body.findElements('section')) {
+        final sectionTitle = section
+                .findElements('title')
+                .firstOrNull
+                ?.innerText
+                .trim() ??
+            'Chapter ${index + 1}';
+
+        final buffer = StringBuffer();
+        _extractFb2Text(section, buffer);
+
+        final content = TextProcessor.normalize(buffer.toString());
+        if (content.isNotEmpty) {
+          chapters.add(ParsedChapter(
+            title: sectionTitle,
+            content: content,
+            index: index,
+          ));
+          index++;
+        }
+      }
+    }
+
+    if (chapters.isEmpty) {
+      chapters.add(const ParsedChapter(
+        title: 'Content',
+        content: 'No readable content found in this FB2 file.',
+        index: 0,
+      ));
+    }
+
+    return ParsedBookResult(
+      metadata: ParsedBookMetadata(
+        title: bookTitle,
+        author: author,
+        description: annotation,
+        language: lang,
+        coverImageData: coverImage,
+        format: BookFormat.fb2,
+        fileSize: bytes.length,
+      ),
+      chapters: chapters,
+    );
   }
 
-  // ── MOBI (stub) ─────────────────────────────────────────────────────────
-
-  Future<ParsedBookResult> _parseMobi(Uint8List bytes, String filename) async {
-    return _stubResult(bytes.length, filename, BookFormat.mobi,
-        note: 'MOBI/KF7 parsing is not yet implemented.');
+  void _extractFb2Text(xml.XmlElement element, StringBuffer buffer) {
+    for (final child in element.children) {
+      if (child is xml.XmlElement) {
+        final tag = child.name.local;
+        if (tag == 'title') continue;
+        if (tag == 'section') continue;
+        if (tag == 'p' || tag == 'empty-line') {
+          if (buffer.isNotEmpty) buffer.write('\n\n');
+          _extractFb2Text(child, buffer);
+        } else if (tag == 'emphasis' || tag == 'strong') {
+          _extractFb2Text(child, buffer);
+        } else if (tag == 'a') {
+          _extractFb2Text(child, buffer);
+        } else {
+          _extractFb2Text(child, buffer);
+        }
+      } else if (child is xml.XmlText) {
+        buffer.write(child.value);
+      }
+    }
   }
 
-  // ── Comic archives CBZ / CBR (stub) ─────────────────────────────────────
+  // ── MOBI / AZW ────────────────────────────────────────────────────────
+
+  Future<ParsedBookResult> _parseMobi(
+      Uint8List bytes, String filename, BookFormat format) async {
+    try {
+      final result = MobiParser.parse(bytes);
+      final normalized = TextProcessor.normalize(result.textContent);
+      final chapters = _splitTextIntoChapters(normalized);
+
+      return ParsedBookResult(
+        metadata: ParsedBookMetadata(
+          title: result.title.isNotEmpty
+              ? result.title
+              : _fileNameWithoutExtension(filename),
+          author: result.author,
+          isbn: result.isbn,
+          description: result.description,
+          publisher: result.publisher,
+          language: result.language,
+          coverImageData: result.coverImage,
+          format: format,
+          fileSize: bytes.length,
+        ),
+        chapters: chapters.isNotEmpty
+            ? chapters
+            : [
+                ParsedChapter(
+                  title: result.title.isNotEmpty
+                      ? result.title
+                      : _fileNameWithoutExtension(filename),
+                  content: normalized,
+                  index: 0,
+                ),
+              ],
+      );
+    } on MobiParseException catch (e) {
+      final name = _fileNameWithoutExtension(filename);
+      return ParsedBookResult(
+        metadata: ParsedBookMetadata(
+          title: name,
+          author: 'Unknown Author',
+          format: format,
+          fileSize: bytes.length,
+        ),
+        chapters: [
+          ParsedChapter(title: name, content: e.message, index: 0),
+        ],
+      );
+    }
+  }
+
+  // ── AZW3 ───────────────────────────────────────────────────────────────
+
+  Future<ParsedBookResult> _parseAzw3(
+      Uint8List bytes, String filename) async {
+    try {
+      return await _parseMobi(bytes, filename, BookFormat.azw3);
+    } catch (_) {
+      return _stubResult(bytes.length, filename, BookFormat.azw3,
+          note: 'This AZW3/KF8 file could not be parsed.\n\n'
+              'Try converting it to EPUB using Calibre for the best '
+              'reading experience.');
+    }
+  }
+
+  // ── KFX ────────────────────────────────────────────────────────────────
+
+  Future<ParsedBookResult> _parseKfx(
+      Uint8List bytes, String filename) async {
+    return _stubResult(bytes.length, filename, BookFormat.kfx,
+        note: 'KFX is Amazon\'s proprietary format and cannot be '
+            'parsed directly.\n\n'
+            'To read this book in Edda, convert it to EPUB using Calibre.');
+  }
+
+  // ── Comic archives CBZ / CBR ───────────────────────────────────────────
 
   Future<ParsedBookResult> _parseComicArchive(
       Uint8List bytes, String filename, BookFormat format) async {
     return _stubResult(bytes.length, filename, format,
-        note:
-            '${format.label} comic archive support is planned for a future release.');
+        note: '${format.label} comic archive support is planned for '
+            'a future release.');
   }
 
-  // ── RTF (stub) ──────────────────────────────────────────────────────────
+  // ── RTF ────────────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseRtf(Uint8List bytes, String filename) async {
+  Future<ParsedBookResult> _parseRtf(
+      Uint8List bytes, String filename) async {
     return _stubResult(bytes.length, filename, BookFormat.rtf,
         note: 'RTF parsing is not yet implemented.');
   }
 
-  // ── DjVu (stub) ─────────────────────────────────────────────────────────
+  // ── DjVu ───────────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseDjvu(Uint8List bytes, String filename) async {
+  Future<ParsedBookResult> _parseDjvu(
+      Uint8List bytes, String filename) async {
     return _stubResult(bytes.length, filename, BookFormat.djvu,
         note: 'DjVu parsing is not yet implemented.');
   }
 
-  // ── AZW3 (stub) ─────────────────────────────────────────────────────────
+  // ── DOCX ───────────────────────────────────────────────────────────────
 
-  Future<ParsedBookResult> _parseAzw3(Uint8List bytes, String filename) async {
-    return _stubResult(bytes.length, filename, BookFormat.azw3,
-        note: 'AZW3/KF8 parsing is not yet implemented.');
-  }
-
-  // ── DOCX (stub) ─────────────────────────────────────────────────────────
-
-  Future<ParsedBookResult> _parseDocx(Uint8List bytes, String filename) async {
+  Future<ParsedBookResult> _parseDocx(
+      Uint8List bytes, String filename) async {
     return _stubResult(bytes.length, filename, BookFormat.docx,
         note: 'DOCX parsing is not yet implemented.');
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
-  /// Generate a minimal stub result for formats not yet fully implemented.
   ParsedBookResult _stubResult(
     int fileSize,
     String fileName,
@@ -435,7 +550,6 @@ class BookParserService {
     required String note,
   }) {
     final name = _fileNameWithoutExtension(fileName);
-
     return ParsedBookResult(
       metadata: ParsedBookMetadata(
         title: name,
@@ -444,16 +558,11 @@ class BookParserService {
         fileSize: fileSize,
       ),
       chapters: [
-        ParsedChapter(
-          title: name,
-          content: note,
-          index: 0,
-        ),
+        ParsedChapter(title: name, content: note, index: 0),
       ],
     );
   }
 
-  /// Split plain text content into chapters using common heading patterns.
   List<ParsedChapter> _splitTextIntoChapters(String text) {
     final chapterPattern =
         RegExp(r'(?:^|\n)(Chapter\s+\w+[^\n]*)', caseSensitive: false);
@@ -464,7 +573,8 @@ class BookParserService {
     final chapters = <ParsedChapter>[];
     for (var i = 0; i < matches.length; i++) {
       final start = matches[i].start;
-      final end = i + 1 < matches.length ? matches[i + 1].start : text.length;
+      final end =
+          i + 1 < matches.length ? matches[i + 1].start : text.length;
       final title = matches[i].group(1)?.trim() ?? 'Chapter ${i + 1}';
       final content = text.substring(start, end).trim();
 

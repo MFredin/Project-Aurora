@@ -28,7 +28,9 @@ class DriveFile {
       mimeType == 'application/epub+zip' ||
       mimeType == 'application/pdf' ||
       mimeType == 'text/plain' ||
-      const {'epub', 'pdf', 'txt'}.contains(extension);
+      mimeType == 'application/x-mobipocket-ebook' ||
+      mimeType == 'application/octet-stream' ||
+      const {'epub', 'pdf', 'txt', 'mobi', 'azw', 'azw3', 'kfx', 'fb2'}.contains(extension);
 
   String get sizeLabel {
     if (size < 1024) return '$size B';
@@ -150,6 +152,8 @@ class GoogleDriveService {
       " or mimeType = 'application/epub+zip'"
       " or mimeType = 'application/pdf'"
       " or mimeType = 'text/plain'"
+      " or mimeType = 'application/x-mobipocket-ebook'"
+      " or mimeType = 'application/octet-stream'"
       ")",
     );
 
@@ -181,7 +185,7 @@ class GoogleDriveService {
               : null,
           isFolder: map['mimeType'] == 'application/vnd.google-apps.folder',
         );
-      }).toList();
+      }).where((f) => f.isFolder || f.isEbook).toList();
 
       return DriveListResult(
         files: files,
@@ -205,7 +209,9 @@ class GoogleDriveService {
         " and trashed = false"
         " and (mimeType = 'application/epub+zip'"
         " or mimeType = 'application/pdf'"
-        " or mimeType = 'text/plain')";
+        " or mimeType = 'text/plain'"
+        " or mimeType = 'application/x-mobipocket-ebook'"
+        " or mimeType = 'application/octet-stream')";
 
     try {
       final response = await _dio.get(
@@ -233,7 +239,7 @@ class GoogleDriveService {
               ? DateTime.tryParse(map['modifiedTime'] as String)
               : null,
         );
-      }).toList();
+      }).where((f) => f.isEbook).toList();
     } on DioException catch (e) {
       if (e.response?.statusCode == 401 && retryOnAuth) {
         _accessToken = null;

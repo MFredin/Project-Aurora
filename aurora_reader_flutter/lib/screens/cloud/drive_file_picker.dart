@@ -406,7 +406,7 @@ class _DriveFilePickerState extends ConsumerState<DriveFilePicker> {
             ),
             const SizedBox(height: 4),
             const Text(
-              'Supported formats: EPUB, PDF, TXT',
+              'Supported: EPUB, PDF, TXT, MOBI, AZW, FB2',
               style: TextStyle(
                 color: AuroraColors.textTertiary,
                 fontSize: 12,
@@ -492,11 +492,17 @@ class _DriveFilePickerState extends ConsumerState<DriveFilePicker> {
   IconData _iconForFile(DriveFile file) {
     switch (file.extension) {
       case 'epub':
+      case 'fb2':
         return Icons.menu_book_rounded;
       case 'pdf':
         return Icons.picture_as_pdf_rounded;
       case 'txt':
         return Icons.text_snippet_rounded;
+      case 'mobi':
+      case 'azw':
+      case 'azw3':
+      case 'kfx':
+        return Icons.auto_stories_rounded;
       default:
         return Icons.insert_drive_file_rounded;
     }
