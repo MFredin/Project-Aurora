@@ -29,6 +29,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   final ScrollController _scrollController = ScrollController();
   double _readingProgress = 0.0;
   bool _restoredProgress = false;
+  final Map<int, GlobalKey> _chapterKeys = {};
 
   // Derived reader colors from app dark mode
   _ReadingTheme get _theme {
@@ -102,9 +103,35 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     if (!_scrollController.hasClients) return;
     final maxScroll = _scrollController.position.maxScrollExtent;
     if (maxScroll > 0) {
-      setState(() {
-        _readingProgress = _scrollController.offset / maxScroll;
-      });
+      final scrollFraction = _scrollController.offset / maxScroll;
+      if (_isScrollMode) {
+        _updateVisibleChapter();
+        setState(() => _readingProgress = scrollFraction);
+      } else {
+        setState(() => _readingProgress = scrollFraction);
+      }
+    }
+  }
+
+  void _updateVisibleChapter() {
+    if (!_isScrollMode) return;
+    final book = ref.read(bookByIdProvider(widget.bookId));
+    if (book == null) return;
+
+    for (int i = book.chapters.length - 1; i >= 0; i--) {
+      final key = _chapterKeys[i];
+      if (key?.currentContext != null) {
+        final renderBox = key!.currentContext!.findRenderObject() as RenderBox?;
+        if (renderBox != null && renderBox.hasSize) {
+          final offset = renderBox.localToGlobal(Offset.zero);
+          if (offset.dy <= 150) {
+            if (_currentChapter != i) {
+              setState(() => _currentChapter = i);
+            }
+            return;
+          }
+        }
+      }
     }
   }
 
@@ -115,7 +142,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         _currentChapter++;
         _readingProgress = 0;
       });
-      _scrollController.jumpTo(0);
+      if (_isScrollMode) {
+        _scrollToChapter(_currentChapter);
+      } else {
+        _scrollController.jumpTo(0);
+      }
     }
   }
 
@@ -126,7 +157,22 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         _currentChapter--;
         _readingProgress = 0;
       });
-      _scrollController.jumpTo(0);
+      if (_isScrollMode) {
+        _scrollToChapter(_currentChapter);
+      } else {
+        _scrollController.jumpTo(0);
+      }
+    }
+  }
+
+  void _scrollToChapter(int index) {
+    final key = _chapterKeys[index];
+    if (key?.currentContext != null) {
+      Scrollable.ensureVisible(
+        key!.currentContext!,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -233,17 +279,22 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
                     // Content
                     Expanded(
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        padding: EdgeInsets.fromLTRB(
-                            24, _showToolbar ? 64 : 16, 24, 100),
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: isMobile ? double.infinity : 720,
+                      child: Opacity(
+                        opacity: _brightness,
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          padding: EdgeInsets.fromLTRB(
+                              24, _showToolbar ? 64 : 16, 24, 100),
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: isMobile ? double.infinity : 720,
+                              ),
+                              child: _isScrollMode
+                                  ? _buildContinuousContent(book)
+                                  : _buildChapterContent(
+                                      currentTitle, currentContent),
                             ),
-                            child: _buildChapterContent(
-                              currentTitle, currentContent),
                           ),
                         ),
                       ),
@@ -361,6 +412,37 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           setState(() => _selectedText = null);
         }
       },
+    );
+  }
+
+  Widget _buildContinuousContent(BookModel book) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < book.chapters.length; i++) ...[
+          KeyedSubtree(
+            key: _chapterKeys.putIfAbsent(i, () => GlobalKey()),
+            child: _buildChapterContent(
+              book.chapters[i].title,
+              book.chapters[i].content,
+            ),
+          ),
+          if (i < book.chapters.length - 1)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              child: Center(
+                child: Text(
+                  '* * *',
+                  style: TextStyle(
+                    color: _theme.fg.withOpacity(0.3),
+                    fontSize: 18,
+                    letterSpacing: 8,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ],
     );
   }
 
@@ -492,8 +574,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   Widget _buildProgressBar(BookModel book) {
-    final totalProgress =
-        (_currentChapter + _readingProgress) / book.chapters.length;
+    final totalProgress = _isScrollMode
+        ? _readingProgress
+        : (_currentChapter + _readingProgress) / book.chapters.length;
     return Container(
       height: 3,
       width: double.infinity,
@@ -898,7 +981,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                       _currentChapter = index;
                       _readingProgress = 0;
                     });
-                    _scrollController.jumpTo(0);
+                    if (_isScrollMode) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _scrollToChapter(index);
+                      });
+                    } else {
+                      _scrollController.jumpTo(0);
+                    }
                     Navigator.of(context).pop();
                   },
                 );
