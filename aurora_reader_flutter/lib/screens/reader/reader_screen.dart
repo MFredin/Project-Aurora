@@ -1,13 +1,13 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pdfrx/pdfrx.dart';
 import '../../core/data/models.dart';
 import '../../core/data/book_repository.dart';
 import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
+import 'pdf_view_stub.dart'
+    if (dart.library.html) 'pdf_view_web.dart';
 
 class ReaderScreen extends ConsumerStatefulWidget {
   final String bookId;
@@ -411,15 +411,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                 children: [
                   _buildProgressBar(book),
                   Expanded(
-                    child: PdfViewer.data(
-                      pdfData,
-                      sourceName: book.title,
-                      params: PdfViewerParams(
-                        backgroundColor: AuroraColors.deepSpace,
-                        margin: 8,
-                        scrollByMouseWheel: 1.0,
-                      ),
-                    ),
+                    child: buildPdfView(pdfData, 'pdf-${widget.bookId}'),
                   ),
                 ],
               ),
