@@ -21,12 +21,14 @@ export '../services/parser/book_parser_service.dart'
 
 /// Cloud storage service.
 final cloudStorageProvider = Provider<CloudStorageService>((ref) {
-  return CloudStorageService();
+  final db = ref.watch(databaseProvider);
+  return CloudStorageService(db);
 });
 
 /// Cross-device sync service.
 final syncServiceProvider = Provider<SyncService>((ref) {
-  return SyncService();
+  final db = ref.watch(databaseProvider);
+  return SyncService(db);
 });
 
 /// LLM settings persistence.
@@ -35,15 +37,18 @@ final llmSettingsProvider = Provider<LlmSettingsService>((ref) {
 });
 
 /// LLM configuration state (reactive).
-final llmConfigProvider = StateNotifierProvider<LlmConfigNotifier, LlmConfig>((ref) {
-  final settings = ref.watch(llmSettingsProvider);
-  return LlmConfigNotifier(settings);
-});
+final llmConfigProvider = NotifierProvider<LlmConfigNotifier, LlmConfig>(
+  LlmConfigNotifier.new,
+);
 
-class LlmConfigNotifier extends StateNotifier<LlmConfig> {
-  final LlmSettingsService _settings;
+class LlmConfigNotifier extends Notifier<LlmConfig> {
+  late final LlmSettingsService _settings;
 
-  LlmConfigNotifier(this._settings) : super(_settings.load());
+  @override
+  LlmConfig build() {
+    _settings = ref.watch(llmSettingsProvider);
+    return _settings.load();
+  }
 
   Future<void> setProvider(LlmProviderType provider) async {
     final existingKey = _settings.loadApiKey(provider);

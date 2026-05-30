@@ -206,8 +206,72 @@ class UserPreferencesTable extends Table {
 
 // ─── DATABASE ───────────────────────────────────────────────────────────────
 
-// AppDatabase requires codegen. Run: dart run build_runner build
-// The alpha uses BookRepository (lib/core/data/book_repository.dart) instead.
-//
-// @DriftDatabase(tables: [...])
-// class AppDatabase extends _$AppDatabase { ... }
+// Stub AppDatabase — the alpha uses BookRepository (Hive) for storage.
+// This satisfies type references until Drift codegen is run.
+class AppDatabase {
+  Future<void> close() async {}
+  Stream<List<Book>> watchAllBooks() => Stream.value([]);
+  Future<Book?> getBookById(String id) async => null;
+  Future<ReadingProgress?> getProgressForBook(String bookId) async => null;
+  Future<List<BookChapter>> getChaptersForBook(String bookId) async => [];
+  Stream<List<Bookmark>> watchBookmarksForBook(String bookId) => Stream.value([]);
+  Stream<List<Highlight>> watchHighlightsForBook(String bookId) => Stream.value([]);
+  Stream<List<ReadingSession>> watchAllSessions() => Stream.value([]);
+  Stream<List<VocabularyEntry>> watchAllVocabulary() => Stream.value([]);
+}
+
+class Book {
+  final String id;
+  final String title;
+  const Book({required this.id, required this.title});
+}
+
+class ReadingProgress {
+  final String bookId;
+  const ReadingProgress({required this.bookId});
+}
+
+class BookChapter {
+  final String id;
+  final String title;
+  const BookChapter({required this.id, required this.title});
+}
+
+class Bookmark {
+  final String id;
+  const Bookmark({required this.id});
+}
+
+class Highlight {
+  final String id;
+  final String bookId;
+  final String highlightedText;
+  final String note;
+  const Highlight({
+    required this.id,
+    required this.bookId,
+    required this.highlightedText,
+    this.note = '',
+  });
+}
+
+class ReadingSession {
+  final String id;
+  final int durationSeconds;
+  final int pagesRead;
+  final int wordsRead;
+  final DateTime startTime;
+  const ReadingSession({
+    required this.id,
+    required this.durationSeconds,
+    required this.pagesRead,
+    required this.wordsRead,
+    required this.startTime,
+  });
+}
+
+class VocabularyEntry {
+  final String id;
+  final String word;
+  const VocabularyEntry({required this.id, required this.word});
+}
