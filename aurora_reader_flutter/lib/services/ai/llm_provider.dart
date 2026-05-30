@@ -19,11 +19,11 @@ enum LlmProviderType {
   String get defaultModel {
     switch (this) {
       case LlmProviderType.anthropic:
-        return 'claude-sonnet-4-20250514';
+        return 'claude-sonnet-4-6';
       case LlmProviderType.openai:
-        return 'gpt-4o';
+        return 'gpt-5.5';
       case LlmProviderType.gemini:
-        return 'gemini-2.0-flash';
+        return 'gemini-3.5-flash';
     }
   }
 
@@ -31,14 +31,14 @@ enum LlmProviderType {
     switch (this) {
       case LlmProviderType.anthropic:
         return [
-          'claude-sonnet-4-20250514',
-          'claude-haiku-4-5-20251001',
-          'claude-opus-4-20250514',
+          'claude-haiku-4-5',
+          'claude-sonnet-4-6',
+          'claude-opus-4-8',
         ];
       case LlmProviderType.openai:
-        return ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'o3-mini'];
+        return ['gpt-5.5', 'gpt-5.2', 'o3', 'o4-mini'];
       case LlmProviderType.gemini:
-        return ['gemini-2.0-flash', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+        return ['gemini-3.5-flash', 'gemini-3.1-pro', 'gemini-2.5-pro', 'gemini-2.5-flash'];
     }
   }
 
