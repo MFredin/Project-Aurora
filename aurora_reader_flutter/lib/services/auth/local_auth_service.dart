@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import 'auth_service.dart';
@@ -44,8 +45,13 @@ class LocalAuthService implements AuthService {
     await _box.put(_usersKey, jsonEncode(users));
   }
 
-  int _hashPassword(String email, String password) {
-    return '$email:$password'.hashCode;
+  String _hashPassword(String salt, String password) {
+    final bytes = utf8.encode('$salt:$password');
+    return sha256.convert(bytes).toString();
+  }
+
+  String _generateSalt() {
+    return _uuid.v4();
   }
 
   @override
@@ -83,9 +89,11 @@ class LocalAuthService implements AuthService {
       createdAt: DateTime.now(),
     );
 
+    final salt = _generateSalt();
     users[normalizedEmail] = {
       ...user.toJson(),
-      'passwordHash': _hashPassword(normalizedEmail, password),
+      'salt': salt,
+      'passwordHash': _hashPassword(salt, password),
     };
     await _saveUsers(users);
 
@@ -111,8 +119,9 @@ class LocalAuthService implements AuthService {
       throw const AuthException('No account found with this email.');
     }
 
-    final storedHash = userData['passwordHash'] as int;
-    if (storedHash != _hashPassword(normalizedEmail, password)) {
+    final storedHash = userData['passwordHash'] as String;
+    final salt = userData['salt'] as String;
+    if (storedHash != _hashPassword(salt, password)) {
       throw const AuthException('Incorrect password.');
     }
 
