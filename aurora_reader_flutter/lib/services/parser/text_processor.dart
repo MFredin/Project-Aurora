@@ -28,15 +28,17 @@ class TextProcessor {
   }
 
   /// For EPUB/FB2 HTML content — extracts text preserving paragraph structure.
-  static String extractFromHtml(String html) {
+  /// [skipFirstHeading] removes the first h1-h4 from the body to avoid
+  /// duplicating the chapter title that's already shown as a styled header.
+  static String extractFromHtml(String html, {bool skipFirstHeading = false}) {
     final document = html_parser.parse(html);
     final body = document.body;
     if (body == null) return html.trim();
 
-    final paragraphs = <String>[];
-    _walkNodes(body, paragraphs);
+    final state = _WalkState(skipFirstHeading: skipFirstHeading);
+    _walkNodes(body, state);
 
-    final result = paragraphs
+    final result = state.paragraphs
         .map((p) => p.trim())
         .where((p) => p.isNotEmpty)
         .join('\n\n');
@@ -44,14 +46,14 @@ class TextProcessor {
     return _decodeEntities(result).trim();
   }
 
-  static void _walkNodes(dom.Node node, List<String> paragraphs) {
+  static void _walkNodes(dom.Node node, _WalkState state) {
     if (node is dom.Text) {
       final text = node.text.replaceAll(RegExp(r'\s+'), ' ');
       if (text.trim().isNotEmpty) {
-        if (paragraphs.isEmpty) {
-          paragraphs.add(text);
+        if (state.paragraphs.isEmpty) {
+          state.paragraphs.add(text);
         } else {
-          paragraphs.last += text;
+          state.paragraphs.last += text;
         }
       }
       return;
@@ -61,32 +63,40 @@ class TextProcessor {
 
     final tag = node.localName?.toLowerCase() ?? '';
 
-    // Skip non-content elements
     if (const {'script', 'style', 'head'}.contains(tag)) return;
 
+    final isHeading = const {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}.contains(tag);
+
+    if (isHeading && state.skipFirstHeading && !state.headingSkipped) {
+      state.headingSkipped = true;
+      return;
+    }
+
     final isBlock = const {
-      'p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      'blockquote', 'li', 'tr', 'section', 'article',
+      'p', 'div', 'blockquote', 'li', 'tr', 'section', 'article',
       'header', 'footer', 'figcaption', 'dt', 'dd',
-    }.contains(tag);
+    }.contains(tag) || isHeading;
 
-    final isBreak = tag == 'br';
+    if (tag == 'br') {
+      state.paragraphs.add('');
+      return;
+    }
 
-    if (isBreak) {
-      paragraphs.add('');
+    if (tag == 'hr') {
+      state.paragraphs.add('* * *');
       return;
     }
 
     if (isBlock) {
-      paragraphs.add('');
+      state.paragraphs.add('');
     }
 
     for (final child in node.nodes) {
-      _walkNodes(child, paragraphs);
+      _walkNodes(child, state);
     }
 
-    if (isBlock && paragraphs.isNotEmpty) {
-      paragraphs.add('');
+    if (isBlock && state.paragraphs.isNotEmpty) {
+      state.paragraphs.add('');
     }
   }
 
@@ -257,4 +267,12 @@ class TextProcessor {
     text = text.replaceAll(RegExp(r"'+"), "'");
     return text;
   }
+}
+
+class _WalkState {
+  final List<String> paragraphs = [];
+  final bool skipFirstHeading;
+  bool headingSkipped = false;
+
+  _WalkState({this.skipFirstHeading = false});
 }

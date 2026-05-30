@@ -29,6 +29,17 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   double _readingProgress = 0.0;
   bool _restoredProgress = false;
 
+  // Reading theme
+  int _themeIndex = 0;
+  static const _themes = [
+    _ReadingTheme('Dark', Color(0xFF0D1210), Color(0xFFD4D0C8), Color(0xFF141A16)),
+    _ReadingTheme('Sepia', Color(0xFF3B2F1E), Color(0xFFE8D5B5), Color(0xFF2E2416)),
+    _ReadingTheme('Light', Color(0xFFF5F5F0), Color(0xFF2A2A2A), Color(0xFFE8E8E0)),
+    _ReadingTheme('Green', Color(0xFF0D2818), Color(0xFFA8E6C3), Color(0xFF0A1F13)),
+  ];
+
+  _ReadingTheme get _theme => _themes[_themeIndex];
+
   // Reading time tracking
   final Stopwatch _stopwatch = Stopwatch();
 
@@ -210,7 +221,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       autofocus: true,
       onKeyEvent: (node, event) => _handleKeyEvent(node, event, book),
       child: Scaffold(
-        backgroundColor: AuroraColors.deepSpace.withOpacity(_brightness),
+        backgroundColor: _theme.bg,
         body: SafeArea(
           child: Stack(
             children: [
@@ -291,27 +302,27 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   Widget _buildChapterContent(String title, String content) {
-    final textColor = AuroraColors.textPrimary.withOpacity(0.9 * _brightness);
+    final textColor = _theme.fg;
     final paragraphs = content.split('\n\n');
 
     final spans = <InlineSpan>[];
     final plainBuffer = StringBuffer();
 
     final isStructuralTitle = RegExp(
-      r'^(prologue|epilogue|chapter\s|part\s|act\s|book\s|acknowledgements|afterword|foreword|preface|introduction)',
+      r'^(prologue|epilogue|chapter\s|part\s|act\s|book\s|acknowledgements|afterword|foreword|preface|introduction|contents|dear reader)',
       caseSensitive: false,
     ).hasMatch(title);
 
     if (isStructuralTitle) {
-      final headerText = '$title\n\n';
+      final headerText = '$title\n';
       spans.add(TextSpan(
         text: headerText,
         style: TextStyle(
-          color: AuroraColors.auroraTeal.withOpacity(_brightness),
-          fontSize: _fontSize + 8,
+          color: AuroraColors.auroraTeal,
+          fontSize: _fontSize + 6,
           fontWeight: FontWeight.w700,
           fontFamily: 'Georgia',
-          height: 2.0,
+          height: 1.8,
         ),
       ));
       plainBuffer.write(headerText);
@@ -508,10 +519,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       right: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: AuroraColors.cosmos.withOpacity(0.95),
+          color: _theme.chrome.withOpacity(0.95),
           border: Border(
             bottom: BorderSide(
-              color: const Color(0xFF252E27).withOpacity(0.6),
+              color: _theme.fg.withOpacity(0.1),
               width: 0.5,
             ),
           ),
@@ -520,8 +531,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         child: Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_rounded,
-                  color: AuroraColors.textPrimary, size: 22),
+              icon: Icon(Icons.arrow_back_rounded,
+                  color: _theme.fg, size: 22),
               onPressed: () => Navigator.of(context).maybePop(),
             ),
             const SizedBox(width: 4),
@@ -533,8 +544,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     book.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AuroraColors.textPrimary,
+                    style: TextStyle(
+                      color: _theme.fg,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -544,8 +555,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     'Chapter ${_currentChapter + 1} of ${book.chapters.length}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AuroraColors.textTertiary,
+                    style: TextStyle(
+                      color: _theme.fg.withOpacity(0.5),
                       fontSize: 12,
                     ),
                   ),
@@ -576,8 +587,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.format_list_bulleted_rounded,
-                  color: AuroraColors.textSecondary, size: 22),
+              icon: Icon(Icons.format_list_bulleted_rounded,
+                  color: _theme.fg.withOpacity(0.6), size: 22),
               onPressed: () => _showChapterList(book),
             ),
           ],
@@ -593,10 +604,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       right: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: AuroraColors.cosmos.withOpacity(0.95),
+          color: _theme.chrome.withOpacity(0.95),
           border: Border(
             top: BorderSide(
-              color: const Color(0xFF252E27).withOpacity(0.6),
+              color: _theme.fg.withOpacity(0.1),
               width: 0.5,
             ),
           ),
@@ -608,16 +619,19 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             _ToolbarButton(
               icon: Icons.chevron_left_rounded,
               label: 'Prev',
+              color: _theme.fg,
               onTap: _currentChapter > 0 ? _previousChapter : null,
             ),
             _ToolbarButton(
               icon: Icons.text_fields_rounded,
               label: 'Font',
+              color: _theme.fg,
               onTap: () => setState(() => _showSettings = !_showSettings),
             ),
             _ToolbarButton(
               icon: Icons.brightness_6_rounded,
               label: 'Light',
+              color: _theme.fg,
               onTap: () {
                 setState(() {
                   _brightness = _brightness == 1.0 ? 0.7 : 1.0;
@@ -629,11 +643,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   ? Icons.swap_horiz_rounded
                   : Icons.swap_vert_rounded,
               label: _isScrollMode ? 'Scroll' : 'Page',
+              color: _theme.fg,
               onTap: () => setState(() => _isScrollMode = !_isScrollMode),
             ),
             _ToolbarButton(
               icon: Icons.chevron_right_rounded,
               label: 'Next',
+              color: _theme.fg,
               onTap: _currentChapter < book.chapters.length - 1
                   ? () => _nextChapter(book)
                   : null,
@@ -722,26 +738,16 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _ThemePreset(
-                          label: 'Dark',
-                          bg: AuroraColors.deepSpace,
-                          fg: AuroraColors.textPrimary,
-                          isSelected: true),
-                      _ThemePreset(
-                          label: 'Sepia',
-                          bg: const Color(0xFF3B2F1E),
-                          fg: const Color(0xFFE8D5B5),
-                          isSelected: false),
-                      _ThemePreset(
-                          label: 'Light',
-                          bg: const Color(0xFFF5F5F0),
-                          fg: const Color(0xFF2A2A2A),
-                          isSelected: false),
-                      _ThemePreset(
-                          label: 'Green',
-                          bg: const Color(0xFF0D2818),
-                          fg: const Color(0xFFA8E6C3),
-                          isSelected: false),
+                      for (var i = 0; i < _themes.length; i++)
+                        GestureDetector(
+                          onTap: () => setState(() => _themeIndex = i),
+                          child: _ThemePreset(
+                            label: _themes[i].label,
+                            bg: _themes[i].bg,
+                            fg: _themes[i].fg,
+                            isSelected: _themeIndex == i,
+                          ),
+                        ),
                     ],
                   ),
                 ],
@@ -924,9 +930,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 class _ToolbarButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color color;
   final VoidCallback? onTap;
 
-  const _ToolbarButton({required this.icon, required this.label, this.onTap});
+  const _ToolbarButton({
+    required this.icon,
+    required this.label,
+    this.color = AuroraColors.textPrimary,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -937,17 +949,13 @@ class _ToolbarButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon,
-              color: enabled
-                  ? AuroraColors.textPrimary
-                  : AuroraColors.textTertiary,
+              color: enabled ? color : color.withOpacity(0.3),
               size: 22),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: enabled
-                  ? AuroraColors.textSecondary
-                  : AuroraColors.textTertiary,
+              color: enabled ? color.withOpacity(0.7) : color.withOpacity(0.3),
               fontSize: 11,
             ),
           ),
@@ -1001,4 +1009,13 @@ class _ThemePreset extends StatelessWidget {
       ],
     );
   }
+}
+
+class _ReadingTheme {
+  final String label;
+  final Color bg;
+  final Color fg;
+  final Color chrome;
+
+  const _ReadingTheme(this.label, this.bg, this.fg, this.chrome);
 }
