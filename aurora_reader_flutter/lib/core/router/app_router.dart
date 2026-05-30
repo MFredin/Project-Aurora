@@ -12,6 +12,7 @@ import '../../screens/discover/discover_screen.dart';
 import '../../screens/settings/export_screen.dart';
 import '../../screens/settings/ai_setup_guide_screen.dart';
 import '../../screens/settings/error_log_screen.dart';
+import '../../screens/library/book_detail_screen.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/signup_screen.dart';
 import '../../providers/auth_provider.dart';
@@ -95,6 +96,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/reader/:bookId',
         builder: (context, state) =>
             ReaderScreen(bookId: state.pathParameters['bookId']!),
+      ),
+      GoRoute(
+        path: '/book/:bookId',
+        builder: (context, state) =>
+            BookDetailScreen(bookId: state.pathParameters['bookId']!),
       ),
       GoRoute(
         path: '/discover',

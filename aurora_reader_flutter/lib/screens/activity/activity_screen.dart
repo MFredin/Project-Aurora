@@ -1,19 +1,20 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/data/models.dart';
+import '../../core/data/book_repository.dart';
 import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
 /// Mock data for activity screen
 class _MockStats {
-  static const int currentStreak = 12;
   static const int longestStreak = 34;
-  static const int booksCompletedThisYear = 18;
   static const int pagesReadToday = 47;
   static const int dailyGoalPages = 60;
   static const int totalMinutesToday = 38;
-  static const int totalBooksInLibrary = 42;
 
   static const weeklyMinutes = [45, 62, 30, 55, 48, 72, 38];
   static const weekDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -110,18 +111,32 @@ class _MockStats {
   ];
 }
 
-class ActivityScreen extends StatefulWidget {
+class ActivityScreen extends ConsumerStatefulWidget {
   const ActivityScreen({super.key});
 
   @override
-  State<ActivityScreen> createState() => _ActivityScreenState();
+  ConsumerState<ActivityScreen> createState() => _ActivityScreenState();
 }
 
-class _ActivityScreenState extends State<ActivityScreen> {
+class _ActivityScreenState extends ConsumerState<ActivityScreen> {
   String _chartPeriod = 'Week';
 
   @override
   Widget build(BuildContext context) {
+    final books = ref.watch(bookRepositoryProvider);
+    final currentStreak = ref.read(bookRepositoryProvider.notifier).getCurrentStreak();
+    final currentYear = DateTime.now().year;
+    final goal = ref.read(bookRepositoryProvider.notifier).getGoal(currentYear);
+
+    // Compute reading stats from real data
+    final totalBooksRead = books.where((b) => b.readingStatus == ReadingStatus.read).length;
+    final currentYearBooks = books.where((b) =>
+        b.readingStatus == ReadingStatus.read &&
+        b.finishDate != null &&
+        b.finishDate!.year == currentYear).length;
+    final totalReadingSeconds = books.fold<int>(
+        0, (sum, b) => sum + b.progress.totalReadingSeconds);
+
     return AuroraBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -147,8 +162,27 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 ),
               ),
 
-              // Streak + Today summary cards
-              SliverToBoxAdapter(child: _buildStreakSection()),
+              // --- NEW: Reading Streak Banner ---
+              SliverToBoxAdapter(
+                child: _buildReadingStreakBanner(currentStreak),
+              ),
+
+              // --- NEW: Annual Reading Goal ---
+              SliverToBoxAdapter(
+                child: _buildAnnualGoalCard(goal, currentYear, currentYearBooks),
+              ),
+
+              // --- NEW: Reading Stats Summary ---
+              SliverToBoxAdapter(
+                child: _buildReadingStatsSummary(
+                  totalBooksRead: totalBooksRead,
+                  totalReadingSeconds: totalReadingSeconds,
+                  currentYearBooks: currentYearBooks,
+                ),
+              ),
+
+              // Streak + Today summary cards (existing)
+              SliverToBoxAdapter(child: _buildStreakSection(currentStreak)),
 
               // Daily reading goal ring
               SliverToBoxAdapter(child: _buildDailyGoal()),
@@ -175,7 +209,483 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Widget _buildStreakSection() {
+  // ── NEW: Reading Streak Banner ──────────────────────────────────────
+
+  Widget _buildReadingStreakBanner(int streak) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: AuroraCard(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            // Flame icon with warm gradient
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AuroraColors.auroraWarm.withOpacity(0.25),
+                    AuroraColors.auroraTeal.withOpacity(0.15),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: ShaderMask(
+                shaderCallback: (bounds) =>
+                    AuroraColors.warmGradient.createShader(bounds),
+                child: const Icon(
+                  Icons.local_fire_department_rounded,
+                  size: 32,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '$streak',
+                        style: const TextStyle(
+                          color: AuroraColors.textPrimary,
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        streak == 1 ? 'day' : 'days',
+                        style: const TextStyle(
+                          color: AuroraColors.textSecondary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    streak > 0
+                        ? 'Current reading streak'
+                        : 'Start reading to build your streak!',
+                    style: const TextStyle(
+                      color: AuroraColors.textTertiary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (streak >= 7)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AuroraColors.auroraWarm.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  streak >= 30 ? 'On fire!' : 'Nice!',
+                  style: const TextStyle(
+                    color: AuroraColors.auroraWarm,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── NEW: Annual Reading Goal Card ───────────────────────────────────
+
+  Widget _buildAnnualGoalCard(ReadingGoalModel? goal, int currentYear, int currentYearBooks) {
+    if (goal == null) {
+      return _buildSetGoalPrompt(currentYear, currentYearBooks);
+    }
+
+    final progressValue = goal.progress;
+    final isAhead = goal.isAhead;
+    final expectedByNow = goal.expectedByNow;
+    final diff = goal.booksRead - expectedByNow;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: AuroraCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title row
+            Row(
+              children: [
+                const Icon(
+                  Icons.emoji_events_rounded,
+                  color: AuroraColors.manuscriptGold,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$currentYear Reading Goal',
+                  style: const TextStyle(
+                    color: AuroraColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => _showGoalDialog(
+                    currentYear,
+                    currentYearBooks,
+                    existingGoal: goal,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AuroraColors.surface,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: const Color(0xFF252E27),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: const Text(
+                      'Edit',
+                      style: TextStyle(
+                        color: AuroraColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Books count
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  '${goal.booksRead}',
+                  style: const TextStyle(
+                    color: AuroraColors.textPrimary,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '/ ${goal.targetBooks} books',
+                  style: const TextStyle(
+                    color: AuroraColors.textSecondary,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Progress bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: SizedBox(
+                height: 8,
+                child: LinearProgressIndicator(
+                  value: progressValue,
+                  backgroundColor: AuroraColors.surface,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isAhead ? AuroraColors.auroraGreen : AuroraColors.auroraWarm,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Pace indicator
+            Row(
+              children: [
+                Icon(
+                  isAhead
+                      ? Icons.trending_up_rounded
+                      : Icons.trending_down_rounded,
+                  color: isAhead
+                      ? AuroraColors.auroraGreen
+                      : AuroraColors.auroraWarm,
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  isAhead
+                      ? 'Ahead of pace by ${diff.abs()} ${diff.abs() == 1 ? "book" : "books"}'
+                      : 'Behind pace by ${diff.abs()} ${diff.abs() == 1 ? "book" : "books"}',
+                  style: TextStyle(
+                    color: isAhead
+                        ? AuroraColors.auroraGreen
+                        : AuroraColors.auroraWarm,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${(progressValue * 100).toInt()}%',
+                  style: const TextStyle(
+                    color: AuroraColors.textTertiary,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSetGoalPrompt(int currentYear, int currentYearBooks) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: AuroraCard(
+        child: Column(
+          children: [
+            const Icon(
+              Icons.flag_rounded,
+              color: AuroraColors.manuscriptGold,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Set a $currentYear Reading Goal',
+              style: const TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Track your annual reading progress',
+              style: TextStyle(
+                color: AuroraColors.textTertiary,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 12),
+            AuroraButton(
+              label: 'Set Goal',
+              icon: Icons.add_rounded,
+              compact: true,
+              onPressed: () => _showGoalDialog(currentYear, currentYearBooks),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showGoalDialog(int year, int currentYearBooks, {ReadingGoalModel? existingGoal}) {
+    final controller = TextEditingController(
+      text: existingGoal != null ? '${existingGoal.targetBooks}' : '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AuroraColors.surfaceElevated,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Color(0xFF252E27), width: 0.5),
+          ),
+          title: Text(
+            existingGoal != null ? 'Edit Reading Goal' : 'Set Reading Goal',
+            style: const TextStyle(
+              color: AuroraColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'How many books do you want to read in $year?',
+                style: const TextStyle(
+                  color: AuroraColors.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                autofocus: true,
+                style: const TextStyle(
+                  color: AuroraColors.textPrimary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+                decoration: InputDecoration(
+                  hintText: '24',
+                  hintStyle: TextStyle(
+                    color: AuroraColors.textTertiary.withOpacity(0.5),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  suffixText: 'books',
+                  suffixStyle: const TextStyle(
+                    color: AuroraColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                  filled: true,
+                  fillColor: AuroraColors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF252E27)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF252E27)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AuroraColors.auroraTeal),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AuroraColors.textSecondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final target = int.tryParse(controller.text);
+                if (target != null && target > 0) {
+                  final booksRead = existingGoal?.booksRead ?? currentYearBooks;
+                  final newGoal = ReadingGoalModel(
+                    year: year,
+                    targetBooks: target,
+                    booksRead: booksRead,
+                  );
+                  ref.read(bookRepositoryProvider.notifier).saveGoal(newGoal);
+                  setState(() {});
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+              child: const Text(
+                'Save',
+                style: TextStyle(
+                  color: AuroraColors.auroraTeal,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ── NEW: Reading Stats Summary ──────────────────────────────────────
+
+  Widget _buildReadingStatsSummary({
+    required int totalBooksRead,
+    required int totalReadingSeconds,
+    required int currentYearBooks,
+  }) {
+    final totalHours = totalReadingSeconds ~/ 3600;
+    final totalMinutes = (totalReadingSeconds % 3600) ~/ 60;
+    final timeLabel = totalHours > 0
+        ? '${totalHours}h ${totalMinutes}m'
+        : '${totalMinutes}m';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Row(
+        children: [
+          _buildStatTile(
+            icon: Icons.check_circle_rounded,
+            iconColor: AuroraColors.auroraGreen,
+            value: '$totalBooksRead',
+            label: 'Total Read',
+          ),
+          const SizedBox(width: 10),
+          _buildStatTile(
+            icon: Icons.schedule_rounded,
+            iconColor: AuroraColors.auroraTeal,
+            value: timeLabel,
+            label: 'Total Time',
+          ),
+          const SizedBox(width: 10),
+          _buildStatTile(
+            icon: Icons.calendar_today_rounded,
+            iconColor: AuroraColors.manuscriptGold,
+            value: '$currentYearBooks',
+            label: 'This Year',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatTile({
+    required IconData icon,
+    required Color iconColor,
+    required String value,
+    required String label,
+  }) {
+    return Expanded(
+      child: AuroraCard(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+        child: Column(
+          children: [
+            Icon(icon, color: iconColor, size: 22),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AuroraColors.textTertiary,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── EXISTING: Streak + Today summary (updated to use live streak) ──
+
+  Widget _buildStreakSection(int currentStreak) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Row(
@@ -191,9 +701,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         size: 36, color: Colors.white),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    '${_MockStats.currentStreak}',
-                    style: TextStyle(
+                  Text(
+                    '$currentStreak',
+                    style: const TextStyle(
                       color: AuroraColors.textPrimary,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -237,18 +747,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             color: AuroraColors.auroraGreen, size: 20),
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${_MockStats.booksCompletedThisYear}',
-                            style: TextStyle(
+                            '${ref.watch(bookRepositoryProvider).where((b) => b.readingStatus == ReadingStatus.read && b.finishDate != null && b.finishDate!.year == DateTime.now().year).length}',
+                            style: const TextStyle(
                               color: AuroraColors.textPrimary,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
+                          const Text(
                             'Books this year',
                             style: TextStyle(
                               color: AuroraColors.textTertiary,

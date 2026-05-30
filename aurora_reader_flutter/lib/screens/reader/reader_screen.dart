@@ -60,6 +60,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     super.initState();
     _scrollController.addListener(_updateProgress);
     _stopwatch.start();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final repo = ref.read(bookRepositoryProvider.notifier);
+      final book = repo.getBook(widget.bookId);
+      if (book != null &&
+          book.readingStatus == ReadingStatus.wantToRead) {
+        repo.setReadingStatus(widget.bookId, ReadingStatus.reading);
+      }
+      repo.recordReadingDay();
+    });
   }
 
   @override

@@ -10,6 +10,8 @@ import '../../services/logging/error_logger.dart';
 const _uuid = Uuid();
 const _booksKey = 'books';
 const _sessionsKey = 'sessions';
+const _goalsKey = 'reading_goals';
+const _streakKey = 'reading_streak';
 
 class BookRepository extends Notifier<List<BookModel>> {
   Box get _box => Hive.box('aurora_reader');
@@ -64,6 +66,7 @@ class BookRepository extends Notifier<List<BookModel>> {
       fileSize: result.metadata.fileSize,
       dateAdded: DateTime.now(),
       chapters: chapters,
+      bookFormatType: BookFormatType.ebook,
     );
 
     state = [...state, book];
@@ -82,81 +85,218 @@ class BookRepository extends Notifier<List<BookModel>> {
     }
   }
 
-  void updateProgress(String bookId, int chapter, double scrollFraction) {
+  void _updateBook(String bookId, BookModel Function(BookModel) updater) {
     state = [
       for (final book in state)
-        if (book.id == bookId)
-          book.copyWith(
-            lastOpened: DateTime.now(),
-            progress: book.progress.copyWith(
-              currentChapter: chapter,
-              scrollFraction: scrollFraction,
-              lastReadDate: DateTime.now(),
-            ),
-          )
-        else
-          book,
+        if (book.id == bookId) updater(book) else book,
     ];
     _persist();
+  }
+
+  void updateProgress(String bookId, int chapter, double scrollFraction) {
+    _updateBook(bookId, (book) {
+      var newStatus = book.readingStatus;
+      if (book.readingStatus == ReadingStatus.wantToRead &&
+          (chapter > 0 || scrollFraction > 0)) {
+        newStatus = ReadingStatus.reading;
+      }
+      return book.copyWith(
+        lastOpened: DateTime.now(),
+        readingStatus: newStatus,
+        startDate: book.startDate == null && (chapter > 0 || scrollFraction > 0)
+            ? () => DateTime.now()
+            : null,
+        progress: book.progress.copyWith(
+          currentChapter: chapter,
+          scrollFraction: scrollFraction,
+          lastReadDate: DateTime.now(),
+        ),
+      );
+    });
   }
 
   void addReadingTime(String bookId, int seconds) {
     if (seconds <= 0) return;
-    state = [
-      for (final book in state)
-        if (book.id == bookId)
-          book.copyWith(
-            progress: book.progress.copyWith(
-              totalReadingSeconds:
-                  book.progress.totalReadingSeconds + seconds,
-            ),
-          )
-        else
-          book,
-    ];
-    _persist();
+    _updateBook(bookId, (book) => book.copyWith(
+      progress: book.progress.copyWith(
+        totalReadingSeconds: book.progress.totalReadingSeconds + seconds,
+      ),
+    ));
   }
 
   void addHighlight(String bookId, HighlightModel highlight) {
-    state = [
-      for (final book in state)
-        if (book.id == bookId)
-          book.copyWith(highlights: [...book.highlights, highlight])
-        else
-          book,
-    ];
-    _persist();
+    _updateBook(bookId, (book) => book.copyWith(
+      highlights: [...book.highlights, highlight],
+    ));
   }
 
   void addBookmark(String bookId, BookmarkModel bookmark) {
-    state = [
-      for (final book in state)
-        if (book.id == bookId)
-          book.copyWith(bookmarks: [...book.bookmarks, bookmark])
-        else
-          book,
-    ];
-    _persist();
+    _updateBook(bookId, (book) => book.copyWith(
+      bookmarks: [...book.bookmarks, bookmark],
+    ));
   }
 
   void removeBookmark(String bookId, String bookmarkId) {
-    state = [
-      for (final book in state)
-        if (book.id == bookId)
-          book.copyWith(
-            bookmarks:
-                book.bookmarks.where((b) => b.id != bookmarkId).toList(),
-          )
-        else
-          book,
-    ];
-    _persist();
+    _updateBook(bookId, (book) => book.copyWith(
+      bookmarks: book.bookmarks.where((b) => b.id != bookmarkId).toList(),
+    ));
+  }
+
+  // --- Tier 1: Reading status & metadata ---
+
+  void setReadingStatus(String bookId, ReadingStatus status) {
+    _updateBook(bookId, (book) {
+      DateTime? Function()? startDate;
+      DateTime? Function()? finishDate;
+
+      if (status == ReadingStatus.reading && book.startDate == null) {
+        startDate = () => DateTime.now();
+      }
+      if (status == ReadingStatus.read && book.finishDate == null) {
+        finishDate = () => DateTime.now();
+      }
+      if (status == ReadingStatus.wantToRead) {
+        startDate = () => null;
+        finishDate = () => null;
+      }
+
+      return book.copyWith(
+        readingStatus: status,
+        startDate: startDate,
+        finishDate: finishDate,
+      );
+    });
+
+    if (status == ReadingStatus.read) {
+      _incrementGoalProgress();
+    }
+  }
+
+  void setRating(String bookId, double? rating) {
+    _updateBook(bookId, (book) => book.copyWith(
+      rating: () => rating,
+    ));
+  }
+
+  void setMoods(String bookId, List<String> moods) {
+    _updateBook(bookId, (book) => book.copyWith(moods: moods));
+  }
+
+  void setPace(String bookId, ReadingPace? pace) {
+    _updateBook(bookId, (book) => book.copyWith(pace: () => pace));
+  }
+
+  void setBookFormatType(String bookId, BookFormatType? formatType) {
+    _updateBook(bookId, (book) => book.copyWith(
+      bookFormatType: () => formatType,
+    ));
+  }
+
+  void setReview(String bookId, String review, {bool? isPrivate}) {
+    _updateBook(bookId, (book) => book.copyWith(
+      review: review,
+      reviewIsPrivate: isPrivate,
+    ));
+  }
+
+  void setCustomTags(String bookId, List<String> tags) {
+    _updateBook(bookId, (book) => book.copyWith(customTags: tags));
+  }
+
+  void addReadingNote(String bookId, ReadingNoteModel note) {
+    _updateBook(bookId, (book) => book.copyWith(
+      readingNotes: [...book.readingNotes, note],
+    ));
+  }
+
+  void removeReadingNote(String bookId, String noteId) {
+    _updateBook(bookId, (book) => book.copyWith(
+      readingNotes: book.readingNotes.where((n) => n.id != noteId).toList(),
+    ));
+  }
+
+  void setDates(String bookId, {DateTime? startDate, DateTime? finishDate}) {
+    _updateBook(bookId, (book) => book.copyWith(
+      startDate: startDate != null ? () => startDate : null,
+      finishDate: finishDate != null ? () => finishDate : null,
+    ));
   }
 
   void deleteBook(String id) {
     _box.delete('raw_$id');
     state = state.where((b) => b.id != id).toList();
     _persist();
+  }
+
+  // --- Reading Goals ---
+
+  void _incrementGoalProgress() {
+    final year = DateTime.now().year;
+    final goal = getGoal(year);
+    if (goal != null) {
+      saveGoal(goal.copyWith(booksRead: goal.booksRead + 1));
+    }
+  }
+
+  ReadingGoalModel? getGoal(int year) {
+    final raw = _box.get('${_goalsKey}_$year');
+    if (raw == null) return null;
+    try {
+      return ReadingGoalModel.fromJson(
+          jsonDecode(raw as String) as Map<String, dynamic>);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void saveGoal(ReadingGoalModel goal) {
+    _box.put('${_goalsKey}_${goal.year}', jsonEncode(goal.toJson()));
+  }
+
+  // --- Reading Streak ---
+
+  int getCurrentStreak() {
+    final raw = _box.get(_streakKey);
+    if (raw == null) return 0;
+    try {
+      final data = jsonDecode(raw as String) as Map<String, dynamic>;
+      final lastDate = DateTime.parse(data['lastDate'] as String);
+      final streak = data['streak'] as int;
+      final today = DateTime.now();
+      final diff = DateTime(today.year, today.month, today.day)
+          .difference(DateTime(lastDate.year, lastDate.month, lastDate.day))
+          .inDays;
+      if (diff > 1) return 0;
+      return streak;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  void recordReadingDay() {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final raw = _box.get(_streakKey);
+    int streak = 1;
+
+    if (raw != null) {
+      try {
+        final data = jsonDecode(raw as String) as Map<String, dynamic>;
+        final lastDate = DateTime.parse(data['lastDate'] as String);
+        final lastDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
+        final diff = todayDate.difference(lastDay).inDays;
+
+        if (diff == 0) return;
+        if (diff == 1) {
+          streak = (data['streak'] as int) + 1;
+        }
+      } catch (_) {}
+    }
+
+    _box.put(_streakKey, jsonEncode({
+      'lastDate': todayDate.toIso8601String(),
+      'streak': streak,
+    }));
   }
 }
 
@@ -169,6 +309,12 @@ final bookByIdProvider = Provider.family<BookModel?, String>((ref, id) {
     if (book.id == id) return book;
   }
   return null;
+});
+
+final booksByStatusProvider =
+    Provider.family<List<BookModel>, ReadingStatus>((ref, status) {
+  final books = ref.watch(bookRepositoryProvider);
+  return books.where((b) => b.readingStatus == status).toList();
 });
 
 class ReadingSessionStore extends Notifier<List<ReadingSessionModel>> {

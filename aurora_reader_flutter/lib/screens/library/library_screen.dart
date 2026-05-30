@@ -32,7 +32,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   bool _isDragOver = false;
   String _importStatus = '';
 
-  final _filters = ['All', 'Reading', 'Finished', 'Want to Read'];
+  final _filters = ['All', 'Reading', 'Want to Read', 'Read', 'DNF'];
 
   static const _supportedExtensions = [
     'epub', 'txt', 'pdf', 'fb2', 'mobi', 'rtf', 'docx',
@@ -43,13 +43,26 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
     switch (_selectedFilter) {
       case 'Reading':
-        books = books.where((b) => b.statusLabel == 'reading').toList();
+        books = books
+            .where((b) =>
+                b.readingStatus == ReadingStatus.reading ||
+                b.readingStatus == ReadingStatus.rereading)
+            .toList();
         break;
-      case 'Finished':
-        books = books.where((b) => b.statusLabel == 'finished').toList();
+      case 'Read':
+        books = books
+            .where((b) => b.readingStatus == ReadingStatus.read)
+            .toList();
         break;
       case 'Want to Read':
-        books = books.where((b) => b.statusLabel == 'wantToRead').toList();
+        books = books
+            .where((b) => b.readingStatus == ReadingStatus.wantToRead)
+            .toList();
+        break;
+      case 'DNF':
+        books = books
+            .where((b) => b.readingStatus == ReadingStatus.dnf)
+            .toList();
         break;
     }
 
@@ -169,6 +182,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         onRead: () {
           Navigator.of(context).pop();
           context.push('/reader/${book.id}');
+        },
+        onViewDetails: () {
+          Navigator.of(context).pop();
+          context.push('/book/${book.id}');
         },
         onDelete: () {
           Navigator.of(context).pop();
@@ -534,7 +551,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         delegate: SliverChildBuilderDelegate(
           (context, index) => _BookGridCard(
             book: books[index],
-            onTap: () => context.push('/reader/${books[index].id}'),
+            onTap: () => context.push('/book/${books[index].id}'),
             onLongPress: () => _showBookDetail(books[index]),
           ),
           childCount: books.length,
@@ -551,7 +568,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) => _BookListTile(
           book: books[index],
-          onTap: () => context.push('/reader/${books[index].id}'),
+          onTap: () => context.push('/book/${books[index].id}'),
           onLongPress: () => _showBookDetail(books[index]),
         ),
       ),
@@ -672,11 +689,13 @@ class _IconButtonState extends State<_IconButton> {
 class _BookDetailSheet extends StatelessWidget {
   final BookModel book;
   final VoidCallback onRead;
+  final VoidCallback onViewDetails;
   final VoidCallback onDelete;
 
   const _BookDetailSheet({
     required this.book,
     required this.onRead,
+    required this.onViewDetails,
     required this.onDelete,
   });
 
@@ -782,6 +801,10 @@ class _BookDetailSheet extends StatelessWidget {
                           runSpacing: 6,
                           children: [
                             _StatChip(
+                              label: book.readingStatus.label,
+                              icon: Icons.circle,
+                            ),
+                            _StatChip(
                               label: book.format.toUpperCase(),
                               icon: Icons.description_outlined,
                             ),
@@ -801,6 +824,35 @@ class _BookDetailSheet extends StatelessWidget {
                               ),
                           ],
                         ),
+                        if (book.rating != null) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              ...List.generate(5, (i) {
+                                final fill = (book.rating! - i).clamp(0.0, 1.0);
+                                return Icon(
+                                  fill >= 0.75
+                                      ? Icons.star_rounded
+                                      : fill >= 0.25
+                                          ? Icons.star_half_rounded
+                                          : Icons.star_border_rounded,
+                                  color: AuroraColors.manuscriptGold,
+                                  size: 18,
+                                );
+                              }),
+                              const SizedBox(width: 6),
+                              Text(
+                                book.rating!.toStringAsFixed(
+                                    book.rating! % 1 == 0 ? 0 : 2),
+                                style: const TextStyle(
+                                  color: AuroraColors.manuscriptGold,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -848,6 +900,26 @@ class _BookDetailSheet extends StatelessWidget {
                       label: progress > 0 ? 'Continue Reading' : 'Start Reading',
                       icon: Icons.auto_stories_rounded,
                       onPressed: onRead,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: onViewDetails,
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AuroraColors.auroraTeal.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(
+                          color: AuroraColors.auroraTeal.withOpacity(0.3),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.info_outline_rounded,
+                        color: AuroraColors.auroraTeal,
+                        size: 22,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1033,7 +1105,7 @@ class _BookGridCardState extends State<_BookGridCard> {
                               ),
                         ),
                       ),
-                      if (widget.book.statusLabel == 'finished')
+                      if (widget.book.readingStatus == ReadingStatus.read)
                         Positioned(
                           top: 8,
                           left: 8,
