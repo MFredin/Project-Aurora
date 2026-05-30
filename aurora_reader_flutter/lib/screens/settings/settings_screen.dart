@@ -5,7 +5,9 @@ import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 import '../../services/ai/llm_provider.dart';
+import '../../services/auth/auth_service.dart';
 import '../../providers/service_providers.dart';
+import '../../providers/auth_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -44,6 +46,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(height: 24),
+
+              // Account section
+              _buildSectionHeader('ACCOUNT'),
+              const SizedBox(height: 8),
+              _buildAccountCard(),
               const SizedBox(height: 24),
 
               // Reading section
@@ -346,6 +354,172 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       height: 1,
       indent: 50,
       color: const Color(0xFF252E27).withOpacity(0.6),
+    );
+  }
+
+  Widget _buildAccountCard() {
+    final user = ref.watch(currentUserProvider);
+
+    if (user == null) {
+      return AuroraCard(
+        padding: EdgeInsets.zero,
+        child: _buildNavRow(
+          icon: Icons.login_rounded,
+          label: 'Sign In',
+          subtitle: 'Sign in to sync your library across devices',
+          onTap: () => context.go('/login'),
+        ),
+      );
+    }
+
+    return AuroraCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: AuroraColors.accentGradient,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    (user.displayName ?? user.email)
+                        .substring(0, 1)
+                        .toUpperCase(),
+                    style: const TextStyle(
+                      color: Color(0xFFF0E8D8),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (user.displayName != null &&
+                          user.displayName!.isNotEmpty)
+                        Text(
+                          user.displayName!,
+                          style: const TextStyle(
+                            color: AuroraColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      Text(
+                        user.email,
+                        style: const TextStyle(
+                          color: AuroraColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _divider(),
+          _buildNavRow(
+            icon: Icons.edit_rounded,
+            label: 'Edit Display Name',
+            onTap: () => _showEditNameDialog(user),
+          ),
+          _divider(),
+          InkWell(
+            onTap: _confirmSignOut,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Icon(Icons.logout_rounded,
+                      color: AuroraColors.auroraWarm, size: 22),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Sign Out',
+                    style: TextStyle(color: AuroraColors.auroraWarm),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditNameDialog(AuthUser user) {
+    final controller =
+        TextEditingController(text: user.displayName ?? '');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        title: const Text('Display Name',
+            style: TextStyle(color: AuroraColors.textPrimary)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: AuroraColors.textPrimary),
+          decoration: const InputDecoration(
+            hintText: 'Enter your name',
+            hintStyle: TextStyle(color: AuroraColors.textTertiary),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref
+                  .read(authServiceProvider)
+                  .updateDisplayName(controller.text);
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmSignOut() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        title: const Text('Sign Out',
+            style: TextStyle(color: AuroraColors.textPrimary)),
+        content: const Text(
+          'Your local data will be preserved. You can sign back in anytime.',
+          style: TextStyle(color: AuroraColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await ref.read(authServiceProvider).signOut();
+              if (mounted) context.go('/login');
+            },
+            child: Text('Sign Out',
+                style: TextStyle(color: AuroraColors.auroraWarm)),
+          ),
+        ],
+      ),
     );
   }
 
