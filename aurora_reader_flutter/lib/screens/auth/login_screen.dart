@@ -22,6 +22,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    ref.listenManual(authStateProvider, (_, next) {
+      if (next.value != null && mounted) {
+        context.go('/library');
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();

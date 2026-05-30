@@ -25,6 +25,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _obscureConfirm = true;
 
   @override
+  void initState() {
+    super.initState();
+    ref.listenManual(authStateProvider, (_, next) {
+      if (next.value != null && mounted) {
+        context.go('/library');
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
