@@ -11,6 +11,7 @@ import '../../core/layout/responsive.dart';
 import '../../core/data/models.dart';
 import '../../core/data/book_repository.dart';
 import '../../services/parser/book_parser_service.dart';
+import '../../services/logging/error_logger.dart';
 
 enum _SortOption { recent, title, author, progress }
 
@@ -134,7 +135,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         );
         repo.addParsedBook(parsed);
         imported++;
-      } catch (_) {
+      } catch (e, stack) {
+        ErrorLogger.instance.capture(e, stackTrace: stack, source: 'Library.importBook');
         failed++;
       }
     }

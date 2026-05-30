@@ -11,6 +11,7 @@ import '../../screens/onboarding/onboarding_screen.dart';
 import '../../screens/discover/discover_screen.dart';
 import '../../screens/settings/export_screen.dart';
 import '../../screens/settings/ai_setup_guide_screen.dart';
+import '../../screens/settings/error_log_screen.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/signup_screen.dart';
 import '../../providers/auth_provider.dart';
@@ -106,6 +107,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/ai-setup',
         builder: (context, state) => const AiSetupGuideScreen(),
+      ),
+      GoRoute(
+        path: '/error-log',
+        builder: (context, state) => const ErrorLogScreen(),
       ),
     ],
   );

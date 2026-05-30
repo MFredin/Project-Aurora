@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:html/parser.dart' as html_parser;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import '../logging/error_logger.dart';
 
 // ─── SUPPORTED FORMATS ──────────────────────────────────────────────────────
 
@@ -252,8 +253,8 @@ class BookParserService {
     if (coverRef != null) {
       try {
         coverImage = Uint8List.fromList(img.encodePng(coverRef));
-      } catch (_) {
-        // Skip cover if encoding fails
+      } catch (e, stack) {
+        ErrorLogger.instance.capture(e, stackTrace: stack, source: 'BookParser.coverEncode');
       }
     }
 

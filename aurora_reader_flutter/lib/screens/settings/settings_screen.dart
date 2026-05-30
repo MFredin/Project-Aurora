@@ -6,6 +6,7 @@ import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 import '../../services/ai/llm_provider.dart';
 import '../../services/auth/auth_service.dart';
+import '../../services/logging/error_logger.dart';
 import '../../providers/service_providers.dart';
 import '../../providers/auth_provider.dart';
 
@@ -190,6 +191,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       label: 'Clear Cache',
                       subtitle: '12.4 MB',
                       onTap: () {},
+                    ),
+                    _divider(),
+                    _buildNavRow(
+                      icon: Icons.bug_report_outlined,
+                      label: 'Error Log',
+                      subtitle: '${ErrorLogger.instance.entryCount} entries',
+                      onTap: () => context.push('/error-log'),
                     ),
                   ],
                 ),

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../logging/error_logger.dart';
 
 /// Provides dictionary lookups using the Free Dictionary API.
 ///
@@ -54,7 +55,8 @@ class DictionaryService {
         audioUrl: audioUrl,
         definitions: definitions,
       );
-    } on DioException {
+    } on DioException catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'Dictionary.lookup');
       return null;
     }
   }

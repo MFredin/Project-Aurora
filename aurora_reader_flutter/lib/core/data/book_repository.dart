@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import 'models.dart';
 import '../../services/parser/book_parser_service.dart';
+import '../../services/logging/error_logger.dart';
 
 const _uuid = Uuid();
 const _booksKey = 'books';
@@ -21,7 +22,8 @@ class BookRepository extends Notifier<List<BookModel>> {
       return decoded
           .map((j) => BookModel.fromJson(j as Map<String, dynamic>))
           .toList();
-    } catch (_) {
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'BookRepository.build');
       return [];
     }
   }
@@ -164,7 +166,8 @@ class ReadingSessionStore extends Notifier<List<ReadingSessionModel>> {
       return decoded
           .map((j) => ReadingSessionModel.fromJson(j as Map<String, dynamic>))
           .toList();
-    } catch (_) {
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'ReadingSessionStore.build');
       return [];
     }
   }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../logging/error_logger.dart';
 
 /// Discovers and searches for books via Open Library and Google Books APIs.
 ///
@@ -35,7 +36,8 @@ class BookDiscoveryService {
           openLibraryKey: doc['key']?.toString(),
         );
       }).toList();
-    } catch (_) {
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'BookDiscovery.search');
       return [];
     }
   }
@@ -60,7 +62,8 @@ class BookDiscoveryService {
           openLibraryKey: work['key']?.toString(),
         );
       }).toList();
-    } catch (_) {
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'BookDiscovery.getTrending');
       return [];
     }
   }
@@ -86,7 +89,8 @@ class BookDiscoveryService {
         description: info['description'],
         pageCount: info['pageCount'],
       );
-    } catch (_) {
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'BookDiscovery.lookupByIsbn');
       return null;
     }
   }

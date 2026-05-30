@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import 'auth_service.dart';
+import '../logging/error_logger.dart';
 
 class LocalAuthService implements AuthService {
   static const _usersKey = 'auth_users';
@@ -25,7 +26,8 @@ class LocalAuthService implements AuthService {
       try {
         final data = jsonDecode(sessionJson) as Map<String, dynamic>;
         _currentUser = AuthUser.fromJson(data);
-      } catch (_) {
+      } catch (e, stack) {
+        ErrorLogger.instance.capture(e, stackTrace: stack, source: 'Auth.restoreSession');
         _currentUser = null;
       }
     }
@@ -36,7 +38,8 @@ class LocalAuthService implements AuthService {
     if (raw == null) return {};
     try {
       return jsonDecode(raw) as Map<String, dynamic>;
-    } catch (_) {
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'Auth.loadUsers');
       return {};
     }
   }
