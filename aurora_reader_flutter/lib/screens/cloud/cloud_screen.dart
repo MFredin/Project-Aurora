@@ -42,7 +42,7 @@ class _CloudScreenState extends ConsumerState<CloudScreen> {
       if (mounted) {
         setState(() {
           _driveConnecting = false;
-          _error = 'Failed to connect Google Drive.';
+          _error = 'Drive connection failed: $e';
         });
       }
     }

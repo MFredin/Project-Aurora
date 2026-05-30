@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 import '../logging/error_logger.dart';
@@ -72,7 +73,7 @@ class GoogleDriveService {
       final provider = fb.GoogleAuthProvider();
       provider.addScope(_scope);
 
-      final credential = await user.reauthenticateWithProvider(provider);
+      final credential = await _authWithProvider(user, provider);
 
       final oAuth = credential.credential;
       if (oAuth == null || oAuth is! fb.OAuthCredential || oAuth.accessToken == null) {
@@ -81,7 +82,7 @@ class GoogleDriveService {
 
       _accessToken = oAuth.accessToken;
       _connected = true;
-      await _box.put(_hiveKey, true);
+      _box.put(_hiveKey, true);
     } on fb.FirebaseAuthException catch (e) {
       throw DriveException('Drive authorization failed: ${e.message}');
     }
@@ -91,6 +92,16 @@ class GoogleDriveService {
     _accessToken = null;
     _connected = false;
     await _box.put(_hiveKey, false);
+  }
+
+  Future<fb.UserCredential> _authWithProvider(
+      fb.User user, fb.GoogleAuthProvider provider) async {
+    try {
+      return await user.reauthenticateWithProvider(provider);
+    } on UnimplementedError {
+      // reauthenticateWithProvider not available on web
+      return await fb.FirebaseAuth.instance.signInWithPopup(provider);
+    }
   }
 
   Future<void> _ensureToken() async {
@@ -104,7 +115,7 @@ class GoogleDriveService {
       final provider = fb.GoogleAuthProvider();
       provider.addScope(_scope);
 
-      final credential = await user.reauthenticateWithProvider(provider);
+      final credential = await _authWithProvider(user, provider);
 
       final oAuth = credential.credential;
       if (oAuth is fb.OAuthCredential && oAuth.accessToken != null) {
@@ -114,7 +125,7 @@ class GoogleDriveService {
       }
     } on fb.FirebaseAuthException catch (e) {
       _connected = false;
-      await _box.put(_hiveKey, false);
+      _box.put(_hiveKey, false);
       throw DriveException('Drive re-authorization failed: ${e.message}');
     }
   }
