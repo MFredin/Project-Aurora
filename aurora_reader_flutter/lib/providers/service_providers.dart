@@ -4,6 +4,7 @@ import '../services/parser/book_parser_service.dart';
 import '../services/cloud/cloud_storage_service.dart';
 import '../services/sync/sync_service.dart';
 import '../services/ai/ai_companion_service.dart';
+import '../services/ai/llm_provider.dart';
 import '../services/audio/ambient_service.dart';
 import '../services/audio/tts_service.dart';
 import '../services/discovery/book_discovery_service.dart';
@@ -28,10 +29,48 @@ final syncServiceProvider = Provider<SyncService>((ref) {
   return SyncService();
 });
 
+/// LLM settings persistence.
+final llmSettingsProvider = Provider<LlmSettingsService>((ref) {
+  return LlmSettingsService();
+});
+
+/// LLM configuration state (reactive).
+final llmConfigProvider = StateNotifierProvider<LlmConfigNotifier, LlmConfig>((ref) {
+  final settings = ref.watch(llmSettingsProvider);
+  return LlmConfigNotifier(settings);
+});
+
+class LlmConfigNotifier extends StateNotifier<LlmConfig> {
+  final LlmSettingsService _settings;
+
+  LlmConfigNotifier(this._settings) : super(_settings.load());
+
+  Future<void> setProvider(LlmProviderType provider) async {
+    final existingKey = _settings.loadApiKey(provider);
+    state = LlmConfig(
+      provider: provider,
+      apiKey: existingKey,
+      model: provider.defaultModel,
+    );
+    await _settings.save(state);
+  }
+
+  Future<void> setModel(String model) async {
+    state = state.copyWith(model: model);
+    await _settings.save(state);
+  }
+
+  Future<void> setApiKey(String apiKey) async {
+    state = state.copyWith(apiKey: apiKey);
+    await _settings.save(state);
+  }
+}
+
 /// AI reading companion.
 final aiCompanionProvider = Provider<AICompanionService>((ref) {
   final db = ref.watch(databaseProvider);
-  return AICompanionService(db);
+  final settings = ref.watch(llmSettingsProvider);
+  return AICompanionService(db, settings);
 });
 
 /// Ambient soundscape service.

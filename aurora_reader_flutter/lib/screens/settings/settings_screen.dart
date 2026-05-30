@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
+import '../../services/ai/llm_provider.dart';
+import '../../providers/service_providers.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _darkMode = true;
   bool _notifications = true;
   bool _haptics = true;
@@ -187,19 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // AI section
               _buildSectionHeader('AI COMPANION'),
               const SizedBox(height: 8),
-              AuroraCard(
-                padding: EdgeInsets.zero,
-                child: Column(
-                  children: [
-                    _buildNavRow(
-                      icon: Icons.key_rounded,
-                      label: 'API Key',
-                      subtitle: 'Configure Anthropic API key',
-                      onTap: () => _showApiKeyDialog(),
-                    ),
-                  ],
-                ),
-              ),
+              _buildAiCompanionCard(),
               const SizedBox(height: 24),
 
               // About section
@@ -357,21 +348,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showApiKeyDialog() {
-    final controller = TextEditingController();
+  Widget _buildAiCompanionCard() {
+    final config = ref.watch(llmConfigProvider);
+    final notifier = ref.read(llmConfigProvider.notifier);
+
+    return AuroraCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          _buildSettingsRow(
+            icon: Icons.smart_toy_rounded,
+            label: 'Provider',
+            trailing: DropdownButton<LlmProviderType>(
+              value: config.provider,
+              dropdownColor: AuroraColors.surfaceElevated,
+              style: const TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 14,
+              ),
+              underline: const SizedBox(),
+              items: LlmProviderType.values
+                  .map((p) => DropdownMenuItem(
+                        value: p,
+                        child: Text(p.displayName),
+                      ))
+                  .toList(),
+              onChanged: (v) {
+                if (v != null) notifier.setProvider(v);
+              },
+            ),
+          ),
+          _divider(),
+          _buildSettingsRow(
+            icon: Icons.psychology_rounded,
+            label: 'Model',
+            trailing: DropdownButton<String>(
+              value: config.provider.availableModels.contains(config.activeModel)
+                  ? config.activeModel
+                  : config.provider.defaultModel,
+              dropdownColor: AuroraColors.surfaceElevated,
+              style: const TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 14,
+              ),
+              underline: const SizedBox(),
+              items: config.provider.availableModels
+                  .map((m) => DropdownMenuItem(
+                        value: m,
+                        child: Text(m, overflow: TextOverflow.ellipsis),
+                      ))
+                  .toList(),
+              onChanged: (v) {
+                if (v != null) notifier.setModel(v);
+              },
+            ),
+          ),
+          _divider(),
+          _buildNavRow(
+            icon: Icons.key_rounded,
+            label: 'API Key',
+            subtitle: config.isConfigured
+                ? '${config.provider.displayName} key saved'
+                : 'Not configured',
+            onTap: () => _showApiKeyDialog(config, notifier),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showApiKeyDialog(LlmConfig config, LlmConfigNotifier notifier) {
+    final controller = TextEditingController(text: config.apiKey ?? '');
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AuroraColors.surfaceElevated,
-        title: const Text('Anthropic API Key',
-            style: TextStyle(color: AuroraColors.textPrimary)),
+        title: Text('${config.provider.displayName} API Key',
+            style: const TextStyle(color: AuroraColors.textPrimary)),
         content: TextField(
           controller: controller,
           obscureText: true,
           style: const TextStyle(color: AuroraColors.textPrimary),
-          decoration: const InputDecoration(
-            hintText: 'sk-ant-...',
-            hintStyle: TextStyle(color: AuroraColors.textTertiary),
+          decoration: InputDecoration(
+            hintText: config.provider.apiKeyHint,
+            hintStyle: const TextStyle(color: AuroraColors.textTertiary),
           ),
         ),
         actions: [
@@ -381,7 +441,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           TextButton(
             onPressed: () {
-              // Save API key to secure storage
+              notifier.setApiKey(controller.text.trim());
               Navigator.of(ctx).pop();
             },
             child: const Text('Save'),

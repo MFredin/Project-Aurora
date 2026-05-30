@@ -1,54 +1,63 @@
 import '../../core/database/database.dart';
+import 'llm_provider.dart';
 
-/// AI reading companion powered by the Anthropic Claude API.
-///
-/// Provides contextual Q&A about the current book, vocabulary help,
-/// chapter summaries, theme analysis, and knowledge graph enrichment.
 class AICompanionService {
   final AppDatabase _db;
+  final LlmSettingsService _settings;
 
-  AICompanionService(this._db);
+  AICompanionService(this._db, this._settings);
 
-  /// Ask a question about the book content.
+  LlmConfig get _config => _settings.load();
+
   Future<String> askQuestion({
     required String bookId,
     required String question,
     String? chapterContext,
   }) async {
-    // TODO: Implement Anthropic API call with book context
-    return 'AI companion response placeholder. '
-        'Connect your Anthropic API key to enable AI features.';
+    final config = _config;
+    if (!config.isConfigured) {
+      return _notConfiguredMessage(config.provider);
+    }
+    // TODO: Implement API call via _callLlm
+    return 'AI companion response placeholder — '
+        '${config.provider.displayName} (${config.activeModel}) is configured.';
   }
 
-  /// Generate a summary of the given chapter.
   Future<String> summarizeChapter({
     required String bookId,
     required int chapterIndex,
   }) async {
-    // TODO: Implement chapter summarization
-    return 'Chapter summary will appear here once the AI companion is configured.';
+    final config = _config;
+    if (!config.isConfigured) {
+      return _notConfiguredMessage(config.provider);
+    }
+    return 'Chapter summary will appear here — '
+        '${config.provider.displayName} is ready.';
   }
 
-  /// Analyze themes and motifs in the book.
   Future<List<String>> analyzeThemes({required String bookId}) async {
-    // TODO: Implement theme analysis
     return [];
   }
 
-  /// Get a definition and context for a word encountered while reading.
   Future<String> explainWord({
     required String word,
     required String surroundingText,
   }) async {
-    // TODO: Implement contextual word explanation
-    return 'Definition for "$word" will be provided by the AI companion.';
+    final config = _config;
+    if (!config.isConfigured) {
+      return _notConfiguredMessage(config.provider);
+    }
+    return 'Definition for "$word" via ${config.provider.displayName}.';
   }
 
-  /// Generate knowledge graph nodes from book content.
   Future<List<Map<String, dynamic>>> extractConcepts({
     required String bookId,
   }) async {
-    // TODO: Implement concept extraction
     return [];
+  }
+
+  String _notConfiguredMessage(LlmProviderType provider) {
+    return 'Add your ${provider.displayName} API key in Settings → AI Companion '
+        'to enable AI features.';
   }
 }
