@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
@@ -411,6 +412,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ? '${config.provider.displayName} key saved'
                 : 'Not configured',
             onTap: () => _showApiKeyDialog(config, notifier),
+          ),
+          _divider(),
+          _buildNavRow(
+            icon: Icons.menu_book_rounded,
+            label: 'Setup Guide',
+            subtitle: 'How to get your API key and connect',
+            onTap: () => context.push('/ai-setup'),
           ),
         ],
       ),

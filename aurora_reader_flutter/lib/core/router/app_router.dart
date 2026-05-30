@@ -10,6 +10,7 @@ import '../../screens/reader/reader_screen.dart';
 import '../../screens/onboarding/onboarding_screen.dart';
 import '../../screens/discover/discover_screen.dart';
 import '../../screens/settings/export_screen.dart';
+import '../../screens/settings/ai_setup_guide_screen.dart';
 import '../layout/adaptive_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -67,6 +68,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/export',
         builder: (context, state) => const ExportScreen(),
+      ),
+      GoRoute(
+        path: '/ai-setup',
+        builder: (context, state) => const AiSetupGuideScreen(),
       ),
     ],
   );
