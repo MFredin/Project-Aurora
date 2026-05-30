@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'auth_service.dart';
 import '../logging/error_logger.dart';
@@ -69,7 +70,12 @@ class FirebaseAuthService implements AuthService {
   Future<AuthUser> signInWithGoogle() async {
     try {
       final provider = fb.GoogleAuthProvider();
-      final credential = await _auth.signInWithProvider(provider);
+      final fb.UserCredential credential;
+      if (kIsWeb) {
+        credential = await _auth.signInWithPopup(provider);
+      } else {
+        credential = await _auth.signInWithProvider(provider);
+      }
       final user = credential.user;
       if (user == null) throw const AuthException('Google sign-in failed.');
       return _mapUser(user);
