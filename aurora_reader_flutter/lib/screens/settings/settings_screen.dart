@@ -401,73 +401,45 @@ class _RunicKnotPainter extends CustomPainter {
     final ember = Paint()
       ..color = AuroraColors.auroraTeal
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.square
+      ..strokeJoin = StrokeJoin.miter;
 
     final lichen = Paint()
-      ..color = AuroraColors.auroraGreen.withOpacity(0.5)
+      ..color = AuroraColors.auroraGreen.withOpacity(0.6)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+      ..strokeCap = StrokeCap.square
+      ..strokeJoin = StrokeJoin.miter;
 
-    // The "E" is built from interlaced strokes:
-    // A vertical spine with three horizontal arms that weave over/under
+    final cx = w * 0.5;
+    final top = h * 0.0;
+    final bot = h * 1.0;
+    final mid = h * 0.5;
 
-    // Vertical spine of E
-    final spine = Path()
-      ..moveTo(w * 0.2, h * 0.05)
-      ..lineTo(w * 0.2, h * 0.95);
-    canvas.drawPath(spine, ember);
+    canvas.drawLine(Offset(cx, top), Offset(cx, bot), ember);
 
-    // Top arm — curves slightly upward at the end
-    final topArm = Path()
-      ..moveTo(w * 0.2, h * 0.05)
-      ..cubicTo(w * 0.5, h * 0.05, w * 0.65, h * 0.0, w * 0.85, h * 0.08)
-      ..cubicTo(w * 0.92, h * 0.11, w * 0.88, h * 0.20, w * 0.78, h * 0.18);
-    canvas.drawPath(topArm, ember);
+    final dRight = w * 0.95;
+    canvas.drawLine(Offset(cx, top), Offset(dRight, mid), lichen);
+    canvas.drawLine(Offset(dRight, mid), Offset(cx, bot), lichen);
+    canvas.drawLine(Offset(cx, top), Offset(w * 0.05, mid), lichen);
+    canvas.drawLine(Offset(w * 0.05, mid), Offset(cx, bot), lichen);
 
-    // Middle arm — the interlace crossover
-    final midArm = Path()
-      ..moveTo(w * 0.2, h * 0.48)
-      ..cubicTo(w * 0.45, h * 0.48, w * 0.55, h * 0.42, w * 0.72, h * 0.45)
-      ..cubicTo(w * 0.82, h * 0.47, w * 0.80, h * 0.55, w * 0.68, h * 0.53);
-    canvas.drawPath(midArm, ember);
+    final eTop = h * 0.22;
+    final eMid = h * 0.38;
+    final eBot = h * 0.54;
+    final eRight = w * 0.82;
+    canvas.drawLine(Offset(cx, eTop), Offset(eRight, eMid), ember);
+    canvas.drawLine(Offset(eRight, eMid), Offset(cx, eBot), ember);
 
-    // Bottom arm
-    final botArm = Path()
-      ..moveTo(w * 0.2, h * 0.95)
-      ..cubicTo(w * 0.5, h * 0.95, w * 0.65, h * 1.0, w * 0.85, h * 0.92)
-      ..cubicTo(w * 0.92, h * 0.89, w * 0.88, h * 0.80, w * 0.78, h * 0.82);
-    canvas.drawPath(botArm, ember);
-
-    // Interlace weave loops — small loops at the arm terminals
-    // Top loop
-    final topLoop = Path()
-      ..moveTo(w * 0.78, h * 0.18)
-      ..cubicTo(w * 0.68, h * 0.16, w * 0.65, h * 0.22, w * 0.72, h * 0.25)
-      ..cubicTo(w * 0.80, h * 0.28, w * 0.85, h * 0.22, w * 0.78, h * 0.18);
-    canvas.drawPath(topLoop, lichen);
-
-    // Middle loop
-    final midLoop = Path()
-      ..moveTo(w * 0.68, h * 0.53)
-      ..cubicTo(w * 0.58, h * 0.51, w * 0.55, h * 0.57, w * 0.62, h * 0.60)
-      ..cubicTo(w * 0.70, h * 0.63, w * 0.75, h * 0.57, w * 0.68, h * 0.53);
-    canvas.drawPath(midLoop, lichen);
-
-    // Bottom loop
-    final botLoop = Path()
-      ..moveTo(w * 0.78, h * 0.82)
-      ..cubicTo(w * 0.68, h * 0.84, w * 0.65, h * 0.78, w * 0.72, h * 0.75)
-      ..cubicTo(w * 0.80, h * 0.72, w * 0.85, h * 0.78, w * 0.78, h * 0.82);
-    canvas.drawPath(botLoop, lichen);
-
-    // Knot terminals — small dots at spine endpoints
-    final dot = Paint()..color = AuroraColors.auroraTeal;
-    canvas.drawCircle(Offset(w * 0.2, h * 0.03), 2.5, dot);
-    canvas.drawCircle(Offset(w * 0.2, h * 0.97), 2.5, dot);
+    final serifW = w * 0.12;
+    final serifPaint = Paint()
+      ..color = AuroraColors.auroraTeal
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.square;
+    canvas.drawLine(Offset(cx - serifW, top), Offset(cx + serifW, top), serifPaint);
+    canvas.drawLine(Offset(cx - serifW, bot), Offset(cx + serifW, bot), serifPaint);
   }
 
   @override

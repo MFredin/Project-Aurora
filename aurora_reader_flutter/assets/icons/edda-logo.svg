@@ -14,36 +14,22 @@
   <circle cx="256" cy="256" r="248" fill="#0D1210"/>
   <circle cx="256" cy="256" r="248" fill="none" stroke="#252E27" stroke-width="2"/>
 
-  <!-- Runic Knot "E" — interlaced Norse knotwork -->
-  <!-- Vertical spine -->
-  <path d="M160 90 L160 422" fill="none" stroke="url(#ember)" stroke-width="12" stroke-linecap="round"/>
+  <!-- Bind Rune: Ehwaz + Dagaz on shared stave -->
 
-  <!-- Top arm with curve -->
-  <path d="M160 90 C220 90, 290 80, 350 100 C380 110, 370 145, 340 138"
-        fill="none" stroke="url(#ember)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Central vertical stave -->
+  <line x1="256" y1="72" x2="256" y2="440" stroke="url(#ember)" stroke-width="14" stroke-linecap="square"/>
 
-  <!-- Middle arm -->
-  <path d="M160 250 C230 250, 270 235, 320 242 C348 246, 342 272, 310 266"
-        fill="none" stroke="url(#ember)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Dagaz: X-cross diagonals forming bowtie -->
+  <line x1="256" y1="72" x2="420" y2="256" stroke="url(#lichen)" stroke-width="11" stroke-linecap="square"/>
+  <line x1="420" y1="256" x2="256" y2="440" stroke="url(#lichen)" stroke-width="11" stroke-linecap="square"/>
+  <line x1="256" y1="72" x2="92" y2="256" stroke="url(#lichen)" stroke-width="11" stroke-linecap="square"/>
+  <line x1="92" y1="256" x2="256" y2="440" stroke="url(#lichen)" stroke-width="11" stroke-linecap="square"/>
 
-  <!-- Bottom arm -->
-  <path d="M160 422 C220 422, 290 432, 350 412 C380 402, 370 367, 340 374"
-        fill="none" stroke="url(#ember)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Ehwaz: chevron branches from upper stave -->
+  <line x1="256" y1="152" x2="380" y2="216" stroke="url(#ember)" stroke-width="12" stroke-linecap="square"/>
+  <line x1="380" y1="216" x2="256" y2="280" stroke="url(#ember)" stroke-width="12" stroke-linecap="square"/>
 
-  <!-- Interlace loops at arm terminals (lichen teal) -->
-  <!-- Top loop -->
-  <path d="M340 138 C310 132, 300 155, 318 168 C336 180, 358 162, 340 138"
-        fill="none" stroke="url(#lichen)" stroke-width="10" stroke-linecap="round"/>
-
-  <!-- Middle loop -->
-  <path d="M310 266 C280 260, 268 282, 286 296 C304 310, 326 292, 310 266"
-        fill="none" stroke="url(#lichen)" stroke-width="10" stroke-linecap="round"/>
-
-  <!-- Bottom loop -->
-  <path d="M340 374 C310 380, 300 357, 318 344 C336 332, 358 350, 340 374"
-        fill="none" stroke="url(#lichen)" stroke-width="10" stroke-linecap="round"/>
-
-  <!-- Spine terminal dots -->
-  <circle cx="160" cy="80" r="10" fill="#B87944"/>
-  <circle cx="160" cy="432" r="10" fill="#B87944"/>
+  <!-- Stave terminal serifs -->
+  <line x1="228" y1="72" x2="284" y2="72" stroke="url(#ember)" stroke-width="10" stroke-linecap="square"/>
+  <line x1="228" y1="440" x2="284" y2="440" stroke="url(#ember)" stroke-width="10" stroke-linecap="square"/>
 </svg>
