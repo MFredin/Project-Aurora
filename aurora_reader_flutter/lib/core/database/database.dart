@@ -211,11 +211,13 @@ class UserPreferencesTable extends Table {
 class AppDatabase {
   Future<void> close() async {}
   Stream<List<Book>> watchAllBooks() => Stream.value([]);
+  Future<List<Book>> getAllBooks() async => [];
   Future<Book?> getBookById(String id) async => null;
   Future<ReadingProgress?> getProgressForBook(String bookId) async => null;
   Future<List<BookChapter>> getChaptersForBook(String bookId) async => [];
   Stream<List<Bookmark>> watchBookmarksForBook(String bookId) => Stream.value([]);
   Stream<List<Highlight>> watchHighlightsForBook(String bookId) => Stream.value([]);
+  Stream<List<Highlight>> watchAllHighlights() => Stream.value([]);
   Stream<List<ReadingSession>> watchAllSessions() => Stream.value([]);
   Stream<List<VocabularyEntry>> watchAllVocabulary() => Stream.value([]);
 }
@@ -228,7 +230,8 @@ class Book {
 
 class ReadingProgress {
   final String bookId;
-  const ReadingProgress({required this.bookId});
+  final double progressPercentage;
+  const ReadingProgress({required this.bookId, this.progressPercentage = 0.0});
 }
 
 class BookChapter {
@@ -247,22 +250,30 @@ class Highlight {
   final String bookId;
   final String highlightedText;
   final String note;
+  final String colorName;
+  final String chapterTitle;
+  final DateTime dateCreated;
   const Highlight({
     required this.id,
     required this.bookId,
     required this.highlightedText,
     this.note = '',
+    this.colorName = 'auroraTeal',
+    this.chapterTitle = '',
+    required this.dateCreated,
   });
 }
 
 class ReadingSession {
   final String id;
+  final String? bookId;
   final int durationSeconds;
   final int pagesRead;
   final int wordsRead;
   final DateTime startTime;
   const ReadingSession({
     required this.id,
+    this.bookId,
     required this.durationSeconds,
     required this.pagesRead,
     required this.wordsRead,
@@ -273,5 +284,18 @@ class ReadingSession {
 class VocabularyEntry {
   final String id;
   final String word;
-  const VocabularyEntry({required this.id, required this.word});
+  final String definition;
+  final String context;
+  final String bookTitle;
+  final bool isMastered;
+  final DateTime dateAdded;
+  const VocabularyEntry({
+    required this.id,
+    required this.word,
+    this.definition = '',
+    this.context = '',
+    this.bookTitle = '',
+    this.isMastered = false,
+    required this.dateAdded,
+  });
 }
