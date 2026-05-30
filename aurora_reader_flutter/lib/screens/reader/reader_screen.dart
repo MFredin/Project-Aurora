@@ -1,6 +1,8 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pdfrx/pdfrx.dart';
 import '../../core/data/models.dart';
 import '../../core/data/book_repository.dart';
 import '../../core/layout/responsive.dart';
@@ -195,9 +197,14 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       _restoredProgress = true;
     }
 
+    final isPdf = book.format == 'pdf';
     final currentContent = book.chapters[_currentChapter].content;
     final currentTitle = book.chapters[_currentChapter].title;
     final isMobile = ResponsiveHelper.isMobile(context);
+
+    if (isPdf) {
+      return _buildPdfReader(book);
+    }
 
     return Focus(
       autofocus: true,
@@ -298,6 +305,141 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                 _buildHighlightToolbar(book),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPdfReader(BookModel book) {
+    final pdfData = ref.read(bookRepositoryProvider.notifier).getRawFileData(widget.bookId);
+
+    if (pdfData == null) {
+      return Scaffold(
+        backgroundColor: AuroraColors.deepSpace,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.picture_as_pdf_rounded,
+                  color: AuroraColors.textTertiary, size: 64),
+              const SizedBox(height: 16),
+              const Text(
+                'PDF data not available',
+                style: TextStyle(
+                  color: AuroraColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Try re-importing this PDF file.',
+                style: TextStyle(
+                  color: AuroraColors.textTertiary,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.of(context).maybePop(),
+                icon: const Icon(Icons.arrow_back_rounded),
+                label: const Text('Go Back'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AuroraColors.auroraTeal,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: AuroraColors.deepSpace,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            GestureDetector(
+              onTap: () => setState(() => _showToolbar = !_showToolbar),
+              child: Column(
+                children: [
+                  _buildProgressBar(book),
+                  Expanded(
+                    child: PdfViewer.data(
+                      pdfData,
+                      sourceName: book.title,
+                      params: PdfViewerParams(
+                        backgroundColor: AuroraColors.deepSpace,
+                        margin: 8,
+                        scrollByMouseWheel: 1.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_showToolbar)
+              _buildPdfTopBar(book),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPdfTopBar(BookModel book) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AuroraColors.cosmos.withOpacity(0.95),
+          border: Border(
+            bottom: BorderSide(
+              color: const Color(0xFF252E27).withOpacity(0.6),
+              width: 0.5,
+            ),
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_rounded,
+                  color: AuroraColors.textPrimary, size: 22),
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                book.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: AuroraColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AuroraColors.auroraTeal.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                'PDF',
+                style: TextStyle(
+                  color: AuroraColors.auroraTeal,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
       ),
     );

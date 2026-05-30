@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
@@ -49,6 +50,10 @@ class BookRepository extends Notifier<List<BookModel>> {
             ))
         .toList();
 
+    if (result.rawFileData != null) {
+      _box.put('raw_$bookId', base64Encode(result.rawFileData!));
+    }
+
     final book = BookModel(
       id: bookId,
       title: result.metadata.title,
@@ -64,6 +69,17 @@ class BookRepository extends Notifier<List<BookModel>> {
     state = [...state, book];
     _persist();
     return bookId;
+  }
+
+  Uint8List? getRawFileData(String bookId) {
+    final raw = _box.get('raw_$bookId');
+    if (raw == null) return null;
+    try {
+      return base64Decode(raw as String);
+    } catch (e) {
+      ErrorLogger.instance.capture(e, source: 'BookRepository.getRawFileData');
+      return null;
+    }
   }
 
   void updateProgress(String bookId, int chapter, double scrollFraction) {
@@ -138,6 +154,7 @@ class BookRepository extends Notifier<List<BookModel>> {
   }
 
   void deleteBook(String id) {
+    _box.delete('raw_$id');
     state = state.where((b) => b.id != id).toList();
     _persist();
   }

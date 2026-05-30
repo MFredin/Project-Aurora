@@ -82,10 +82,12 @@ class ParsedChapter {
 class ParsedBookResult {
   final ParsedBookMetadata metadata;
   final List<ParsedChapter> chapters;
+  final Uint8List? rawFileData;
 
   const ParsedBookResult({
     required this.metadata,
     required this.chapters,
+    this.rawFileData,
   });
 }
 
@@ -271,10 +273,11 @@ class BookParserService {
       chapters: [
         ParsedChapter(
           title: fileName,
-          content: '[PDF content rendered natively by pdfrx]',
+          content: '',
           index: 0,
         ),
       ],
+      rawFileData: bytes,
     );
   }
 
