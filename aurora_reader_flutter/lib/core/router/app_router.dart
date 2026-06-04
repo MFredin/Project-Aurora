@@ -13,8 +13,15 @@ import '../../screens/settings/export_screen.dart';
 import '../../screens/settings/ai_setup_guide_screen.dart';
 import '../../screens/settings/error_log_screen.dart';
 import '../../screens/library/book_detail_screen.dart';
+import '../../screens/activity/reading_wrap_screen.dart';
+import '../../screens/activity/daily_review_screen.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/signup_screen.dart';
+import '../../screens/social/social_feed_screen.dart';
+import '../../screens/social/book_club_screen.dart';
+import '../../screens/social/club_detail_screen.dart';
+import '../../screens/knowledge/vocabulary_screen.dart';
+import '../../screens/reader/audiobook_tracker_screen.dart';
 import '../../providers/auth_provider.dart';
 import '../layout/adaptive_shell.dart';
 
@@ -88,6 +95,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: SettingsScreen()),
           ),
+          GoRoute(
+            path: '/social',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SocialFeedScreen()),
+          ),
         ],
       ),
 
@@ -117,6 +129,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/error-log',
         builder: (context, state) => const ErrorLogScreen(),
+      ),
+      GoRoute(
+        path: '/reading-wrap/:year',
+        builder: (context, state) => ReadingWrapScreen(
+          year: int.parse(state.pathParameters['year']!),
+        ),
+      ),
+      GoRoute(
+        path: '/daily-review',
+        builder: (context, state) => const DailyReviewScreen(),
+      ),
+      GoRoute(
+        path: '/clubs',
+        builder: (context, state) => const BookClubScreen(),
+      ),
+      GoRoute(
+        path: '/club/:clubId',
+        builder: (context, state) =>
+            ClubDetailScreen(clubId: state.pathParameters['clubId']!),
+      ),
+      GoRoute(
+        path: '/vocabulary',
+        builder: (context, state) => const VocabularyScreen(),
+      ),
+      GoRoute(
+        path: '/audiobook/:bookId',
+        builder: (context, state) =>
+            AudiobookTrackerScreen(bookId: state.pathParameters['bookId']!),
       ),
     ],
   );

@@ -13,6 +13,8 @@ import '../services/discovery/book_discovery_service.dart';
 import '../services/export/data_export_service.dart';
 import '../services/dictionary/dictionary_service.dart';
 import '../services/stats/reading_stats_service.dart';
+import '../services/ai/ai_reading_tools.dart';
+import '../services/import/kindle_import_service.dart';
 import 'database_provider.dart';
 
 /// Book parser — stateless, no DB dependency.
@@ -135,4 +137,15 @@ final dictionaryProvider = Provider<DictionaryService>((ref) {
 final readingStatsProvider = Provider<ReadingStatsService>((ref) {
   final db = ref.watch(databaseProvider);
   return ReadingStatsService(db);
+});
+
+/// AI reading tools (enhanced companion features).
+final aiReadingToolsProvider = Provider<AiReadingTools>((ref) {
+  final aiService = ref.watch(aiCompanionProvider);
+  return AiReadingTools(aiService);
+});
+
+/// Kindle clippings import service.
+final kindleImportProvider = Provider<KindleImportService>((ref) {
+  return KindleImportService();
 });

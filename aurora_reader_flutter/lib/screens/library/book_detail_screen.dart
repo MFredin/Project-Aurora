@@ -7,6 +7,7 @@ import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 import '../../core/data/models.dart';
 import '../../core/data/book_repository.dart';
+import '../../services/export/highlight_export_service.dart';
 
 const _uuid = Uuid();
 
@@ -260,6 +261,265 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
     ref.read(bookRepositoryProvider.notifier).removeReadingNote(widget.bookId, noteId);
   }
 
+  void _addQuote(BookModel book) {
+    final quoteController = TextEditingController();
+    final noteController = TextEditingController();
+    final chapterController = TextEditingController(
+      text: book.progress.currentChapter.toString(),
+    );
+    final pageRefController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Save Quote',
+            style: TextStyle(color: AuroraColors.textPrimary)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: quoteController,
+                maxLines: 4,
+                style: const TextStyle(color: AuroraColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Enter the quote...',
+                  hintStyle: const TextStyle(color: AuroraColors.textTertiary),
+                  filled: true,
+                  fillColor: AuroraColors.surface.withOpacity(0.5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: noteController,
+                maxLines: 2,
+                style: const TextStyle(color: AuroraColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Note (optional)',
+                  hintStyle: const TextStyle(color: AuroraColors.textTertiary),
+                  filled: true,
+                  fillColor: AuroraColors.surface.withOpacity(0.5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: chapterController,
+                      keyboardType: TextInputType.number,
+                      style: const TextStyle(color: AuroraColors.textPrimary),
+                      decoration: InputDecoration(
+                        labelText: 'Chapter',
+                        labelStyle: const TextStyle(color: AuroraColors.textSecondary),
+                        filled: true,
+                        fillColor: AuroraColors.surface.withOpacity(0.5),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: pageRefController,
+                      style: const TextStyle(color: AuroraColors.textPrimary),
+                      decoration: InputDecoration(
+                        labelText: 'Page (opt)',
+                        labelStyle: const TextStyle(color: AuroraColors.textSecondary),
+                        filled: true,
+                        fillColor: AuroraColors.surface.withOpacity(0.5),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel',
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              final text = quoteController.text.trim();
+              if (text.isEmpty) return;
+              ref.read(bookRepositoryProvider.notifier).addQuote(
+                widget.bookId,
+                SavedQuoteModel(
+                  id: _uuid.v4(),
+                  bookId: widget.bookId,
+                  text: text,
+                  chapterIndex: int.tryParse(chapterController.text) ?? 0,
+                  pageRef: pageRefController.text.trim().isEmpty
+                      ? null
+                      : pageRefController.text.trim(),
+                  note: noteController.text.trim(),
+                  dateCreated: DateTime.now(),
+                ),
+              );
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Save',
+                style: TextStyle(color: AuroraColors.auroraTeal)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteQuote(String quoteId) {
+    ref.read(bookRepositoryProvider.notifier).removeQuote(widget.bookId, quoteId);
+  }
+
+  void _editSeries(BookModel book) {
+    final nameController = TextEditingController(text: book.seriesName ?? '');
+    final posController = TextEditingController(
+      text: book.seriesPosition?.toString() ?? '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Series Info',
+            style: TextStyle(color: AuroraColors.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              style: const TextStyle(color: AuroraColors.textPrimary),
+              decoration: InputDecoration(
+                labelText: 'Series Name',
+                hintText: 'e.g., The Lord of the Rings',
+                labelStyle: const TextStyle(color: AuroraColors.textSecondary),
+                hintStyle: const TextStyle(color: AuroraColors.textTertiary),
+                filled: true,
+                fillColor: AuroraColors.surface.withOpacity(0.5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: posController,
+              keyboardType: TextInputType.number,
+              style: const TextStyle(color: AuroraColors.textPrimary),
+              decoration: InputDecoration(
+                labelText: 'Book # in Series',
+                hintText: 'e.g., 1',
+                labelStyle: const TextStyle(color: AuroraColors.textSecondary),
+                hintStyle: const TextStyle(color: AuroraColors.textTertiary),
+                filled: true,
+                fillColor: AuroraColors.surface.withOpacity(0.5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              ref.read(bookRepositoryProvider.notifier).setSeries(
+                widget.bookId,
+                seriesName: null,
+                seriesPosition: null,
+              );
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Clear',
+                style: TextStyle(color: AuroraColors.textTertiary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel',
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              final pos = int.tryParse(posController.text);
+              ref.read(bookRepositoryProvider.notifier).setSeries(
+                widget.bookId,
+                seriesName: name.isEmpty ? null : name,
+                seriesPosition: pos,
+              );
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Save',
+                style: TextStyle(color: AuroraColors.auroraTeal)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmArchiveRead(BookModel book) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Start Re-read',
+            style: TextStyle(color: AuroraColors.textPrimary)),
+        content: Text(
+          'This will archive your current reading data (rating, review, moods, progress) '
+          'and start a fresh read of "${book.title}".\n\n'
+          'Your previous read data will be saved in the read history.',
+          style: const TextStyle(color: AuroraColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel',
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(bookRepositoryProvider.notifier).archiveCurrentRead(widget.bookId);
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Previous read archived. Starting fresh!'),
+                  backgroundColor: AuroraColors.surfaceElevated,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            child: const Text('Archive & Restart',
+                style: TextStyle(color: AuroraColors.auroraTeal)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _confirmDelete(BookModel book) {
     showDialog(
       context: context,
@@ -383,6 +643,18 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                       _buildSectionDivider(),
                       const SizedBox(height: 16),
                       _buildDatesSection(book, dateFmt),
+                      const SizedBox(height: 20),
+                      _buildSectionDivider(),
+                      const SizedBox(height: 16),
+                      _buildSeriesSection(book),
+                      const SizedBox(height: 20),
+                      _buildSectionDivider(),
+                      const SizedBox(height: 16),
+                      _buildQuotesSection(book, dateFmt),
+                      const SizedBox(height: 20),
+                      _buildSectionDivider(),
+                      const SizedBox(height: 16),
+                      _buildReadHistorySection(book, dateFmt),
                       const SizedBox(height: 24),
                       // Read button
                       SizedBox(
@@ -445,8 +717,35 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                 borderRadius: BorderRadius.circular(12)),
             onSelected: (value) {
               if (value == 'delete') _confirmDelete(book);
+              if (value == 'reread') _confirmArchiveRead(book);
+              if (value == 'export') _exportBook(book);
             },
             itemBuilder: (_) => [
+              if (book.readingStatus == ReadingStatus.read)
+                const PopupMenuItem(
+                  value: 'reread',
+                  child: Row(
+                    children: [
+                      Icon(Icons.replay_rounded,
+                          color: AuroraColors.auroraGreen, size: 20),
+                      SizedBox(width: 8),
+                      Text('Re-read',
+                          style: TextStyle(color: AuroraColors.textPrimary)),
+                    ],
+                  ),
+                ),
+              const PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download_rounded,
+                        color: AuroraColors.auroraTeal, size: 20),
+                    SizedBox(width: 8),
+                    Text('Export Notes',
+                        style: TextStyle(color: AuroraColors.textPrimary)),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'delete',
                 child: Row(
@@ -1181,6 +1480,397 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
         ),
       ],
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Series
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSeriesSection(BookModel book) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _sectionHeader('Series'),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => _editSeries(book),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AuroraColors.auroraTeal.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  book.seriesName != null
+                      ? Icons.edit_rounded
+                      : Icons.add_rounded,
+                  color: AuroraColors.auroraTeal,
+                  size: 18,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (book.seriesName == null)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'Not part of a series.',
+              style: TextStyle(color: AuroraColors.textTertiary, fontSize: 13),
+            ),
+          )
+        else
+          AuroraCard(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AuroraColors.auroraPurple.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.collections_bookmark_rounded,
+                      color: AuroraColors.auroraPurple, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        book.seriesName!,
+                        style: const TextStyle(
+                          color: AuroraColors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (book.seriesPosition != null)
+                        Text(
+                          'Book ${book.seriesPosition}',
+                          style: const TextStyle(
+                            color: AuroraColors.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Quotes
+  // ---------------------------------------------------------------------------
+
+  Widget _buildQuotesSection(BookModel book, DateFormat dateFmt) {
+    final quotes = List<SavedQuoteModel>.from(book.savedQuotes)
+      ..sort((a, b) => b.dateCreated.compareTo(a.dateCreated));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _sectionHeader('Saved Quotes'),
+            const SizedBox(width: 8),
+            if (quotes.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AuroraColors.manuscriptGold.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '${quotes.length}',
+                  style: const TextStyle(
+                    color: AuroraColors.manuscriptGold,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => _addQuote(book),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AuroraColors.auroraTeal.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.add_rounded,
+                    color: AuroraColors.auroraTeal, size: 18),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (quotes.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'No saved quotes yet.',
+              style: TextStyle(color: AuroraColors.textTertiary, fontSize: 13),
+            ),
+          )
+        else
+          ...quotes.map((q) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: AuroraCard(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 3,
+                          height: 40,
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(
+                            color: AuroraColors.manuscriptGold,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            q.text,
+                            style: const TextStyle(
+                              color: AuroraColors.textPrimary,
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (q.note.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        q.note,
+                        style: const TextStyle(
+                          color: AuroraColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          'Ch. ${q.chapterIndex + 1}',
+                          style: const TextStyle(
+                            color: AuroraColors.textTertiary,
+                            fontSize: 12,
+                          ),
+                        ),
+                        if (q.pageRef != null) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            'p. ${q.pageRef}',
+                            style: const TextStyle(
+                              color: AuroraColors.textTertiary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
+                        Text(
+                          dateFmt.format(q.dateCreated),
+                          style: const TextStyle(
+                            color: AuroraColors.textTertiary,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _deleteQuote(q.id),
+                          child: const Icon(Icons.delete_outline_rounded,
+                              color: AuroraColors.textTertiary, size: 16),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Read History (Re-reads)
+  // ---------------------------------------------------------------------------
+
+  Widget _buildReadHistorySection(BookModel book, DateFormat dateFmt) {
+    if (book.readHistory.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader('Read History'),
+        const SizedBox(height: 10),
+        ...book.readHistory.reversed.map((entry) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: AuroraCard(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AuroraColors.auroraPurple.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'Read #${entry.readNumber}',
+                          style: const TextStyle(
+                            color: AuroraColors.auroraPurple,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      if (entry.rating != null)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.star_rounded,
+                                color: AuroraColors.manuscriptGold, size: 16),
+                            const SizedBox(width: 2),
+                            Text(
+                              entry.rating!.toStringAsFixed(1),
+                              style: const TextStyle(
+                                color: AuroraColors.manuscriptGold,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      if (entry.startDate != null) ...[
+                        const Icon(Icons.play_arrow_rounded,
+                            color: AuroraColors.textTertiary, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          dateFmt.format(entry.startDate!),
+                          style: const TextStyle(
+                            color: AuroraColors.textTertiary,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                      if (entry.startDate != null && entry.finishDate != null)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(' — ',
+                              style: TextStyle(
+                                  color: AuroraColors.textTertiary,
+                                  fontSize: 12)),
+                        ),
+                      if (entry.finishDate != null) ...[
+                        const Icon(Icons.check_circle_outline_rounded,
+                            color: AuroraColors.textTertiary, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          dateFmt.format(entry.finishDate!),
+                          style: const TextStyle(
+                            color: AuroraColors.textTertiary,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (entry.moods.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      children: entry.moods.map((m) => Text(
+                        m,
+                        style: const TextStyle(
+                          color: AuroraColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      )).toList(),
+                    ),
+                  ],
+                  if (entry.review.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      entry.review,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AuroraColors.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Export single book
+  // ---------------------------------------------------------------------------
+
+  Future<void> _exportBook(BookModel book) async {
+    try {
+      final service = HighlightExportService([book]);
+      final path = await service.exportBookMarkdown(book);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Exported to $path'),
+            backgroundColor: AuroraColors.surfaceElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: AuroraColors.auroraWarm,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------

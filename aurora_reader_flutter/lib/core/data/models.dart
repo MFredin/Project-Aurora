@@ -113,6 +113,7 @@ class BookModel {
   final List<HighlightModel> highlights;
   final List<BookmarkModel> bookmarks;
   final List<ReadingNoteModel> readingNotes;
+  final List<SavedQuoteModel> savedQuotes;
 
   // Tier 1: Journal & metadata
   final ReadingStatus readingStatus;
@@ -125,6 +126,13 @@ class BookModel {
   final List<String> customTags;
   final DateTime? startDate;
   final DateTime? finishDate;
+
+  // Series tracking
+  final String? seriesName;
+  final int? seriesPosition;
+
+  // Re-read tracking
+  final List<ReadHistoryEntry> readHistory;
 
   const BookModel({
     required this.id,
@@ -141,6 +149,7 @@ class BookModel {
     this.highlights = const [],
     this.bookmarks = const [],
     this.readingNotes = const [],
+    this.savedQuotes = const [],
     this.readingStatus = ReadingStatus.wantToRead,
     this.rating,
     this.moods = const [],
@@ -151,6 +160,9 @@ class BookModel {
     this.customTags = const [],
     this.startDate,
     this.finishDate,
+    this.seriesName,
+    this.seriesPosition,
+    this.readHistory = const [],
   });
 
   BookModel copyWith({
@@ -162,6 +174,7 @@ class BookModel {
     List<HighlightModel>? highlights,
     List<BookmarkModel>? bookmarks,
     List<ReadingNoteModel>? readingNotes,
+    List<SavedQuoteModel>? savedQuotes,
     ReadingStatus? readingStatus,
     double? Function()? rating,
     List<String>? moods,
@@ -172,6 +185,9 @@ class BookModel {
     List<String>? customTags,
     DateTime? Function()? startDate,
     DateTime? Function()? finishDate,
+    String? Function()? seriesName,
+    int? Function()? seriesPosition,
+    List<ReadHistoryEntry>? readHistory,
   }) {
     return BookModel(
       id: id,
@@ -188,6 +204,7 @@ class BookModel {
       highlights: highlights ?? this.highlights,
       bookmarks: bookmarks ?? this.bookmarks,
       readingNotes: readingNotes ?? this.readingNotes,
+      savedQuotes: savedQuotes ?? this.savedQuotes,
       readingStatus: readingStatus ?? this.readingStatus,
       rating: rating != null ? rating() : this.rating,
       moods: moods ?? this.moods,
@@ -199,6 +216,10 @@ class BookModel {
       customTags: customTags ?? this.customTags,
       startDate: startDate != null ? startDate() : this.startDate,
       finishDate: finishDate != null ? finishDate() : this.finishDate,
+      seriesName: seriesName != null ? seriesName() : this.seriesName,
+      seriesPosition:
+          seriesPosition != null ? seriesPosition() : this.seriesPosition,
+      readHistory: readHistory ?? this.readHistory,
     );
   }
 
@@ -228,6 +249,7 @@ class BookModel {
         'highlights': highlights.map((h) => h.toJson()).toList(),
         'bookmarks': bookmarks.map((b) => b.toJson()).toList(),
         'readingNotes': readingNotes.map((n) => n.toJson()).toList(),
+        'savedQuotes': savedQuotes.map((q) => q.toJson()).toList(),
         'readingStatus': readingStatus.name,
         'rating': rating,
         'moods': moods,
@@ -238,6 +260,9 @@ class BookModel {
         'customTags': customTags,
         'startDate': startDate?.toIso8601String(),
         'finishDate': finishDate?.toIso8601String(),
+        'seriesName': seriesName,
+        'seriesPosition': seriesPosition,
+        'readHistory': readHistory.map((r) => r.toJson()).toList(),
       };
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
@@ -306,6 +331,11 @@ class BookModel {
                   ReadingNoteModel.fromJson(n as Map<String, dynamic>))
               .toList() ??
           [],
+      savedQuotes: (json['savedQuotes'] as List?)
+              ?.map((q) =>
+                  SavedQuoteModel.fromJson(q as Map<String, dynamic>))
+              .toList() ??
+          [],
       readingStatus: status,
       rating: (json['rating'] as num?)?.toDouble(),
       moods: (json['moods'] as List?)?.cast<String>() ?? [],
@@ -330,6 +360,13 @@ class BookModel {
       finishDate: json['finishDate'] != null
           ? DateTime.parse(json['finishDate'] as String)
           : null,
+      seriesName: json['seriesName'] as String?,
+      seriesPosition: json['seriesPosition'] as int?,
+      readHistory: (json['readHistory'] as List?)
+              ?.map((r) =>
+                  ReadHistoryEntry.fromJson(r as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 }
@@ -609,4 +646,195 @@ class ReadingGoalModel {
         targetBooks: json['targetBooks'] as int,
         booksRead: json['booksRead'] as int? ?? 0,
       );
+}
+
+class SavedQuoteModel {
+  final String id;
+  final String bookId;
+  final String text;
+  final int chapterIndex;
+  final String? pageRef;
+  final String note;
+  final DateTime dateCreated;
+
+  const SavedQuoteModel({
+    required this.id,
+    required this.bookId,
+    required this.text,
+    required this.chapterIndex,
+    this.pageRef,
+    this.note = '',
+    required this.dateCreated,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'bookId': bookId,
+        'text': text,
+        'chapterIndex': chapterIndex,
+        'pageRef': pageRef,
+        'note': note,
+        'dateCreated': dateCreated.toIso8601String(),
+      };
+
+  factory SavedQuoteModel.fromJson(Map<String, dynamic> json) =>
+      SavedQuoteModel(
+        id: json['id'] as String,
+        bookId: json['bookId'] as String,
+        text: json['text'] as String,
+        chapterIndex: json['chapterIndex'] as int? ?? 0,
+        pageRef: json['pageRef'] as String?,
+        note: json['note'] as String? ?? '',
+        dateCreated: DateTime.parse(json['dateCreated'] as String),
+      );
+}
+
+class ReadHistoryEntry {
+  final int readNumber;
+  final DateTime? startDate;
+  final DateTime? finishDate;
+  final double? rating;
+  final String review;
+  final List<String> moods;
+
+  const ReadHistoryEntry({
+    required this.readNumber,
+    this.startDate,
+    this.finishDate,
+    this.rating,
+    this.review = '',
+    this.moods = const [],
+  });
+
+  Map<String, dynamic> toJson() => {
+        'readNumber': readNumber,
+        'startDate': startDate?.toIso8601String(),
+        'finishDate': finishDate?.toIso8601String(),
+        'rating': rating,
+        'review': review,
+        'moods': moods,
+      };
+
+  factory ReadHistoryEntry.fromJson(Map<String, dynamic> json) =>
+      ReadHistoryEntry(
+        readNumber: json['readNumber'] as int,
+        startDate: json['startDate'] != null
+            ? DateTime.parse(json['startDate'] as String)
+            : null,
+        finishDate: json['finishDate'] != null
+            ? DateTime.parse(json['finishDate'] as String)
+            : null,
+        rating: (json['rating'] as num?)?.toDouble(),
+        review: json['review'] as String? ?? '',
+        moods: (json['moods'] as List?)?.cast<String>() ?? [],
+      );
+}
+
+enum AchievementType {
+  firstBook,
+  bookworm10,
+  bibliophile25,
+  centurion100,
+  genreExplorer,
+  streakWeek,
+  streakMonth,
+  nightOwl,
+  earlyBird,
+  speedReader,
+  reviewer,
+  highlighter,
+  consistent;
+
+  String get label {
+    switch (this) {
+      case AchievementType.firstBook:
+        return 'First Chapter';
+      case AchievementType.bookworm10:
+        return 'Bookworm';
+      case AchievementType.bibliophile25:
+        return 'Bibliophile';
+      case AchievementType.centurion100:
+        return 'Centurion';
+      case AchievementType.genreExplorer:
+        return 'Genre Explorer';
+      case AchievementType.streakWeek:
+        return 'Week Warrior';
+      case AchievementType.streakMonth:
+        return 'Month Master';
+      case AchievementType.nightOwl:
+        return 'Night Owl';
+      case AchievementType.earlyBird:
+        return 'Early Bird';
+      case AchievementType.speedReader:
+        return 'Speed Reader';
+      case AchievementType.reviewer:
+        return 'Critic';
+      case AchievementType.highlighter:
+        return 'Highlighter';
+      case AchievementType.consistent:
+        return 'Consistent';
+    }
+  }
+
+  String get description {
+    switch (this) {
+      case AchievementType.firstBook:
+        return 'Finish your first book';
+      case AchievementType.bookworm10:
+        return 'Read 10 books';
+      case AchievementType.bibliophile25:
+        return 'Read 25 books';
+      case AchievementType.centurion100:
+        return 'Read 100 books';
+      case AchievementType.genreExplorer:
+        return 'Read books with 5+ different mood tags';
+      case AchievementType.streakWeek:
+        return 'Maintain a 7-day reading streak';
+      case AchievementType.streakMonth:
+        return 'Maintain a 30-day reading streak';
+      case AchievementType.nightOwl:
+        return 'Read for 2+ hours in one session';
+      case AchievementType.earlyBird:
+        return 'Read 5 days in a row';
+      case AchievementType.speedReader:
+        return 'Finish a book in under 24 hours';
+      case AchievementType.reviewer:
+        return 'Write 5 reviews';
+      case AchievementType.highlighter:
+        return 'Create 50 highlights';
+      case AchievementType.consistent:
+        return 'Read every day for 2 weeks';
+    }
+  }
+
+  String get icon {
+    switch (this) {
+      case AchievementType.firstBook:
+        return '📖';
+      case AchievementType.bookworm10:
+        return '🐛';
+      case AchievementType.bibliophile25:
+        return '📚';
+      case AchievementType.centurion100:
+        return '🏛️';
+      case AchievementType.genreExplorer:
+        return '🧭';
+      case AchievementType.streakWeek:
+        return '🔥';
+      case AchievementType.streakMonth:
+        return '⚡';
+      case AchievementType.nightOwl:
+        return '🦉';
+      case AchievementType.earlyBird:
+        return '🌅';
+      case AchievementType.speedReader:
+        return '⚡';
+      case AchievementType.reviewer:
+        return '✍️';
+      case AchievementType.highlighter:
+        return '🖍️';
+      case AchievementType.consistent:
+        return '📅';
+    }
+  }
 }

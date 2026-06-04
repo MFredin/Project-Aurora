@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/data/models.dart';
 import '../../core/data/book_repository.dart';
 import '../../core/layout/responsive.dart';
@@ -65,50 +66,6 @@ class _MockStats {
     },
   ];
 
-  static const achievements = <Map<String, dynamic>>[
-    {
-      'icon': Icons.local_fire_department_rounded,
-      'title': 'Week Warrior',
-      'desc': '7-day reading streak',
-      'unlocked': true,
-      'color': AuroraColors.auroraWarm,
-    },
-    {
-      'icon': Icons.auto_stories_rounded,
-      'title': 'Bookworm',
-      'desc': 'Read 10 books',
-      'unlocked': true,
-      'color': AuroraColors.auroraGreen,
-    },
-    {
-      'icon': Icons.nights_stay_rounded,
-      'title': 'Night Owl',
-      'desc': 'Read past midnight 5 times',
-      'unlocked': true,
-      'color': AuroraColors.auroraPurple,
-    },
-    {
-      'icon': Icons.speed_rounded,
-      'title': 'Speed Reader',
-      'desc': 'Read 100 pages in one day',
-      'unlocked': false,
-      'color': AuroraColors.auroraTeal,
-    },
-    {
-      'icon': Icons.emoji_events_rounded,
-      'title': 'Marathon',
-      'desc': '30-day reading streak',
-      'unlocked': false,
-      'color': AuroraColors.auroraWarm,
-    },
-    {
-      'icon': Icons.library_books_rounded,
-      'title': 'Librarian',
-      'desc': 'Add 50 books to library',
-      'unlocked': false,
-      'color': AuroraColors.auroraBlue,
-    },
-  ];
 }
 
 class ActivityScreen extends ConsumerStatefulWidget {
@@ -162,6 +119,11 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                 ),
               ),
 
+              // --- Year in Review & Daily Review ---
+              SliverToBoxAdapter(
+                child: _buildYearInReviewCard(currentYear),
+              ),
+
               // --- NEW: Reading Streak Banner ---
               SliverToBoxAdapter(
                 child: _buildReadingStreakBanner(currentStreak),
@@ -205,6 +167,145 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ── Year in Review & Daily Review Cards ─────────────────────────────
+
+  Widget _buildYearInReviewCard(int year) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: AuroraCard(
+              onTap: () => context.push('/reading-wrap/$year'),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AuroraColors.manuscriptGold.withOpacity(0.25),
+                          AuroraColors.auroraTeal.withOpacity(0.15),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [
+                          AuroraColors.auroraTeal,
+                          AuroraColors.manuscriptGold,
+                        ],
+                      ).createShader(bounds),
+                      child: const Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 22,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$year in Review',
+                          style: const TextStyle(
+                            color: AuroraColors.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Your reading wrapped',
+                          style: TextStyle(
+                            color: AuroraColors.textTertiary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AuroraColors.textTertiary,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: AuroraCard(
+              onTap: () => context.push('/daily-review'),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AuroraColors.auroraGreen.withOpacity(0.25),
+                          AuroraColors.auroraPurple.withOpacity(0.15),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.highlight_rounded,
+                      size: 22,
+                      color: AuroraColors.manuscriptGold,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Daily Review',
+                          style: TextStyle(
+                            color: AuroraColors.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Revisit highlights',
+                          style: TextStyle(
+                            color: AuroraColors.textTertiary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AuroraColors.textTertiary,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1273,21 +1374,68 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     );
   }
 
+  static const _achievementIcons = <AchievementType, IconData>{
+    AchievementType.firstBook: Icons.auto_stories_rounded,
+    AchievementType.bookworm10: Icons.menu_book_rounded,
+    AchievementType.bibliophile25: Icons.library_books_rounded,
+    AchievementType.centurion100: Icons.emoji_events_rounded,
+    AchievementType.genreExplorer: Icons.explore_rounded,
+    AchievementType.streakWeek: Icons.local_fire_department_rounded,
+    AchievementType.streakMonth: Icons.whatshot_rounded,
+    AchievementType.nightOwl: Icons.nights_stay_rounded,
+    AchievementType.earlyBird: Icons.wb_sunny_rounded,
+    AchievementType.speedReader: Icons.speed_rounded,
+    AchievementType.reviewer: Icons.rate_review_rounded,
+    AchievementType.highlighter: Icons.highlight_rounded,
+    AchievementType.consistent: Icons.calendar_month_rounded,
+  };
+
+  static const _achievementColors = <AchievementType, Color>{
+    AchievementType.firstBook: AuroraColors.auroraGreen,
+    AchievementType.bookworm10: AuroraColors.auroraGreen,
+    AchievementType.bibliophile25: AuroraColors.auroraTeal,
+    AchievementType.centurion100: AuroraColors.manuscriptGold,
+    AchievementType.genreExplorer: AuroraColors.auroraPurple,
+    AchievementType.streakWeek: AuroraColors.auroraWarm,
+    AchievementType.streakMonth: AuroraColors.auroraWarm,
+    AchievementType.nightOwl: AuroraColors.auroraPurple,
+    AchievementType.earlyBird: AuroraColors.manuscriptGold,
+    AchievementType.speedReader: AuroraColors.auroraTeal,
+    AchievementType.reviewer: AuroraColors.auroraGreen,
+    AchievementType.highlighter: AuroraColors.manuscriptGold,
+    AchievementType.consistent: AuroraColors.auroraGreen,
+  };
+
   Widget _buildAchievements() {
+    final unlocked = ref.read(bookRepositoryProvider.notifier).getUnlockedAchievements();
+    final unlockedSet = unlocked.toSet();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: Text(
-              'Achievements',
-              style: TextStyle(
-                color: AuroraColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                const Text(
+                  'Achievements',
+                  style: TextStyle(
+                    color: AuroraColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${unlocked.length}/${AchievementType.values.length}',
+                  style: const TextStyle(
+                    color: AuroraColors.textTertiary,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           ),
           GridView.count(
@@ -1297,55 +1445,60 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             childAspectRatio: 0.85,
-            children: _MockStats.achievements.map((a) {
-              final unlocked = a['unlocked'] as bool;
-              final color = a['color'] as Color;
+            children: AchievementType.values.map((type) {
+              final isUnlocked = unlockedSet.contains(type);
+              final icon = _achievementIcons[type] ?? Icons.star_rounded;
+              final color = _achievementColors[type] ?? AuroraColors.auroraGreen;
+
               return AuroraCard(
                 padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: unlocked
-                            ? color.withOpacity(0.2)
-                            : AuroraColors.surface,
-                        shape: BoxShape.circle,
+                child: Opacity(
+                  opacity: isUnlocked ? 1.0 : 0.4,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: isUnlocked
+                              ? color.withOpacity(0.2)
+                              : AuroraColors.surface,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          icon,
+                          color: isUnlocked ? color : AuroraColors.textTertiary,
+                          size: 24,
+                        ),
                       ),
-                      child: Icon(
-                        a['icon'] as IconData,
-                        color: unlocked ? color : AuroraColors.textTertiary,
-                        size: 24,
+                      const SizedBox(height: 8),
+                      Text(
+                        type.label,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: isUnlocked
+                              ? AuroraColors.textPrimary
+                              : AuroraColors.textTertiary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      a['title'] as String,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: unlocked
-                            ? AuroraColors.textPrimary
-                            : AuroraColors.textTertiary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 2),
+                      Text(
+                        type.description,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AuroraColors.textTertiary,
+                          fontSize: 10,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      a['desc'] as String,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AuroraColors.textTertiary,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }).toList(),

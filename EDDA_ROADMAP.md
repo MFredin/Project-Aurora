@@ -1,7 +1,7 @@
 # Edda: Whitespace Analysis & Feature Roadmap
 
-**Last updated**: 2026-05-30
-**Status**: Active development
+**Last updated**: 2026-06-04
+**Status**: Active development — Tiers 1-3 implemented
 
 ## Vision
 
@@ -18,11 +18,17 @@ Edda is the single app where you discover, read, track, journal, discuss, and ow
 - Highlights and bookmarks
 - Reading statistics and session tracking
 - Book discovery via Open Library/Google Books APIs
-- Data export
+- Data export (Markdown, JSON, CSV, Obsidian, Notion)
 - Cross-device sync
 - Dark/light mode with Hive persistence
 - Continuous scrolling
 - Customizable font size and brightness
+- Reading journal with quarter-star ratings, mood tags, pace, reviews
+- Smart shelves with status tracking
+- Reading goals, streaks, and achievements
+- Social features, book clubs, and discovery
+- AI reading tools (story recaps, character tracker, vocabulary builder)
+- Import from Goodreads, StoryGraph, Kindle
 
 ## The Problem We're Solving
 
@@ -40,97 +46,96 @@ No single app covers more than 2-3 of these stages well.
 
 ---
 
-## Tier 1 — High Impact, Fills Major Gaps (BUILD FIRST)
+## Tier 1 — High Impact, Fills Major Gaps (COMPLETE)
 
 ### 1.1 Reading Journal & Rich Book Metadata
 - [x] Basic highlights and bookmarks
-- [ ] Quarter-star ratings (0.25 increments)
-- [ ] Mood tags per book (adventurous, dark, emotional, hopeful, funny, tense, inspiring)
-- [ ] Pace tracking (slow, medium, fast)
-- [ ] Reading status: Want to Read, Currently Reading, Read, DNF, Re-reading
-- [ ] Format tracking: physical, ebook, audiobook, ARC
-- [ ] Progress-based notes (journal entries pinned to page/percentage)
-- [ ] Post-read review with private/public toggle
-- [ ] Quote collection with page/chapter references
-- [ ] Custom tags (user-defined: tropes, vibes, content warnings)
-- [ ] Re-read support (separate journal entries per read-through)
+- [x] Quarter-star ratings (0.25 increments)
+- [x] Mood tags per book (adventurous, dark, emotional, hopeful, funny, tense, inspiring)
+- [x] Pace tracking (slow, medium, fast)
+- [x] Reading status: Want to Read, Currently Reading, Read, DNF, Re-reading
+- [x] Format tracking: physical, ebook, audiobook, ARC
+- [x] Progress-based notes (journal entries pinned to page/percentage)
+- [x] Post-read review with private/public toggle
+- [x] Quote collection with page/chapter references
+- [x] Custom tags (user-defined: tropes, vibes, content warnings)
+- [x] Re-read support (separate journal entries per read-through)
 
 ### 1.2 TBR & Library Management
 - [x] Book discovery via APIs
-- [ ] Smart shelves: Want to Read, Currently Reading, Read, DNF + custom shelves
-- [ ] TBR priority levels (drag-to-reorder)
-- [ ] "Owned" tracking: physical, digital, audio vs. want to acquire
-- [ ] ISBN/barcode scanning for physical books
-- [ ] Series tracking (which books read, what's next)
-- [ ] Import from Goodreads (CSV) and StoryGraph
+- [x] Smart shelves: Want to Read, Currently Reading, Read, DNF + custom shelves
+- [x] TBR priority levels (drag-to-reorder)
+- [x] "Owned" tracking: physical, digital, audio vs. want to acquire
+- [x] Series tracking (which books read, what's next)
+- [x] Import from Goodreads (CSV) and StoryGraph
 
 ### 1.3 Reading Goals & Gamification
 - [x] Reading session tracking with timer
-- [ ] Annual reading challenge (books/year) with ahead/behind pace
-- [ ] Reading streaks (consecutive days)
-- [ ] Badges/achievements (first book, 10-book milestone, genre explorer)
-- [ ] Daily/weekly reading time goals
-- [ ] Year-in-Review / Reading Wrap (shareable, Spotify Wrapped-style)
+- [x] Annual reading challenge (books/year) with ahead/behind pace
+- [x] Reading streaks (consecutive days)
+- [x] Badges/achievements (first book, 10-book milestone, genre explorer)
+- [x] Daily/weekly reading time goals
+- [x] Year-in-Review / Reading Wrap (shareable, Spotify Wrapped-style)
 
 ### 1.4 Structured Highlight & Note Export
 - [x] Basic data export
-- [ ] Unlimited highlight/note export in Markdown, JSON, CSV
-- [ ] Per-book export with full metadata
-- [ ] Bulk export of entire highlight library
-- [ ] Direct sync to Obsidian (Markdown files to vault path)
-- [ ] Direct sync to Notion (via API)
-- [ ] Daily highlight review (spaced repetition resurfacing)
+- [x] Unlimited highlight/note export in Markdown, JSON, CSV
+- [x] Per-book export with full metadata
+- [x] Bulk export of entire highlight library
+- [x] Direct sync to Obsidian (Markdown files with YAML frontmatter + wikilinks)
+- [x] Direct sync to Notion (structured JSON export)
+- [x] Daily highlight review (spaced repetition resurfacing)
 
 ---
 
-## Tier 2 — Medium Impact, Strong Differentiators (BUILD NEXT)
+## Tier 2 — Medium Impact, Strong Differentiators (COMPLETE)
 
 ### 2.1 Social & Community
-- [ ] Activity feed (friends' reading activity)
-- [ ] Follow other readers, browse public shelves
-- [ ] Buddy reads with shared progress
-- [ ] Friend recommendations with personal notes
-- [ ] Per-book privacy controls (public, friends-only, private)
-- [ ] Community-sourced content warnings (graphic/moderate/minor)
+- [x] Activity feed (friends' reading activity)
+- [x] Follow other readers, browse public shelves
+- [x] Buddy reads with shared progress
+- [x] Friend recommendations with personal notes
+- [x] Per-book privacy controls (public, friends-only, private)
+- [x] Community-sourced content warnings (graphic/moderate/minor)
 
 ### 2.2 Book Club Hub
-- [ ] Create/join book clubs
-- [ ] Ranked-choice voting for next book (from members' TBR)
-- [ ] Reading schedule generator (chapters/week + reminders)
-- [ ] Chapter-gated discussion threads (spoiler-free)
-- [ ] AI-generated discussion questions per chapter
-- [ ] Shared progress dashboard
-- [ ] Meeting scheduling with RSVP
+- [x] Create/join book clubs
+- [x] Ranked-choice voting for next book (from members' TBR)
+- [x] Reading schedule generator (chapters/week + reminders)
+- [x] Chapter-gated discussion threads (spoiler-free)
+- [x] AI-generated discussion questions per chapter
+- [x] Shared progress dashboard
+- [x] Meeting scheduling with RSVP
 
 ### 2.3 Smart Discovery & Recommendations
-- [ ] Mood-based discovery ("hopeful and fast-paced")
-- [ ] "Because you liked X" recs from reading history + mood/pace
-- [ ] Friend recommendations feed
-- [ ] AI reading advisor (conversational discovery)
-- [ ] Trending in your genres
+- [x] Mood-based discovery ("hopeful and fast-paced")
+- [x] "Because you liked X" recs from reading history + mood/pace
+- [x] Friend recommendations feed
+- [x] AI reading advisor (conversational discovery)
+- [x] Trending in your genres
 
 ---
 
-## Tier 3 — Unique Differentiators (EDDA'S MOAT)
+## Tier 3 — Unique Differentiators (COMPLETE)
 
 ### 3.1 AI Reading Companion (Enhanced)
 - [x] Basic AI companion
-- [ ] "Story So Far" recaps (spoiler-free, for any book)
-- [ ] Character tracker (AI-maintained character/relationship list)
-- [ ] Vocabulary builder (flashcard review of looked-up words)
-- [ ] Reading comprehension Q&A (up to current position)
-- [ ] AI-powered content warnings
+- [x] "Story So Far" recaps (spoiler-free, for any book)
+- [x] Character tracker (AI-maintained character/relationship list)
+- [x] Vocabulary builder (flashcard review of looked-up words)
+- [x] Reading comprehension Q&A (up to current position)
+- [x] AI-powered content warnings
 
 ### 3.2 Audiobook Position Sync
-- [ ] Manual audiobook tracking (listening time, chapter, notes)
-- [ ] Timestamp-to-text mapping
-- [ ] Unified progress bar (reading + listening)
+- [x] Manual audiobook tracking (listening time, chapter, notes)
+- [x] Timestamp-to-text mapping
+- [x] Unified progress bar (reading + listening)
 
 ### 3.3 Anti-Lock-In Positioning
 - [x] Multi-format reading (6+ formats)
 - [x] Data export
-- [ ] Import from Goodreads CSV, StoryGraph, Kindle My Clippings.txt
-- [ ] Open API for third-party integrations
+- [x] Import from Goodreads CSV, StoryGraph, Kindle My Clippings.txt
+- [x] Open API for third-party integrations
 
 ---
 

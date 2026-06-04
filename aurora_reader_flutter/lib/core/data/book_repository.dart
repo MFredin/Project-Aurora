@@ -74,6 +74,12 @@ class BookRepository extends Notifier<List<BookModel>> {
     return bookId;
   }
 
+  /// Add a pre-built BookModel directly (used by import services).
+  void addImportedBook(BookModel book) {
+    state = [...state, book];
+    _persist();
+  }
+
   Uint8List? getRawFileData(String bookId) {
     final raw = _box.get('raw_$bookId');
     if (raw == null) return null;
@@ -220,6 +226,148 @@ class BookRepository extends Notifier<List<BookModel>> {
       startDate: startDate != null ? () => startDate : null,
       finishDate: finishDate != null ? () => finishDate : null,
     ));
+  }
+
+  // --- Quotes ---
+
+  void addQuote(String bookId, SavedQuoteModel quote) {
+    _updateBook(bookId, (book) => book.copyWith(
+      savedQuotes: [...book.savedQuotes, quote],
+    ));
+  }
+
+  void removeQuote(String bookId, String quoteId) {
+    _updateBook(bookId, (book) => book.copyWith(
+      savedQuotes: book.savedQuotes.where((q) => q.id != quoteId).toList(),
+    ));
+  }
+
+  // --- Series ---
+
+  void setSeries(String bookId, {String? seriesName, int? seriesPosition}) {
+    _updateBook(bookId, (book) => book.copyWith(
+      seriesName: () => seriesName,
+      seriesPosition: () => seriesPosition,
+    ));
+  }
+
+  // --- Re-read archival ---
+
+  void archiveCurrentRead(String bookId) {
+    _updateBook(bookId, (book) {
+      final entry = ReadHistoryEntry(
+        readNumber: book.readHistory.length + 1,
+        startDate: book.startDate,
+        finishDate: book.finishDate,
+        rating: book.rating,
+        review: book.review,
+        moods: List.from(book.moods),
+      );
+      return book.copyWith(
+        readHistory: [...book.readHistory, entry],
+        readingStatus: ReadingStatus.rereading,
+        startDate: () => DateTime.now(),
+        finishDate: () => null,
+        rating: () => null,
+        review: '',
+        moods: [],
+        progress: const ReadingProgressModel(),
+      );
+    });
+  }
+
+  // --- Highlight management ---
+
+  void removeHighlight(String bookId, String highlightId) {
+    _updateBook(bookId, (book) => book.copyWith(
+      highlights: book.highlights.where((h) => h.id != highlightId).toList(),
+    ));
+  }
+
+  void updateHighlightNote(String bookId, String highlightId, String note) {
+    _updateBook(bookId, (book) => book.copyWith(
+      highlights: book.highlights.map((h) {
+        if (h.id == highlightId) {
+          return HighlightModel(
+            id: h.id,
+            bookId: h.bookId,
+            highlightedText: h.highlightedText,
+            note: note,
+            colorName: h.colorName,
+            chapterIndex: h.chapterIndex,
+            dateCreated: h.dateCreated,
+          );
+        }
+        return h;
+      }).toList(),
+    ));
+  }
+
+  // --- Achievement evaluation ---
+
+  List<AchievementType> getUnlockedAchievements() {
+    final unlocked = <AchievementType>[];
+    final booksRead = state.where((b) => b.readingStatus == ReadingStatus.read).length;
+    final streak = getCurrentStreak();
+    final totalHighlights = state.fold<int>(0, (s, b) => s + b.highlights.length);
+    final totalReviews = state.where((b) => b.review.isNotEmpty).length;
+    final allMoods = <String>{};
+    for (final b in state) {
+      allMoods.addAll(b.moods);
+    }
+
+    if (booksRead >= 1) unlocked.add(AchievementType.firstBook);
+    if (booksRead >= 10) unlocked.add(AchievementType.bookworm10);
+    if (booksRead >= 25) unlocked.add(AchievementType.bibliophile25);
+    if (booksRead >= 100) unlocked.add(AchievementType.centurion100);
+    if (allMoods.length >= 5) unlocked.add(AchievementType.genreExplorer);
+    if (streak >= 7) unlocked.add(AchievementType.streakWeek);
+    if (streak >= 30) unlocked.add(AchievementType.streakMonth);
+    if (streak >= 14) unlocked.add(AchievementType.consistent);
+    if (streak >= 5) unlocked.add(AchievementType.earlyBird);
+    if (totalReviews >= 5) unlocked.add(AchievementType.reviewer);
+    if (totalHighlights >= 50) unlocked.add(AchievementType.highlighter);
+
+    // Night owl + speed reader need session data — check sessions
+    final sessions = Hive.box('aurora_reader').get(_sessionsKey);
+    if (sessions != null) {
+      try {
+        final List<dynamic> decoded = jsonDecode(sessions as String);
+        for (final raw in decoded) {
+          final s = raw as Map<String, dynamic>;
+          final dur = s['durationSeconds'] as int? ?? 0;
+          if (dur >= 7200) {
+            unlocked.add(AchievementType.nightOwl);
+            break;
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Speed reader: finished a book with start and finish on same day
+    for (final b in state) {
+      if (b.readingStatus == ReadingStatus.read &&
+          b.startDate != null &&
+          b.finishDate != null) {
+        final diff = b.finishDate!.difference(b.startDate!).inHours;
+        if (diff <= 24) {
+          unlocked.add(AchievementType.speedReader);
+          break;
+        }
+      }
+    }
+
+    return unlocked.toSet().toList();
+  }
+
+  // --- TBR reorder ---
+
+  void reorderBooks(int oldIndex, int newIndex) {
+    final books = List<BookModel>.from(state);
+    final item = books.removeAt(oldIndex);
+    books.insert(newIndex > oldIndex ? newIndex - 1 : newIndex, item);
+    state = books;
+    _persist();
   }
 
   void deleteBook(String id) {

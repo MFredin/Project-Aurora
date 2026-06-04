@@ -13,7 +13,7 @@ import '../../core/data/book_repository.dart';
 import '../../services/parser/book_parser_service.dart';
 import '../../services/logging/error_logger.dart';
 
-enum _SortOption { recent, title, author, progress }
+enum _SortOption { recent, title, author, progress, series }
 
 class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
@@ -89,6 +89,18 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           final aDate = a.lastOpened ?? a.dateAdded;
           final bDate = b.lastOpened ?? b.dateAdded;
           return bDate.compareTo(aDate);
+        });
+        break;
+      case _SortOption.series:
+        books.sort((a, b) {
+          final aSeries = a.seriesName ?? '';
+          final bSeries = b.seriesName ?? '';
+          if (aSeries.isEmpty && bSeries.isEmpty) return 0;
+          if (aSeries.isEmpty) return 1;
+          if (bSeries.isEmpty) return -1;
+          final cmp = aSeries.compareTo(bSeries);
+          if (cmp != 0) return cmp;
+          return (a.seriesPosition ?? 999).compareTo(b.seriesPosition ?? 999);
         });
         break;
     }
@@ -299,6 +311,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                               _buildSortItem(_SortOption.title, 'Title'),
                               _buildSortItem(_SortOption.author, 'Author'),
                               _buildSortItem(_SortOption.progress, 'Progress'),
+                              _buildSortItem(_SortOption.series, 'Series'),
                             ],
                           ),
                         ],
@@ -394,6 +407,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   // Content
                   if (books.isEmpty)
                     SliverFillRemaining(child: _buildEmptyState())
+                  else if (_selectedFilter == 'Want to Read' && !_isGridView)
+                    _buildReorderableList(books, allBooks)
                   else if (_isGridView)
                     _buildSliverGrid(books)
                   else
@@ -535,6 +550,71 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     );
 
     return body;
+  }
+
+  Widget _buildReorderableList(List<BookModel> filtered, List<BookModel> allBooks) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.drag_indicator_rounded,
+                      color: AuroraColors.textTertiary, size: 16),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Drag to prioritize your TBR',
+                    style: TextStyle(
+                      color: AuroraColors.textTertiary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              itemCount: filtered.length,
+              onReorder: (oldIndex, newIndex) {
+                final globalOldIndex = allBooks.indexOf(filtered[oldIndex]);
+                final adjustedNewIndex = newIndex > oldIndex ? newIndex : newIndex;
+                final targetBook = adjustedNewIndex < filtered.length
+                    ? filtered[adjustedNewIndex]
+                    : filtered.last;
+                final globalNewIndex = allBooks.indexOf(targetBook);
+                if (globalOldIndex >= 0 && globalNewIndex >= 0) {
+                  ref.read(bookRepositoryProvider.notifier)
+                      .reorderBooks(globalOldIndex, globalNewIndex);
+                }
+              },
+              itemBuilder: (context, index) {
+                final book = filtered[index];
+                return ReorderableDragStartListener(
+                  key: ValueKey(book.id),
+                  index: index,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _BookListTile(
+                      book: book,
+                      onTap: () => context.push('/book/${book.id}'),
+                      onLongPress: () => _showBookDetail(book),
+                      showDragHandle: true,
+                      priority: index + 1,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildSliverGrid(List<BookModel> books) {
@@ -1180,10 +1260,14 @@ class _BookListTile extends StatefulWidget {
   final BookModel book;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final bool showDragHandle;
+  final int? priority;
   const _BookListTile({
     required this.book,
     required this.onTap,
     required this.onLongPress,
+    this.showDragHandle = false,
+    this.priority,
   });
 
   @override
@@ -1222,6 +1306,25 @@ class _BookListTileState extends State<_BookListTile> {
           ),
           child: Row(
             children: [
+              if (widget.showDragHandle) ...[
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.priority != null)
+                      Text(
+                        '${widget.priority}',
+                        style: const TextStyle(
+                          color: AuroraColors.textTertiary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    const Icon(Icons.drag_handle_rounded,
+                        color: AuroraColors.textTertiary, size: 20),
+                  ],
+                ),
+                const SizedBox(width: 8),
+              ],
               Container(
                 width: 48,
                 height: 68,
@@ -1313,6 +1416,19 @@ class _BookListTileState extends State<_BookListTile> {
                       fontSize: 11,
                     ),
                   ),
+                  if (widget.book.seriesName != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.book.seriesPosition != null
+                          ? '#${widget.book.seriesPosition}'
+                          : 'Series',
+                      style: const TextStyle(
+                        color: AuroraColors.auroraPurple,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/data/book_repository.dart';
 import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 import '../../services/ai/llm_provider.dart';
 import '../../services/auth/auth_service.dart';
+import '../../services/import/goodreads_import_service.dart';
+import '../../services/import/storygraph_import_service.dart';
+import '../../services/import/platform/import_native.dart'
+    if (dart.library.html) '../../services/import/platform/import_web.dart'
+    as import_platform;
 import '../../services/logging/error_logger.dart';
 import '../../providers/service_providers.dart';
 import '../../providers/auth_provider.dart';
@@ -178,11 +184,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Column(
                   children: [
                     _buildNavRow(
+                      icon: Icons.file_upload_rounded,
+                      label: 'Import from Goodreads/StoryGraph',
+                      subtitle: 'Import your reading history',
+                      onTap: () => _showImportBottomSheet(),
+                    ),
+                    _divider(),
+                    _buildNavRow(
                       icon: Icons.file_download_rounded,
                       label: 'Export Library Data',
-                      onTap: () {
-                        // Navigate to export screen
-                      },
+                      subtitle: 'Markdown, JSON, CSV, Obsidian, Notion',
+                      onTap: () => context.push('/export'),
                     ),
                     _divider(),
                     _buildNavRow(
@@ -639,7 +651,360 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
+
+  // ── Import ──────────────────────────────────────────────────────────────
+
+  void _showImportBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: AuroraColors.surfaceElevated,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AuroraColors.textTertiary.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Import Reading History',
+                style: TextStyle(
+                  color: AuroraColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Select the source of your CSV export file.',
+                style: TextStyle(
+                  color: AuroraColors.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildImportOption(
+                ctx: ctx,
+                icon: Icons.menu_book_rounded,
+                title: 'Goodreads',
+                subtitle: 'Import from Goodreads CSV export',
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _startImport(ImportSource.goodreads);
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildImportOption(
+                ctx: ctx,
+                icon: Icons.auto_stories_rounded,
+                title: 'StoryGraph',
+                subtitle: 'Import from StoryGraph CSV export',
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _startImport(ImportSource.storygraph);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImportOption({
+    required BuildContext ctx,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AuroraColors.surface.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFF252E27),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AuroraColors.auroraTeal.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: AuroraColors.auroraTeal, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: AuroraColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: AuroraColors.textTertiary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                color: AuroraColors.textTertiary, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _startImport(ImportSource source) async {
+    // Pick CSV file
+    final csvContent = await import_platform.pickCsvFile();
+    if (csvContent == null || !mounted) return;
+
+    // Show progress dialog
+    _showImportProgressDialog(source);
+
+    final repository = ref.read(bookRepositoryProvider.notifier);
+
+    ImportResult result;
+    try {
+      if (source == ImportSource.goodreads) {
+        final service = GoodreadsImportService(repository);
+        result = await service.importFromCsv(csvContent);
+      } else {
+        final service = StorygraphImportService(repository);
+        result = await service.importFromCsv(csvContent);
+      }
+    } catch (e, stack) {
+      ErrorLogger.instance.capture(e, stackTrace: stack, source: 'SettingsScreen._startImport');
+      if (mounted) {
+        Navigator.of(context).pop(); // dismiss progress dialog
+        _showImportError(e.toString());
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.of(context).pop(); // dismiss progress dialog
+    _showImportResults(result, source);
+  }
+
+  void _showImportProgressDialog(ImportSource source) {
+    final label = source == ImportSource.goodreads ? 'Goodreads' : 'StoryGraph';
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            const CircularProgressIndicator(
+              color: AuroraColors.auroraTeal,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Importing from $label...',
+              style: const TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'This may take a moment for large libraries.',
+              style: TextStyle(
+                color: AuroraColors.textTertiary,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showImportResults(ImportResult result, ImportSource source) {
+    final label = source == ImportSource.goodreads ? 'Goodreads' : 'StoryGraph';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        title: Row(
+          children: [
+            Icon(
+              result.errors == 0
+                  ? Icons.check_circle_rounded
+                  : Icons.info_rounded,
+              color: result.errors == 0
+                  ? AuroraColors.auroraGreen
+                  : AuroraColors.auroraTeal,
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Import Complete',
+              style: const TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Imported from $label:',
+              style: const TextStyle(
+                color: AuroraColors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildStatRow(
+                Icons.add_circle_outline_rounded,
+                AuroraColors.auroraGreen,
+                '${result.imported} books imported'),
+            if (result.skipped > 0) ...[
+              const SizedBox(height: 8),
+              _buildStatRow(
+                  Icons.skip_next_rounded,
+                  AuroraColors.auroraTeal,
+                  '${result.skipped} skipped (duplicates or empty)'),
+            ],
+            if (result.errors > 0) ...[
+              const SizedBox(height: 8),
+              _buildStatRow(
+                  Icons.warning_amber_rounded,
+                  AuroraColors.auroraWarm,
+                  '${result.errors} errors'),
+            ],
+            if (result.errorMessages.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 120),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AuroraColors.surface.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    result.errorMessages.take(10).join('\n'),
+                    style: const TextStyle(
+                      color: AuroraColors.textTertiary,
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(IconData icon, Color color, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: AuroraColors.textPrimary,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showImportError(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.surfaceElevated,
+        title: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded,
+                color: AuroraColors.auroraWarm, size: 24),
+            const SizedBox(width: 10),
+            const Text(
+              'Import Failed',
+              style: TextStyle(
+                color: AuroraColors.textPrimary,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: AuroraColors.textSecondary,
+            fontSize: 14,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+enum ImportSource { goodreads, storygraph }
 
 class _RunicKnotPainter extends CustomPainter {
   @override
