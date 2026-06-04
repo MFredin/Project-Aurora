@@ -15,77 +15,89 @@ import '../../core/theme/aurora_widgets.dart';
 
 const _audiobookKey = 'audiobook_progress';
 
-class AudiobookRepository extends FamilyNotifier<AudiobookProgress?, String> {
+class AudiobookRepository
+    extends Notifier<Map<String, AudiobookProgress>> {
   Box get _box => Hive.box('aurora_reader');
 
   @override
-  AudiobookProgress? build(String arg) {
-    final raw = _box.get('${_audiobookKey}_$arg');
-    if (raw == null) return null;
-    try {
-      return AudiobookProgress.fromJson(
-          jsonDecode(raw as String) as Map<String, dynamic>);
-    } catch (_) {
-      return null;
+  Map<String, AudiobookProgress> build() {
+    final result = <String, AudiobookProgress>{};
+    for (final key in _box.keys) {
+      final keyStr = key as String;
+      if (!keyStr.startsWith('${_audiobookKey}_')) continue;
+      final raw = _box.get(key);
+      if (raw == null) continue;
+      try {
+        final progress = AudiobookProgress.fromJson(
+            jsonDecode(raw as String) as Map<String, dynamic>);
+        result[progress.bookId] = progress;
+      } catch (_) {}
     }
+    return result;
   }
 
   void _persist(AudiobookProgress progress) {
-    _box.put('${_audiobookKey}_${progress.bookId}',
-        jsonEncode(progress.toJson()));
-    state = progress;
+    _box.put(
+        '${_audiobookKey}_${progress.bookId}', jsonEncode(progress.toJson()));
+    state = {...state, progress.bookId: progress};
   }
 
   void initProgress({
     required String bookId,
     required Duration totalDuration,
   }) {
-    final progress = AudiobookProgress(
+    _persist(AudiobookProgress(
       bookId: bookId,
       totalDuration: totalDuration,
       lastListened: DateTime.now(),
-    );
-    _persist(progress);
+    ));
   }
 
-  void updatePosition(Duration position) {
-    if (state == null) return;
-    _persist(state!.copyWith(
+  void updatePosition(String bookId, Duration position) {
+    final p = state[bookId];
+    if (p == null) return;
+    _persist(p.copyWith(
       currentPosition: position,
       lastListened: DateTime.now(),
     ));
   }
 
-  void updateChapter(int chapter) {
-    if (state == null) return;
-    _persist(state!.copyWith(currentChapter: chapter));
+  void updateChapter(String bookId, int chapter) {
+    final p = state[bookId];
+    if (p == null) return;
+    _persist(p.copyWith(currentChapter: chapter));
   }
 
-  void updatePlaybackSpeed(double speed) {
-    if (state == null) return;
-    _persist(state!.copyWith(playbackSpeed: speed));
+  void updatePlaybackSpeed(String bookId, double speed) {
+    final p = state[bookId];
+    if (p == null) return;
+    _persist(p.copyWith(playbackSpeed: speed));
   }
 
-  void updateTotalDuration(Duration duration) {
-    if (state == null) return;
-    _persist(state!.copyWith(totalDuration: duration));
+  void updateTotalDuration(String bookId, Duration duration) {
+    final p = state[bookId];
+    if (p == null) return;
+    _persist(p.copyWith(totalDuration: duration));
   }
 
-  void addNote(AudiobookNote note) {
-    if (state == null) return;
-    _persist(state!.copyWith(notes: [...state!.notes, note]));
+  void addNote(String bookId, AudiobookNote note) {
+    final p = state[bookId];
+    if (p == null) return;
+    _persist(p.copyWith(notes: [...p.notes, note]));
   }
 
-  void removeNote(String noteId) {
-    if (state == null) return;
-    _persist(state!.copyWith(
-      notes: state!.notes.where((n) => n.id != noteId).toList(),
+  void removeNote(String bookId, String noteId) {
+    final p = state[bookId];
+    if (p == null) return;
+    _persist(p.copyWith(
+      notes: p.notes.where((n) => n.id != noteId).toList(),
     ));
   }
 }
 
-final audiobookProgressProvider = NotifierProvider.family<AudiobookRepository,
-    AudiobookProgress?, String>(AudiobookRepository.new);
+final audiobookRepositoryProvider =
+    NotifierProvider<AudiobookRepository, Map<String, AudiobookProgress>>(
+        AudiobookRepository.new);
 
 // ── Screen ──────────────────────────────────────────────────────────────────
 
@@ -165,8 +177,8 @@ class _AudiobookTrackerScreenState
       seconds: seconds,
     );
     ref
-        .read(audiobookProgressProvider(widget.bookId).notifier)
-        .updatePosition(position);
+        .read(audiobookRepositoryProvider.notifier)
+        .updatePosition(widget.bookId, position);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Position updated')),
     );
@@ -176,10 +188,12 @@ class _AudiobookTrackerScreenState
     final noteText = _noteController.text.trim();
     if (noteText.isEmpty) return;
 
-    final progress = ref.read(audiobookProgressProvider(widget.bookId));
+    final progress =
+        ref.read(audiobookRepositoryProvider)[widget.bookId];
     final timestamp = progress?.currentPosition ?? Duration.zero;
 
-    ref.read(audiobookProgressProvider(widget.bookId).notifier).addNote(
+    ref.read(audiobookRepositoryProvider.notifier).addNote(
+          widget.bookId,
           AudiobookNote.create(
             timestamp: timestamp,
             note: noteText,
@@ -194,7 +208,7 @@ class _AudiobookTrackerScreenState
     final minutes = int.tryParse(_setupMinutesController.text) ?? 0;
     if (hours == 0 && minutes == 0) return;
 
-    ref.read(audiobookProgressProvider(widget.bookId).notifier).initProgress(
+    ref.read(audiobookRepositoryProvider.notifier).initProgress(
           bookId: widget.bookId,
           totalDuration: Duration(hours: hours, minutes: minutes),
         );
@@ -204,7 +218,8 @@ class _AudiobookTrackerScreenState
 
   @override
   Widget build(BuildContext context) {
-    final progress = ref.watch(audiobookProgressProvider(widget.bookId));
+    final progress = ref.watch(
+        audiobookRepositoryProvider.select((m) => m[widget.bookId]));
     final book = ref.watch(bookByIdProvider(widget.bookId));
     final bookTitle = book?.title ?? 'Audiobook';
 
@@ -556,10 +571,9 @@ class _AudiobookTrackerScreenState
                           color: AuroraColors.textSecondary, size: 20),
                       onPressed: progress.currentChapter > 1
                           ? () => ref
-                              .read(audiobookProgressProvider(widget.bookId)
-                                  .notifier)
+                              .read(audiobookRepositoryProvider.notifier)
                               .updateChapter(
-                                  progress.currentChapter - 1)
+                                  widget.bookId, progress.currentChapter - 1)
                           : null,
                     ),
                     Expanded(
@@ -577,9 +591,9 @@ class _AudiobookTrackerScreenState
                       icon: const Icon(Icons.add_rounded,
                           color: AuroraColors.textSecondary, size: 20),
                       onPressed: () => ref
-                          .read(audiobookProgressProvider(widget.bookId)
-                              .notifier)
-                          .updateChapter(progress.currentChapter + 1),
+                          .read(audiobookRepositoryProvider.notifier)
+                          .updateChapter(
+                              widget.bookId, progress.currentChapter + 1),
                     ),
                   ],
                 ),
@@ -633,9 +647,8 @@ class _AudiobookTrackerScreenState
                   onChanged: (v) {
                     if (v != null) {
                       ref
-                          .read(audiobookProgressProvider(widget.bookId)
-                              .notifier)
-                          .updatePlaybackSpeed(v);
+                          .read(audiobookRepositoryProvider.notifier)
+                          .updatePlaybackSpeed(widget.bookId, v);
                     }
                   },
                 ),
@@ -819,9 +832,8 @@ class _AudiobookTrackerScreenState
                     ),
                     GestureDetector(
                       onTap: () => ref
-                          .read(audiobookProgressProvider(widget.bookId)
-                              .notifier)
-                          .removeNote(note.id),
+                          .read(audiobookRepositoryProvider.notifier)
+                          .removeNote(widget.bookId, note.id),
                       child: const Icon(Icons.close_rounded,
                           color: AuroraColors.textTertiary, size: 16),
                     ),
