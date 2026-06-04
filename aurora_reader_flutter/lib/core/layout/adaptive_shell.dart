@@ -12,6 +12,7 @@ class AdaptiveShell extends StatelessWidget {
     (icon: Icons.library_books_outlined, activeIcon: Icons.library_books, label: 'Library', path: '/library'),
     (icon: Icons.insights_outlined, activeIcon: Icons.insights, label: 'Activity', path: '/activity'),
     (icon: Icons.hub_outlined, activeIcon: Icons.hub, label: 'Knowledge', path: '/knowledge'),
+    (icon: Icons.people_outline, activeIcon: Icons.people, label: 'Social', path: '/social'),
     (icon: Icons.cloud_outlined, activeIcon: Icons.cloud, label: 'Cloud', path: '/cloud'),
     (icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings', path: '/settings'),
   ];
@@ -20,8 +21,9 @@ class AdaptiveShell extends StatelessWidget {
     final location = GoRouterState.of(context).uri.toString();
     if (location.startsWith('/activity')) return 1;
     if (location.startsWith('/knowledge')) return 2;
-    if (location.startsWith('/cloud')) return 3;
-    if (location.startsWith('/settings')) return 4;
+    if (location.startsWith('/social')) return 3;
+    if (location.startsWith('/cloud')) return 4;
+    if (location.startsWith('/settings')) return 5;
     return 0;
   }
 
