@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 import '../../core/data/social_models.dart';
@@ -121,8 +122,7 @@ class _SocialFeedScreenState extends ConsumerState<SocialFeedScreen> {
               icon: const Icon(Icons.group_rounded,
                   color: AuroraColors.textSecondary),
               tooltip: 'Book Clubs',
-              onPressed: () =>
-                  Navigator.of(context).pushNamed('/clubs'),
+              onPressed: () => context.push('/clubs'),
             ),
           ],
         ),
@@ -384,7 +384,7 @@ class _FeedItemCardState extends State<_FeedItemCard> {
                 ),
                 child: Text(
                   item.detail!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AuroraColors.textSecondary,
                     fontSize: 13,
                     height: 1.5,

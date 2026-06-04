@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
-import '../../core/data/social_models.dart';
 import '../../core/data/social_repository.dart';
 
 /// Mock discover data
