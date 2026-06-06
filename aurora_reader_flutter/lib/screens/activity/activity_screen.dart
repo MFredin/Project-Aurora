@@ -10,63 +10,11 @@ import '../../core/layout/responsive.dart';
 import '../../core/theme/aurora_theme.dart';
 import '../../core/theme/aurora_widgets.dart';
 
-/// Mock data for activity screen
-class _MockStats {
-  static const int longestStreak = 34;
-  static const int pagesReadToday = 47;
-  static const int dailyGoalPages = 60;
-  static const int totalMinutesToday = 38;
-
-  static const weeklyMinutes = [45, 62, 30, 55, 48, 72, 38];
-  static const weekDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-  static const monthlyBooks = [3, 2, 4, 1, 3, 2, 2, 3, 4, 1, 2, 3];
-  static const monthLabels = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-
-  // Calendar heatmap data (last 28 days, minutes read)
-  static final heatmapData = List.generate(28, (i) {
-    final rng = Random(i * 7 + 3);
-    if (rng.nextDouble() < 0.15) return 0;
-    return (rng.nextDouble() * 90 + 10).toInt();
-  });
-
-  static const recentSessions = <Map<String, dynamic>>[
-    {
-      'book': 'Dune',
-      'date': 'Today',
-      'duration': 38,
-      'pages': 47,
-    },
-    {
-      'book': 'The Left Hand of Darkness',
-      'date': 'Yesterday',
-      'duration': 52,
-      'pages': 34,
-    },
-    {
-      'book': 'Dune',
-      'date': '2 days ago',
-      'duration': 45,
-      'pages': 55,
-    },
-    {
-      'book': 'Snow Crash',
-      'date': '3 days ago',
-      'duration': 30,
-      'pages': 28,
-    },
-    {
-      'book': 'Dune',
-      'date': '4 days ago',
-      'duration': 62,
-      'pages': 72,
-    },
-  ];
-
-}
+const _weekDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const _monthLabels = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
 
 class ActivityScreen extends ConsumerStatefulWidget {
   const ActivityScreen({super.key});
@@ -81,9 +29,11 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
   @override
   Widget build(BuildContext context) {
     final books = ref.watch(bookRepositoryProvider);
+    final sessions = ref.watch(readingSessionsProvider);
     final currentStreak = ref.read(bookRepositoryProvider.notifier).getCurrentStreak();
     final currentYear = DateTime.now().year;
     final goal = ref.read(bookRepositoryProvider.notifier).getGoal(currentYear);
+    final today = DateTime.now();
 
     // Compute reading stats from real data
     final totalBooksRead = books.where((b) => b.readingStatus == ReadingStatus.read).length;
@@ -93,6 +43,20 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
         b.finishDate!.year == currentYear).length;
     final totalReadingSeconds = books.fold<int>(
         0, (sum, b) => sum + b.progress.totalReadingSeconds);
+
+    // Session-derived stats
+    final todayMinutes = sessions
+        .where((s) => _isSameDay(s.startTime, today))
+        .fold(0, (sum, s) => sum + s.durationSeconds ~/ 60);
+
+    final longestStreak = _computeLongestStreak(sessions);
+
+    final weeklyMinutes = _computeWeeklyMinutes(sessions, today);
+    final monthlyBooksData = _computeMonthlyBooks(books, currentYear);
+    final heatmapData = _computeHeatmap(sessions, today);
+
+    final recentSessions = sessions.toList()
+      ..sort((a, b) => b.startTime.compareTo(a.startTime));
 
     return AuroraBackground(
       child: Scaffold(
@@ -143,20 +107,22 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                 ),
               ),
 
-              // Streak + Today summary cards (existing)
-              SliverToBoxAdapter(child: _buildStreakSection(currentStreak)),
+              // Streak + Today summary cards
+              SliverToBoxAdapter(
+                  child: _buildStreakSection(currentStreak, longestStreak, todayMinutes)),
 
-              // Daily reading goal ring
-              SliverToBoxAdapter(child: _buildDailyGoal()),
+              // Today's reading goal ring (real data)
+              SliverToBoxAdapter(child: _buildTodayReading(todayMinutes)),
 
               // Reading time chart
-              SliverToBoxAdapter(child: _buildReadingChart()),
+              SliverToBoxAdapter(
+                  child: _buildReadingChart(weeklyMinutes, monthlyBooksData)),
 
               // Calendar heatmap
-              SliverToBoxAdapter(child: _buildHeatmap()),
+              SliverToBoxAdapter(child: _buildHeatmap(heatmapData)),
 
               // Recent sessions
-              SliverToBoxAdapter(child: _buildRecentSessions()),
+              SliverToBoxAdapter(child: _buildRecentSessions(recentSessions)),
 
               // Achievement badges
               SliverToBoxAdapter(child: _buildAchievements()),
@@ -786,7 +752,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
 
   // ── EXISTING: Streak + Today summary (updated to use live streak) ──
 
-  Widget _buildStreakSection(int currentStreak) {
+  Widget _buildStreakSection(int currentStreak, int longestStreak, int todayMinutes) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Row(
@@ -819,7 +785,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Longest: ${_MockStats.longestStreak} days',
+                    'Longest: $longestStreak days',
                     style: const TextStyle(
                       color: AuroraColors.textTertiary,
                       fontSize: 11,
@@ -887,18 +853,18 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                             color: AuroraColors.auroraTeal, size: 20),
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${_MockStats.totalMinutesToday} min',
-                            style: TextStyle(
+                            '$todayMinutes min',
+                            style: const TextStyle(
                               color: AuroraColors.textPrimary,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
+                          const Text(
                             'Read today',
                             style: TextStyle(
                               color: AuroraColors.textTertiary,
@@ -918,37 +884,32 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     );
   }
 
-  Widget _buildDailyGoal() {
-    const progress =
-        _MockStats.pagesReadToday / _MockStats.dailyGoalPages;
+  Widget _buildTodayReading(int todayMinutes) {
+    const goalMinutes = 30;
+    final progress = (todayMinutes / goalMinutes).clamp(0.0, 1.0);
+    final goalMet = todayMinutes >= goalMinutes;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: AuroraCard(
         child: Row(
           children: [
-            // Progress ring
             SizedBox(
               width: 80,
               height: 80,
               child: CustomPaint(
                 painter: _GoalRingPainter(
-                  progress: progress.clamp(0.0, 1.0),
-                  color: AuroraColors.auroraTeal,
+                  progress: progress,
+                  color: goalMet ? AuroraColors.auroraGreen : AuroraColors.auroraTeal,
                 ),
                 child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${(progress * 100).toInt()}%',
-                        style: const TextStyle(
-                          color: AuroraColors.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    '${todayMinutes}m',
+                    style: const TextStyle(
+                      color: AuroraColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -959,7 +920,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Daily Reading Goal',
+                    "Today's Reading",
                     style: TextStyle(
                       color: AuroraColors.textPrimary,
                       fontSize: 16,
@@ -968,17 +929,21 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${_MockStats.pagesReadToday} of ${_MockStats.dailyGoalPages} pages',
+                    '$todayMinutes of $goalMinutes min',
                     style: const TextStyle(
-                      color: AuroraColors.textSecondary,
-                      fontSize: 14,
-                    ),
+                        color: AuroraColors.textSecondary, fontSize: 14),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${_MockStats.dailyGoalPages - _MockStats.pagesReadToday} pages to go',
-                    style: const TextStyle(
-                      color: AuroraColors.auroraTeal,
+                    todayMinutes == 0
+                        ? 'Open a book to start!'
+                        : goalMet
+                            ? 'Daily goal reached!'
+                            : '${goalMinutes - todayMinutes} min to go',
+                    style: TextStyle(
+                      color: goalMet
+                          ? AuroraColors.auroraGreen
+                          : AuroraColors.auroraTeal,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -992,7 +957,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     );
   }
 
-  Widget _buildReadingChart() {
+  Widget _buildReadingChart(List<int> weeklyMinutes, List<int> monthlyBooksData) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: AuroraCard(
@@ -1026,8 +991,8 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             SizedBox(
               height: 180,
               child: _chartPeriod == 'Week'
-                  ? _buildWeeklyBarChart()
-                  : _buildMonthlyLineChart(),
+                  ? _buildWeeklyBarChart(weeklyMinutes)
+                  : _buildMonthlyLineChart(monthlyBooksData),
             ),
           ],
         ),
@@ -1035,11 +1000,15 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     );
   }
 
-  Widget _buildWeeklyBarChart() {
+  Widget _buildWeeklyBarChart(List<int> weeklyMinutes) {
+    final maxY = weeklyMinutes.isEmpty
+        ? 60.0
+        : (weeklyMinutes.reduce(max) * 1.2).clamp(20.0, double.infinity);
+
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: 80,
+        maxY: maxY,
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
             getTooltipColor: (_) => AuroraColors.surfaceElevated,
@@ -1062,28 +1031,26 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
               showTitles: true,
               getTitlesWidget: (value, meta) {
                 final index = value.toInt();
-                if (index < 0 || index >= _MockStats.weekDayLabels.length) {
+                if (index < 0 || index >= _weekDayLabels.length) {
                   return const SizedBox.shrink();
                 }
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    _MockStats.weekDayLabels[index],
+                    _weekDayLabels[index],
                     style: const TextStyle(
-                      color: AuroraColors.textTertiary,
-                      fontSize: 11,
-                    ),
+                        color: AuroraColors.textTertiary, fontSize: 11),
                   ),
                 );
               },
             ),
           ),
-          leftTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
+          leftTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(show: false),
         gridData: const FlGridData(show: false),
@@ -1092,10 +1059,10 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             x: i,
             barRods: [
               BarChartRodData(
-                toY: _MockStats.weeklyMinutes[i].toDouble(),
+                toY: (i < weeklyMinutes.length ? weeklyMinutes[i] : 0).toDouble(),
                 width: 20,
-                borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(6)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(6)),
                 gradient: const LinearGradient(
                   colors: [AuroraColors.auroraTeal, AuroraColors.auroraGreen],
                   begin: Alignment.bottomCenter,
@@ -1109,11 +1076,15 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     );
   }
 
-  Widget _buildMonthlyLineChart() {
+  Widget _buildMonthlyLineChart(List<int> monthlyBooksData) {
+    final maxY = monthlyBooksData.isEmpty
+        ? 5.0
+        : (monthlyBooksData.reduce(max) * 1.3).clamp(2.0, double.infinity);
+
     return LineChart(
       LineChartData(
         minY: 0,
-        maxY: 5,
+        maxY: maxY,
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -1121,57 +1092,53 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
               interval: 2,
               getTitlesWidget: (value, meta) {
                 final i = value.toInt();
-                if (i < 0 || i >= _MockStats.monthLabels.length) {
+                if (i < 0 || i >= _monthLabels.length) {
                   return const SizedBox.shrink();
                 }
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    _MockStats.monthLabels[i],
+                    _monthLabels[i],
                     style: const TextStyle(
-                      color: AuroraColors.textTertiary,
-                      fontSize: 11,
-                    ),
+                        color: AuroraColors.textTertiary, fontSize: 11),
                   ),
                 );
               },
             ),
           ),
-          leftTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
+          leftTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(show: false),
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) => FlLine(
-            color: Colors.white.withOpacity(0.04),
-            strokeWidth: 1,
-          ),
+          getDrawingHorizontalLine: (value) =>
+              FlLine(color: Colors.white.withOpacity(0.04), strokeWidth: 1),
         ),
         lineBarsData: [
           LineChartBarData(
             spots: List.generate(12, (i) {
               return FlSpot(
-                  i.toDouble(), _MockStats.monthlyBooks[i].toDouble());
+                  i.toDouble(),
+                  (i < monthlyBooksData.length ? monthlyBooksData[i] : 0)
+                      .toDouble());
             }),
             gradient: AuroraColors.secondaryGradient,
             barWidth: 2.5,
             isCurved: true,
             dotData: FlDotData(
               show: true,
-              getDotPainter: (spot, _, __, ___) {
-                return FlDotCirclePainter(
-                  radius: 3,
-                  color: AuroraColors.auroraPurple,
-                  strokeWidth: 1.5,
-                  strokeColor: Colors.white,
-                );
-              },
+              getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                radius: 3,
+                color: AuroraColors.auroraPurple,
+                strokeWidth: 1.5,
+                strokeColor: Colors.white,
+              ),
             ),
             belowBarData: BarAreaData(
               show: true,
@@ -1190,7 +1157,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     );
   }
 
-  Widget _buildHeatmap() {
+  Widget _buildHeatmap(List<int> heatmapData) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: AuroraCard(
@@ -1214,14 +1181,13 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // 4 rows x 7 cols
             Column(
               children: List.generate(4, (row) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(7, (col) {
                     final idx = row * 7 + col;
-                    final minutes = _MockStats.heatmapData[idx];
+                    final minutes = idx < heatmapData.length ? heatmapData[idx] : 0;
                     final intensity = (minutes / 90.0).clamp(0.0, 1.0);
                     return Container(
                       width: 36,
@@ -1286,7 +1252,9 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     );
   }
 
-  Widget _buildRecentSessions() {
+  Widget _buildRecentSessions(List<ReadingSessionModel> sessions) {
+    final recent = sessions.take(5).toList();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Column(
@@ -1303,72 +1271,100 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
               ),
             ),
           ),
-          ...(_MockStats.recentSessions).map((session) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: AuroraCard(
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        gradient: AuroraColors.coverGradient(
-                            session['book'] as String),
-                        borderRadius: BorderRadius.circular(8),
+          if (recent.isEmpty)
+            AuroraCard(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.menu_book_outlined,
+                          color: AuroraColors.textTertiary, size: 32),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'No reading sessions yet',
+                        style: TextStyle(
+                            color: AuroraColors.textSecondary, fontSize: 14),
                       ),
-                      child: const Icon(Icons.auto_stories_rounded,
-                          color: Colors.white70, size: 18),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Open a book and start reading to track your sessions here.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: AuroraColors.textTertiary, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            ...recent.map((session) {
+              final durationMinutes = session.durationSeconds ~/ 60;
+              final dateLabel = _sessionDateLabel(session.startTime);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: AuroraCard(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          gradient:
+                              AuroraColors.coverGradient(session.bookTitle),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.auto_stories_rounded,
+                            color: Colors.white70, size: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              session.bookTitle,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AuroraColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              dateLabel,
+                              style: const TextStyle(
+                                  color: AuroraColors.textTertiary,
+                                  fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            session['book'] as String,
+                            '$durationMinutes min',
                             style: const TextStyle(
-                              color: AuroraColors.textPrimary,
+                              color: AuroraColors.auroraTeal,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                             ),
                           ),
                           Text(
-                            session['date'] as String,
+                            '${session.pagesRead} pages',
                             style: const TextStyle(
-                              color: AuroraColors.textTertiary,
-                              fontSize: 12,
-                            ),
+                                color: AuroraColors.textTertiary, fontSize: 12),
                           ),
                         ],
                       ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${session['duration']} min',
-                          style: const TextStyle(
-                            color: AuroraColors.auroraTeal,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          '${session['pages']} pages',
-                          style: const TextStyle(
-                            color: AuroraColors.textTertiary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
         ],
       ),
     );
@@ -1506,6 +1502,70 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
         ],
       ),
     );
+  }
+
+  // ── Session data helpers ────────────────────────────────────────────
+
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  static int _computeLongestStreak(List<ReadingSessionModel> sessions) {
+    if (sessions.isEmpty) return 0;
+    final days = sessions
+        .map((s) => DateTime(s.startTime.year, s.startTime.month, s.startTime.day))
+        .toSet()
+        .toList()
+      ..sort();
+    var longest = 1, current = 1;
+    for (var i = 1; i < days.length; i++) {
+      if (days[i].difference(days[i - 1]).inDays == 1) {
+        current++;
+        if (current > longest) longest = current;
+      } else {
+        current = 1;
+      }
+    }
+    return longest;
+  }
+
+  static List<int> _computeWeeklyMinutes(
+      List<ReadingSessionModel> sessions, DateTime today) {
+    final monday = today.subtract(Duration(days: today.weekday - 1));
+    return List.generate(7, (i) {
+      final day = monday.add(Duration(days: i));
+      return sessions
+          .where((s) => _isSameDay(s.startTime, day))
+          .fold(0, (sum, s) => sum + s.durationSeconds ~/ 60);
+    });
+  }
+
+  static List<int> _computeMonthlyBooks(List<BookModel> books, int year) {
+    return List.generate(12, (month) {
+      return books
+          .where((b) =>
+              b.readingStatus == ReadingStatus.read &&
+              b.finishDate != null &&
+              b.finishDate!.year == year &&
+              b.finishDate!.month == month + 1)
+          .length;
+    });
+  }
+
+  static List<int> _computeHeatmap(
+      List<ReadingSessionModel> sessions, DateTime today) {
+    return List.generate(28, (i) {
+      final day = today.subtract(Duration(days: 27 - i));
+      return sessions
+          .where((s) => _isSameDay(s.startTime, day))
+          .fold(0, (sum, s) => sum + s.durationSeconds ~/ 60);
+    });
+  }
+
+  static String _sessionDateLabel(DateTime dt) {
+    final diff = DateTime.now().difference(dt).inDays;
+    if (diff == 0) return 'Today';
+    if (diff == 1) return 'Yesterday';
+    return '$diff days ago';
   }
 }
 

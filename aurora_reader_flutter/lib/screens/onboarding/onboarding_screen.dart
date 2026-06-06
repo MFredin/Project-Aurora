@@ -20,31 +20,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.auto_awesome_rounded,
       title: 'Welcome to Edda',
       subtitle:
-          'Read in the shadows of the stave — your mystical ebook companion',
+          'Your complete reading life in one place — read, track, capture, and preserve what matters.',
       gradient: AuroraColors.accentGradient,
     ),
     _OnboardingPage(
       icon: Icons.menu_book_rounded,
-      title: '11 Format Support',
+      title: '11 Formats Supported',
       subtitle:
-          'Read EPUB, PDF, TXT, MOBI, FB2, CBZ, CBR, RTF, DJVU, AZW3, and DOCX files',
+          'EPUB, PDF, TXT, MOBI, FB2, CBZ, CBR, RTF, DJVU, AZW3, and DOCX — your books, your formats.',
       gradient: AuroraColors.secondaryGradient,
     ),
     _OnboardingPage(
       icon: Icons.insights_rounded,
-      title: 'Track Your Progress',
+      title: 'Track Your Reading Life',
       subtitle:
-          'Reading streaks, daily goals, achievements, and beautiful statistics',
+          'Streaks, goals, highlights, vocabulary, and achievements — everything grows as you read.',
       gradient: AuroraColors.warmGradient,
     ),
     _OnboardingPage(
       icon: Icons.psychology_rounded,
       title: 'AI Reading Companion',
       subtitle:
-          'Ask questions about your books, get summaries, and build your knowledge graph',
+          'Ask questions about your books, get summaries, build character maps, and review vocabulary.',
       gradient: LinearGradient(
         colors: [AuroraColors.auroraPurple, AuroraColors.auroraPink],
       ),
+    ),
+    _OnboardingPage(
+      icon: Icons.download_rounded,
+      title: 'Import Your Library',
+      subtitle:
+          'Add EPUB or PDF files directly, or import your reading history from Goodreads, StoryGraph, or Kindle.',
+      gradient: AuroraColors.secondaryGradient,
     ),
   ];
 
@@ -173,10 +180,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       width: double.infinity,
                       child: AuroraButton(
                         label: _currentPage == _pages.length - 1
-                            ? 'Get Started'
+                            ? 'Import Books'
                             : 'Next',
                         icon: _currentPage == _pages.length - 1
-                            ? Icons.arrow_forward_rounded
+                            ? Icons.add_rounded
                             : null,
                         onPressed: () {
                           if (_currentPage == _pages.length - 1) {
@@ -190,6 +197,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         },
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    if (_currentPage == _pages.length - 1)
+                      TextButton(
+                        onPressed: () => context.go('/library'),
+                        child: const Text(
+                          'Explore first',
+                          style: TextStyle(
+                            color: AuroraColors.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

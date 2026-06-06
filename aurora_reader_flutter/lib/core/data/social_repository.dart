@@ -107,12 +107,7 @@ class SocialRepository extends Notifier<SocialData> {
   @override
   SocialData build() {
     final raw = _box.get(_socialKey);
-    if (raw == null) {
-      // Generate demo data on first access
-      final demo = generateDemoData();
-      _box.put(_socialKey, jsonEncode(demo.toJson()));
-      return demo;
-    }
+    if (raw == null) return const SocialData();
     try {
       final decoded = jsonDecode(raw as String) as Map<String, dynamic>;
       return SocialData.fromJson(decoded);
