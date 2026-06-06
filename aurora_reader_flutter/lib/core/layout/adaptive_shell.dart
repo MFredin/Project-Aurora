@@ -8,22 +8,24 @@ class AdaptiveShell extends StatelessWidget {
 
   const AdaptiveShell({super.key, required this.child});
 
+  // Keep the primary navigation focused on the v1 reading-to-knowledge loop.
+  // Social and clubs remain routable for internal testing, but are intentionally
+  // removed from the default shell until the backend/community experience is
+  // production-ready.
   static const _destinations = [
     (icon: Icons.library_books_outlined, activeIcon: Icons.library_books, label: 'Library', path: '/library'),
-    (icon: Icons.insights_outlined, activeIcon: Icons.insights, label: 'Activity', path: '/activity'),
     (icon: Icons.hub_outlined, activeIcon: Icons.hub, label: 'Knowledge', path: '/knowledge'),
-    (icon: Icons.people_outline, activeIcon: Icons.people, label: 'Social', path: '/social'),
-    (icon: Icons.cloud_outlined, activeIcon: Icons.cloud, label: 'Cloud', path: '/cloud'),
+    (icon: Icons.insights_outlined, activeIcon: Icons.insights, label: 'Activity', path: '/activity'),
+    (icon: Icons.cloud_outlined, activeIcon: Icons.cloud, label: 'Import', path: '/cloud'),
     (icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings', path: '/settings'),
   ];
 
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
-    if (location.startsWith('/activity')) return 1;
-    if (location.startsWith('/knowledge')) return 2;
-    if (location.startsWith('/social')) return 3;
-    if (location.startsWith('/cloud')) return 4;
-    if (location.startsWith('/settings')) return 5;
+    if (location.startsWith('/knowledge')) return 1;
+    if (location.startsWith('/activity')) return 2;
+    if (location.startsWith('/cloud')) return 3;
+    if (location.startsWith('/settings')) return 4;
     return 0;
   }
 
@@ -106,10 +108,10 @@ class AdaptiveShell extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
               unselectedIconTheme: const IconThemeData(
-                color: AuroraColors.textTertiary,
+                color: AuroraColors.textSecondary,
               ),
               unselectedLabelTextStyle: const TextStyle(
-                color: AuroraColors.textTertiary,
+                color: AuroraColors.textSecondary,
               ),
               indicatorColor: AuroraColors.auroraTeal.withOpacity(0.1),
               onDestinationSelected: (index) =>
@@ -181,8 +183,8 @@ class _NavItemState extends State<_NavItem> {
                   color: widget.isActive
                       ? AuroraColors.auroraTeal
                       : _hovering
-                          ? AuroraColors.textSecondary
-                          : AuroraColors.textTertiary,
+                          ? AuroraColors.textPrimary
+                          : AuroraColors.textSecondary,
                   size: 24,
                 ),
               ),
@@ -192,7 +194,7 @@ class _NavItemState extends State<_NavItem> {
                 style: TextStyle(
                   color: widget.isActive
                       ? AuroraColors.auroraTeal
-                      : AuroraColors.textTertiary,
+                      : AuroraColors.textSecondary,
                   fontSize: 10,
                   fontWeight: widget.isActive ? FontWeight.w600 : FontWeight.normal,
                 ),
