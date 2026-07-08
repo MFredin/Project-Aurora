@@ -12,7 +12,7 @@ export function ProjectDetail() {
 
   if (!project) {
     return (
-      <section className="mx-auto max-w-3xl px-6 py-24 text-center">
+      <section className="mx-auto max-w-2xl px-6 py-24 text-center">
         <p className="text-ink-dim">No project found at "{slug}".</p>
         <Link to="/projects" className="mt-4 inline-block text-copper hover:underline">
           &larr; Back to projects
@@ -22,7 +22,7 @@ export function ProjectDetail() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-6 py-20">
+    <section className="mx-auto max-w-2xl px-6 py-24">
       <Link to="/projects" className="text-sm text-ink-dim hover:text-ink">
         &larr; All projects
       </Link>
@@ -48,7 +48,7 @@ export function ProjectDetail() {
         ))}
       </div>
 
-      <p className="mt-10 max-w-2xl text-base leading-relaxed text-ink-dim">
+      <p className="mt-10 text-base leading-relaxed text-ink-dim">
         {project.description}
       </p>
 
