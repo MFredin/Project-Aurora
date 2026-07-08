@@ -11,9 +11,7 @@ export function Home() {
       <section className="relative overflow-hidden">
         <div className="ambient-glow" />
         <div className="relative mx-auto flex min-h-[70vh] max-w-5xl flex-col justify-center gap-6 px-6 py-24">
-          <p className="text-xs font-medium uppercase tracking-[0.3em] text-ink-faint">
-            {site.role}
-          </p>
+          <p className="eyebrow text-ink-faint">{site.role}</p>
           <h1 className="max-w-3xl text-5xl font-extrabold leading-[1.05] tracking-tight text-gradient sm:text-6xl md:text-7xl">
             {site.name}
           </h1>
@@ -51,7 +49,7 @@ export function Home() {
               See all &rarr;
             </Link>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,min(360px,100%)))] gap-6">
             {recent.map((p) => (
               <ProjectCard key={p.slug} project={p} />
             ))}

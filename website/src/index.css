@@ -66,6 +66,14 @@
   );
 }
 
+@utility eyebrow {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
 /* Soft ambient glow used once, behind the hero */
 @utility ambient-glow {
   position: absolute;

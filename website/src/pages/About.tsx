@@ -4,9 +4,7 @@ import { site } from "@/data/site";
 export function About() {
   return (
     <section className="mx-auto max-w-2xl px-6 py-24">
-      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-ink-faint">
-        About
-      </p>
+      <p className="eyebrow text-ink-faint">About</p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
         {site.name}
       </h1>
