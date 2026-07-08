@@ -19,7 +19,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  # Built independently from the website so a broken Flutter build never
+  # blocks the website deploy (or vice versa). Failures here are swallowed
+  # with continue-on-error — the artifact upload is skipped if the build
+  # didn't produce output, and the deploy job proceeds without it.
+  build-flutter:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,48 +38,82 @@ jobs:
         run: flutter config --enable-web
 
       - name: Install dependencies
+        id: pub_get
         working-directory: aurora_reader_flutter
         run: flutter pub get
+        continue-on-error: true
 
       - name: Build for web
+        id: build_web
+        if: steps.pub_get.outcome == 'success'
         working-directory: aurora_reader_flutter
         run: |
           flutter build web \
             --release \
             --base-href "/Project-Aurora/" \
             --web-renderer canvaskit
+        continue-on-error: true
+
+      - name: Upload Flutter artifact
+        if: steps.build_web.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-web
+          path: aurora_reader_flutter/build/web
+          retention-days: 1
+
+  build-website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Install website dependencies
+      - name: Install dependencies
         working-directory: website
         run: npm ci
 
-      - name: Build website
+      - name: Build
         working-directory: website
         run: npm run build
 
-      - name: Combine build output
-        run: |
-          mkdir -p combined
-          cp -r aurora_reader_flutter/build/web/. combined/
-          mkdir -p combined/site
-          cp -r website/dist/. combined/site/
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          path: combined
+          name: website-dist
+          path: website/dist
+          retention-days: 1
 
   deploy:
-    needs: build
+    needs: [build-flutter, build-website]
+    # Deploy whenever the website built, regardless of the Flutter job's
+    # outcome — worst case the reader app is briefly missing from the
+    # root while the website still ships.
+    if: ${{ !cancelled() && needs.build-website.result == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Download website artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: website-dist
+          path: combined/site
+
+      - name: Download Flutter artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: flutter-web
+          path: combined
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: combined
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
