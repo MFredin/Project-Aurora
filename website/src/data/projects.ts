@@ -15,16 +15,18 @@ export interface Project {
 // page at /projects/:slug automatically.
 export const projects: Project[] = [
   {
-    slug: "aurora-reader",
-    title: "AuroraReader",
-    tagline: "A cross-platform ebook reader with a Northern Lights theme.",
+    slug: "edda",
+    title: "Edda",
+    tagline: "Mystical ebook reader — read in the shadows of the stave.",
     description:
-      "A calm, cross-platform reader for EPUB and PDF books, built with " +
-      "Flutter and Swift. Handles book import and reading progress, " +
-      "ambient soundscapes and text-to-speech while you read, and syncs " +
-      "your library across devices. Runs on iOS, Android, Windows, and " +
-      "the web from a single codebase.",
-    tech: ["Flutter", "Dart", "Swift", "SwiftUI", "Riverpod", "SQLite"],
+      "Edda is a mystical ebook reader for EPUB and PDF, built on Flutter " +
+      "with Riverpod and Firebase. Beyond the reading experience, it " +
+      "includes a reading journal for ratings, moods, and pace; social " +
+      "features and book clubs; and a multi-provider AI companion across " +
+      "OpenAI, Gemini, and Anthropic. It imports libraries from Goodreads, " +
+      "StoryGraph, and Kindle, exports highlights to Obsidian and Notion, " +
+      "and keeps audiobook playback in sync with your place in the text.",
+    tech: ["Flutter", "Dart", "Riverpod", "Firebase", "Drift", "Hive"],
     status: "in-development",
   },
 ];

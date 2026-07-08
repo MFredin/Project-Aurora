@@ -7,6 +7,36 @@ export interface ChangelogEntry {
 // Newest first. Add an entry here whenever something worth noting ships.
 export const changelog: ChangelogEntry[] = [
   {
+    date: "2026-06-06",
+    title: "A pass for trust before beta",
+    body: "Went through the whole app addressing trust and clarity issues ahead of a public beta — tightening up permissions, error states, and anything that could confuse a first-time reader.",
+  },
+  {
+    date: "2026-06-04",
+    title: "The full Tier 1–3 feature set",
+    body: "Rounded out Edda's core feature set: a reading journal with ratings, mood tags, and pace tracking, social features and book clubs, cross-format import from Goodreads, StoryGraph, and Kindle, and highlight export to Obsidian and Notion.",
+  },
+  {
+    date: "2026-05-30",
+    title: "Signed in, backed up",
+    body: "Wired up Firebase authentication and Google Drive-backed cloud storage, so an account and a library can now follow you across devices.",
+  },
+  {
+    date: "2026-05-30",
+    title: "Choose your AI companion",
+    body: "Added a multi-provider AI reading companion, with a choice of OpenAI, Gemini, or Anthropic models for discussing and exploring what you're reading.",
+  },
+  {
+    date: "2026-05-29",
+    title: "Stave & Shadow",
+    body: "Replaced the Runestone look with a new Stave & Shadow aesthetic and carried it across the whole app, then iterated the mark itself — from a stave arch, to a runic knot 'E', to a bind rune combining Ehwaz and Dagaz — before finally dropping the wordmark from the library header in favor of the mark alone.",
+  },
+  {
+    date: "2026-05-29",
+    title: "Aurora Reader becomes Edda",
+    body: "Renamed the app from Aurora Reader to Edda, with new logo and icons — the first step in a broader rebrand toward a more mystical, Norse-inflected identity.",
+  },
+  {
     date: "2026-05-29",
     title: "Progress that survives a refresh",
     body: "Added Hive-backed persistence for AuroraReader's web build — books, reading progress, and sessions now survive a page refresh instead of resetting.",

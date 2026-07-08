@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 /*
- * Palette: a dark, warm canvas (near-black with a hint of green) with a
+ * Palette: a dark, near-black canvas with a green cast, matched to Edda's
+ * real in-app colors (#0D1210 background, #B87944 bronze accent), with a
  * copper -> clay -> moss gradient as the single accent. One gradient, used
  * sparingly, is the whole "personality" of the site.
  */
 @theme {
-  --color-bg: #12140f;
-  --color-surface: #1a1d15;
-  --color-surface-hi: #23271c;
-  --color-line: rgba(238, 232, 220, 0.09);
+  --color-bg: #0d1210;
+  --color-surface: #141c19;
+  --color-surface-hi: #1b2622;
+  --color-line: rgba(238, 232, 220, 0.1);
 
   --color-ink: #eee8dc;
   --color-ink-dim: #a9a396;
   --color-ink-faint: #6b675c;
 
-  --color-copper: #f2b45a;
-  --color-clay: #e08a6b;
-  --color-moss: #4f9e78;
+  --color-copper: #b87944;
+  --color-clay: #c26647;
+  --color-moss: #438966;
 
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -83,12 +84,12 @@
   z-index: 0;
   background: radial-gradient(
     60% 60% at 30% 20%,
-    color-mix(in oklab, var(--color-copper) 16%, transparent),
+    color-mix(in oklab, var(--color-copper) 20%, transparent),
     transparent 70%
   ),
   radial-gradient(
     50% 50% at 80% 40%,
-    color-mix(in oklab, var(--color-moss) 14%, transparent),
+    color-mix(in oklab, var(--color-moss) 17%, transparent),
     transparent 70%
   );
 }
