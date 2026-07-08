@@ -4,6 +4,7 @@ import { site } from "@/data/site";
 const links = [
   { to: "/", label: "Home", end: true },
   { to: "/projects", label: "Projects" },
+  { to: "/log", label: "Log" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ];
