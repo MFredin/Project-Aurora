@@ -5,6 +5,7 @@ on:
     branches: [main, master]
     paths:
       - 'aurora_reader_flutter/**'
+      - 'website/**'
       - '.github/workflows/deploy-web.yml'
   workflow_dispatch:
 
@@ -44,10 +45,29 @@ jobs:
             --base-href "/Project-Aurora/" \
             --web-renderer canvaskit
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install website dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Build website
+        working-directory: website
+        run: npm run build
+
+      - name: Combine build output
+        run: |
+          mkdir -p combined
+          cp -r aurora_reader_flutter/build/web/. combined/
+          mkdir -p combined/site
+          cp -r website/dist/. combined/site/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: aurora_reader_flutter/build/web
+          path: combined
 
   deploy:
     needs: build
