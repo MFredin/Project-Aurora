@@ -14,15 +14,27 @@ export function Logo({ className }: { className?: string }) {
         </linearGradient>
       </defs>
       <rect width="48" height="48" rx="12" fill="var(--color-surface)" />
+      <circle
+        cx="24"
+        cy="24"
+        r="17"
+        fill="none"
+        stroke="url(#logo-gradient)"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeDasharray="98 9"
+        strokeDashoffset="27"
+      />
       <g
         fill="none"
         stroke="url(#logo-gradient)"
-        strokeWidth="3.5"
+        strokeWidth="3.2"
         strokeLinecap="round"
+        strokeLinejoin="round"
       >
-        <path d="M24 36 L24 12" />
-        <path d="M24 23 L14 12" />
-        <path d="M24 23 L34 12" />
+        <path d="M24 12 L17 19 L24 26 L31 19 Z" />
+        <path d="M24 26 L17 35" />
+        <path d="M24 26 L31 35" />
       </g>
     </svg>
   );
