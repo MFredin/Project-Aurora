@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { site } from "@/data/site";
 import { Logo } from "@/components/Logo";
+import { Container } from "@/components/Container";
 
 const links = [
   { to: "/", label: "Home", end: true },
@@ -25,8 +26,8 @@ export function SiteHeader() {
   }, [location.pathname]);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line/80 bg-bg/85 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+    <header className="sticky top-0 z-20 border-b border-line/80 bg-bg/80 backdrop-blur">
+      <Container width="wide" className="flex items-center justify-between py-4">
         <NavLink
           to="/"
           onClick={() => setOpen(false)}
@@ -61,7 +62,7 @@ export function SiteHeader() {
             </svg>
           )}
         </button>
-      </div>
+      </Container>
 
       {open && (
         <nav className="border-t border-line/80 px-6 py-3 sm:hidden">
@@ -73,7 +74,7 @@ export function SiteHeader() {
                 end={link.end}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
-                  `rounded-lg px-3 py-2.5 text-base transition-colors ${
+                  `rounded-full px-3 py-2.5 text-base transition-colors ${
                     isActive ? "text-ink" : "text-ink-dim hover:text-ink"
                   }`
                 }

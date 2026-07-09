@@ -5,6 +5,14 @@
  * real in-app colors (#0D1210 background, #B87944 bronze accent), with a
  * copper -> clay -> moss gradient as the single accent. One gradient, used
  * sparingly, is the whole "personality" of the site.
+ *
+ * Opacity modifiers on these tokens (e.g. border-copper/40) are limited to
+ * five steps by convention: /10, /20, /40, /60, /80. Not enforced by
+ * tooling — just don't introduce a sixth value without a reason.
+ *
+ * NOTE: public/favicon.svg hardcodes the copper/clay/moss/surface hex
+ * values below because a static favicon file can't read page CSS custom
+ * properties. If these change, update favicon.svg by hand to match.
  */
 @theme {
   --color-bg: #0d1210;
@@ -20,7 +28,27 @@
   --color-clay: #c26647;
   --color-moss: #438966;
 
+  --gradient-accent: linear-gradient(
+    100deg,
+    var(--color-copper),
+    var(--color-clay),
+    var(--color-moss)
+  );
+
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+
+  /* Purpose-built scale for the two real headline roles (interior-page H1,
+     Home hero H1) — not a blind geometric series, which produces unusable
+     numbers at the top. Content/UI sizes use Tailwind's stock scale. */
+  --text-display-sm: 2.75rem; /* 44px */
+  --text-display-sm--line-height: 1.1;
+  --text-display-md: 3.5rem; /* 56px */
+  --text-display-md--line-height: 1.05;
+  --text-display-lg: 4.5rem; /* 72px */
+  --text-display-lg--line-height: 1.02;
+  --text-display-xl: 5.5rem; /* 88px */
+  --text-display-xl--line-height: 1;
 }
 
 @layer base {
@@ -44,27 +72,24 @@
     background-color: color-mix(in oklab, var(--color-copper) 35%, transparent);
     color: var(--color-ink);
   }
+
+  a:focus-visible,
+  button:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid var(--color-copper);
+    outline-offset: 3px;
+  }
 }
 
 @utility text-gradient {
-  background-image: linear-gradient(
-    100deg,
-    var(--color-copper),
-    var(--color-clay),
-    var(--color-moss)
-  );
+  background-image: var(--gradient-accent);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
 }
 
 @utility bg-gradient-accent {
-  background-image: linear-gradient(
-    100deg,
-    var(--color-copper),
-    var(--color-clay),
-    var(--color-moss)
-  );
+  background-image: var(--gradient-accent);
 }
 
 @utility eyebrow {
@@ -75,7 +100,7 @@
   text-transform: uppercase;
 }
 
-/* Soft ambient glow used once, behind the hero */
+/* Soft ambient glow used behind hero/index-page treatments */
 @utility ambient-glow {
   position: absolute;
   inset: -10% -10% auto -10%;

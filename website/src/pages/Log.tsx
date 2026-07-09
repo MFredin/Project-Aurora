@@ -1,4 +1,6 @@
 import { changelog } from "@/data/changelog";
+import { Container } from "@/components/Container";
+import { PageHero } from "@/components/PageHero";
 
 function formatDate(iso: string) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {
@@ -10,30 +12,26 @@ function formatDate(iso: string) {
 
 export function Log() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="ambient-glow" />
-      <div className="relative mx-auto max-w-2xl px-6 py-24">
-        <p className="eyebrow text-ink-faint">Log</p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-          Building in the open.
-        </h1>
-        <p className="mt-4 text-lg text-ink-dim">
-          A running record of what's shipped, changed, or shifted along the
-          way.
-        </p>
-
-        <ol className="mt-12 divide-y divide-line border-t border-line">
+    <>
+      <PageHero
+        eyebrow="Log"
+        title="Building in the open."
+        subhead="A running record of what's shipped, changed, or shifted along the way."
+        containerWidth="narrow"
+      />
+      <Container width="narrow" className="pb-16 sm:pb-20 lg:pb-24">
+        <ol className="divide-y divide-line border-t border-line">
           {changelog.map((entry) => (
             <li key={`${entry.date}-${entry.title}`} className="py-8">
               <p className="eyebrow text-ink-faint">{formatDate(entry.date)}</p>
-              <h2 className="mt-2 text-xl font-semibold text-ink">
+              <h2 className="font-display mt-2 text-xl font-semibold text-ink">
                 {entry.title}
               </h2>
               <p className="mt-2 leading-relaxed text-ink-dim">{entry.body}</p>
             </li>
           ))}
         </ol>
-      </div>
-    </section>
+      </Container>
+    </>
   );
 }

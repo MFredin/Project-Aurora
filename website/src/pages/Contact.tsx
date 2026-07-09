@@ -1,16 +1,13 @@
 import { site, socialLinks } from "@/data/site";
+import { Container } from "@/components/Container";
+import { PageHero } from "@/components/PageHero";
 
 export function Contact() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="ambient-glow" />
-      <div className="relative mx-auto max-w-2xl px-6 py-24">
-        <p className="eyebrow text-ink-faint">Contact</p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-          Let's talk.
-        </h1>
-
-        <div className="mt-10 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+    <>
+      <PageHero eyebrow="Contact" title="Let's talk." containerWidth="narrow" />
+      <Container width="narrow" className="pb-16 sm:pb-20 lg:pb-24">
+        <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
           <a
             href={`mailto:${site.email}`}
             className="group flex items-center justify-between gap-4 px-6 py-5 transition-colors hover:bg-surface-hi"
@@ -58,7 +55,7 @@ export function Contact() {
             ),
           )}
         </div>
-      </div>
-    </section>
+      </Container>
+    </>
   );
 }
