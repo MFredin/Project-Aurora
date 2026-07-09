@@ -7,6 +7,9 @@ export function Logo({ className }: { className?: string }) {
       aria-label="Site mark"
     >
       <defs>
+        {/* Stops mirror --gradient-accent's colors/offsets (index.css) — SVG
+            gradients can't consume a CSS linear-gradient() string, so this
+            stays a parallel definition. Keep the two in sync by hand. */}
         <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="var(--color-copper)" />
           <stop offset="55%" stopColor="var(--color-clay)" />

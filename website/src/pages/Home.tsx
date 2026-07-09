@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
 import { site } from "@/data/site";
 import { projects } from "@/data/projects";
-import { ProjectCard } from "@/components/ProjectCard";
+import { Container } from "@/components/Container";
+import { Button } from "@/components/Button";
+import { ProjectGrid } from "@/components/ProjectGrid";
+import { Link } from "react-router-dom";
 
 export function Home() {
   const recent = projects.slice(0, 3);
@@ -10,9 +12,12 @@ export function Home() {
     <>
       <section className="relative overflow-hidden">
         <div className="ambient-glow" />
-        <div className="relative mx-auto flex min-h-[70vh] max-w-5xl flex-col justify-center gap-6 px-6 py-24">
+        <Container
+          width="wide"
+          className="relative flex min-h-[70vh] flex-col justify-center gap-6 py-16 sm:py-20 lg:py-24"
+        >
           <p className="eyebrow text-ink-faint">{site.role}</p>
-          <h1 className="max-w-3xl text-5xl font-extrabold leading-[1.05] tracking-tight text-gradient sm:text-6xl md:text-7xl">
+          <h1 className="font-display max-w-3xl text-display-md font-semibold tracking-tight text-gradient sm:text-display-lg lg:text-display-xl">
             {site.name}
           </h1>
           <p className="max-w-xl text-lg text-ink-dim">
@@ -20,40 +25,29 @@ export function Home() {
             what's in progress, and what's still taking shape.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              to="/projects"
-              className="rounded-full bg-gradient-accent px-6 py-3 text-sm font-semibold text-bg transition-transform hover:-translate-y-0.5"
-            >
+            <Button to="/projects" variant="primary">
               View projects
-            </Link>
-            <Link
-              to="/contact"
-              className="rounded-full border border-line px-6 py-3 text-sm font-medium text-ink transition-colors hover:border-copper/40"
-            >
+            </Button>
+            <Button to="/contact" variant="outline">
               Get in touch
-            </Link>
+            </Button>
           </div>
-        </div>
+        </Container>
       </section>
 
       {recent.length > 0 && (
-        <section className="mx-auto max-w-5xl px-6 pb-24">
-          <div className="mb-8 flex items-end justify-between gap-4">
-            <h2 className="text-2xl font-bold tracking-tight text-ink">
-              Recent work
-            </h2>
-            <Link
-              to="/projects"
-              className="text-sm text-ink-dim hover:text-ink"
-            >
-              See all &rarr;
-            </Link>
-          </div>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,min(360px,100%)))] gap-6">
-            {recent.map((p) => (
-              <ProjectCard key={p.slug} project={p} />
-            ))}
-          </div>
+        <section>
+          <Container width="wide" className="pb-16 sm:pb-20 lg:pb-24">
+            <div className="mb-8 flex items-end justify-between gap-4">
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
+                Recent work
+              </h2>
+              <Link to="/projects" className="text-sm text-ink-dim hover:text-ink">
+                See all &rarr;
+              </Link>
+            </div>
+            <ProjectGrid projects={recent} />
+          </Container>
         </section>
       )}
     </>

@@ -1,9 +1,18 @@
 import { Link, useParams } from "react-router-dom";
 import { projects } from "@/data/projects";
+import { Container } from "@/components/Container";
+import { PageHero } from "@/components/PageHero";
+import { Badge } from "@/components/Badge";
+import { Button } from "@/components/Button";
 
 const statusLabel = {
   "in-development": "In development",
   live: "Live",
+} as const;
+
+const statusVariant = {
+  "in-development": "status-dev",
+  live: "status-live",
 } as const;
 
 export function ProjectDetail() {
@@ -12,41 +21,37 @@ export function ProjectDetail() {
 
   if (!project) {
     return (
-      <section className="mx-auto max-w-2xl px-6 py-24 text-center">
+      <Container width="narrow" className="py-24 text-center">
         <p className="text-ink-dim">No project found at "{slug}".</p>
         <Link to="/projects" className="mt-4 inline-block text-copper hover:underline">
           &larr; Back to projects
         </Link>
-      </section>
+      </Container>
     );
   }
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="ambient-glow" />
-      <div className="relative mx-auto max-w-2xl px-6 py-24">
-        <Link to="/projects" className="text-sm text-ink-dim hover:text-ink">
-          &larr; All projects
-        </Link>
-
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-            {project.title}
-          </h1>
-          <span className="rounded-full border border-line px-2.5 py-1 text-xs text-ink-faint">
+    <>
+      <PageHero
+        beforeEyebrow={
+          <Link to="/projects" className="text-sm text-ink-dim hover:text-ink">
+            &larr; All projects
+          </Link>
+        }
+        eyebrow="Project"
+        title={<span className="text-gradient">{project.title}</span>}
+        titleAdornment={
+          <Badge variant={statusVariant[project.status]}>
             {statusLabel[project.status]}
-          </span>
-        </div>
-        <p className="mt-3 text-lg text-ink-dim">{project.tagline}</p>
-
-        <div className="mt-6 flex flex-wrap gap-2">
+          </Badge>
+        }
+        subhead={project.tagline}
+        containerWidth="narrow"
+      />
+      <Container width="narrow" className="pb-16 sm:pb-20 lg:pb-24">
+        <div className="flex flex-wrap gap-2">
           {project.tech.map((t) => (
-            <span
-              key={t}
-              className="rounded-full bg-surface px-3 py-1 text-xs text-ink-dim"
-            >
-              {t}
-            </span>
+            <Badge key={t}>{t}</Badge>
           ))}
         </div>
 
@@ -57,28 +62,18 @@ export function ProjectDetail() {
         {(project.liveUrl || project.repoUrl) && (
           <div className="mt-10 flex flex-wrap gap-3">
             {project.liveUrl && (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full bg-gradient-accent px-5 py-2.5 text-sm font-semibold text-bg"
-              >
+              <Button href={project.liveUrl} variant="primary" size="sm">
                 View live
-              </a>
+              </Button>
             )}
             {project.repoUrl && (
-              <a
-                href={project.repoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full border border-line px-5 py-2.5 text-sm text-ink hover:border-copper/40"
-              >
+              <Button href={project.repoUrl} variant="outline" size="sm">
                 Source
-              </a>
+              </Button>
             )}
           </div>
         )}
-      </div>
-    </section>
+      </Container>
+    </>
   );
 }
